@@ -1,0 +1,4 @@
+form.accountApplicationForm div.buttonLayer {	margin: 0;	padding: 0;	text-align: left;	padding-left: 175px;}form.accountApplicationForm div.buttonLayer a {	text-decoration: underline;
+	color: #000;
+	background: url(button_image.gif) right no-repeat;	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10px;	padding-right: 14px;	text-align: left;}

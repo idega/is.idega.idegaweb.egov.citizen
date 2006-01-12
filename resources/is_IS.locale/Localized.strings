@@ -1,0 +1,16 @@
+application_errors_occured=Ums\u00F3knin var ekki fyllt r\u00E9tt \u00FAt
+application_submitted=Ums\u00F3kn um \u00FEj\u00F3nustug\u00E1tt er m\u00F3ttekin
+application_submitted_text=Ums\u00F3kn \u00FE\u00EDn um a\u00F0gang hefur veri\u00F0 m\u00F3ttekin. \u00DE\u00FA munt samstundis f\u00E1 notendanafn og lykilor\u00F0 sent me\u00F0 netp\u00F3sti. A\u00F0gangurinn \u00FEinn er or\u00F0inn virkur um lei\u00F0 og \u00FE\u00FA skr\u00E1ir \u00FEig inn \u00ED fyrsta sinn.
+citizen_registration=N\u00FDskr\u00E1ning
+email=Netfang
+email_can_not_be_empty=Vinsamlegast gef\u00F0u upp netfang
+email_repeat=Endurtaka netfang
+emails_dont_match=B\u00E6\u00F0i netf\u00F6ng ver\u00F0a a\u00F0 vera eins
+home_phone=Heimas\u00EDmi
+mobile_phone=Fars\u00EDmi
+must_be_18_years=Einungis 18 \u00E1ra og eldri geta s\u00F3tt um a\u00F0gang
+must_provide_personal_id=Vinsamlegast gef\u00F0u upp kennit\u00F6lu
+not_a_valid_personal_id=Kennitalan er ekki r\u00E9tt
+personal_id=Kennitala
+unknown_citizen=Enginn notandi finnst me\u00F0 \u00FEessa kennit\u00F6lu
+user_already_has_an_account=Notandi me\u00F0 \u00FEessa kennit\u00F6lu hefur n\u00FA \u00FEegar a\u00F0gang
