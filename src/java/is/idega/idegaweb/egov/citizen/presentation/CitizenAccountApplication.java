@@ -321,7 +321,7 @@ public class CitizenAccountApplication extends Block {
 			}
 		}
 		
-		if (!hasErrors) {
+		if (hasErrors) {
 			showErrors(iwc, errors);
 			viewSimpleApplicationForm(iwc);
 		}
