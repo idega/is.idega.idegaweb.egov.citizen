@@ -47,6 +47,7 @@ public class CitizenAccountApplicationForwarder extends Block {
 		
 		Link link = new Link(iwrb.getLocalizedString("next", "Next"));
 		if (iForwardPage != null) {
+			link.setPage(iForwardPage);
 			link.setToFormSubmit(form);
 		}
 		else {
