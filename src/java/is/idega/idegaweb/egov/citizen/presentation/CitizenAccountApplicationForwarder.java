@@ -53,6 +53,7 @@ public class CitizenAccountApplicationForwarder extends Block {
 			link.setURL("#");
 			link.setOnClick("alert('No forward page set');");
 		}
+		form.add(link);
 		
 		add(form);
 	}
