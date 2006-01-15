@@ -1,13 +1,17 @@
 package is.idega.idegaweb.egov.citizen.presentation;
 
+import java.io.FileInputStream;
 import java.rmi.RemoteException;
-import javax.ejb.FinderException;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
 import se.idega.idegaweb.commune.account.citizen.business.CitizenAccountSession;
 import se.idega.idegaweb.commune.message.business.MessageSession;
 import com.idega.business.IBOLookup;
 import com.idega.core.builder.data.ICPage;
 import com.idega.core.contact.data.Email;
 import com.idega.core.contact.data.Phone;
+import com.idega.core.file.data.ICFile;
 import com.idega.core.location.data.Address;
 import com.idega.core.location.data.AddressHome;
 import com.idega.core.location.data.AddressType;
@@ -15,20 +19,24 @@ import com.idega.core.location.data.PostalCode;
 import com.idega.core.location.data.PostalCodeHome;
 import com.idega.data.IDOLookup;
 import com.idega.idegaweb.IWResourceBundle;
-import com.idega.presentation.Block;
+import com.idega.io.UploadFile;
 import com.idega.presentation.ExceptionWrapper;
 import com.idega.presentation.IWContext;
-import com.idega.presentation.Table;
-import com.idega.presentation.text.Break;
+import com.idega.presentation.Image;
+import com.idega.presentation.Layer;
+import com.idega.presentation.text.Heading1;
+import com.idega.presentation.text.Link;
 import com.idega.presentation.text.Text;
 import com.idega.presentation.ui.CheckBox;
+import com.idega.presentation.ui.FileInput;
 import com.idega.presentation.ui.Form;
-import com.idega.presentation.ui.GenericButton;
-import com.idega.presentation.ui.SubmitButton;
+import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.TextInput;
 import com.idega.user.business.NoPhoneFoundException;
 import com.idega.user.business.UserBusiness;
 import com.idega.user.data.User;
+import com.idega.util.EmailValidator;
+import com.idega.util.FileUtil;
 
 /*
  * import com.idega.presentation.ExceptionWrapper; import
@@ -45,14 +53,12 @@ import com.idega.user.data.User;
  * @author Anders Lindman
  * @version 1.0
  */
-public class CitizenAccountPreferences extends Block {
+public class CitizenAccountPreferences extends CitizenBlock {
 
-	private final static String IW_BUNDLE_IDENTIFIER = "is.idega.idegaweb.egov.citizen";
 	private final static int ACTION_VIEW_FORM = 1;
 	private final static int ACTION_FORM_SUBMIT = 2;
-	private final static int ACTION_CANCEL = 3;
+
 	private final static String PARAMETER_FORM_SUBMIT = "cap_sbmt";
-	private final static String PARAMETER_CANCEL = "cap_cncl";
 	private final static String PARAMETER_EMAIL = "cap_email";
 	private final static String PARAMETER_PHONE_HOME = "cap_phn_h";
 	private final static String PARAMETER_PHONE_WORK = "cap_phn_w";
@@ -62,10 +68,11 @@ public class CitizenAccountPreferences extends Block {
 	private final static String PARAMETER_CO_POSTAL_CODE = "cap_co_pc";
 	private final static String PARAMETER_CO_CITY = "cap_co_ct";
 	private final static String PARAMETER_MESSAGES_VIA_EMAIL = "cap_m_v_e";
+	private final static String PARAMETER_REMOVE_IMAGE = "cap_remove_image";
+	
 	private final static String KEY_PREFIX = "citizen.";
 	private final static String KEY_EMAIL = KEY_PREFIX + "email";
 	private final static String KEY_UPDATE = KEY_PREFIX + "update";
-	// private final static String KEY_CANCEL = KEY_PREFIX + "cancel";
 	private final static String KEY_NAME = KEY_PREFIX + "name";
 	private final static String KEY_ADDRESS = KEY_PREFIX + "address";
 	private final static String KEY_PHONE_HOME = KEY_PREFIX + "phone_home";
@@ -83,6 +90,7 @@ public class CitizenAccountPreferences extends Block {
 	private final static String KEY_CO_CITY_MISSING = KEY_PREFIX + "co_city_missing";
 	private final static String KEY_PREFERENCES_SAVED = KEY_PREFIX + "preferenced_saved";
 	private final static String KEY_NO_EMAIL_FOR_LETTERS = KEY_PREFIX + "no_email_to_send_letter_to";
+	
 	private final static String DEFAULT_EMAIL = "E-mail";
 	private final static String DEFAULT_UPDATE = "Update";
 	private final static String DEFAULT_NAME = "Name";
@@ -94,7 +102,7 @@ public class CitizenAccountPreferences extends Block {
 	private final static String DEFAULT_CO_STREET_ADDRESS = "Street address c/o";
 	private final static String DEFAULT_CO_POSTAL_CODE = "Postal code c/o";
 	private final static String DEFAULT_CO_CITY = "City c/o";
-	private final static String DEFAULT_MESSAGES_VIA_EMAIL = "I want to get my messages via e-email";
+	private final static String DEFAULT_MESSAGES_VIA_EMAIL = "I want to get my messages via e-mail";
 	private final static String DEFAULT_EMAIL_INVALID = "Email address invalid.";
 	private final static String DEFAULT_EMAIL_EMPTY = "Email address cannot be empty.";
 	private final static String DEFAULT_CO_STREET_ADDRESS_MISSING = "Street address c/o must be entered.";
@@ -104,6 +112,7 @@ public class CitizenAccountPreferences extends Block {
 	private final static String DEFAULT_NO_EMAIL_FOR_LETTERS = "No email entered to send letters to.";
 	public static final String CITIZEN_ACCOUNT_PREFERENCES_PROPERTIES = "citizen_account_preferences";
 	public static final String USER_PROPERTY_USE_CO_ADDRESS = "cap_use_co_address";
+
 	private User user = null;
 
 	private boolean removeEmailWhenEmpty = true;
@@ -114,11 +123,7 @@ public class CitizenAccountPreferences extends Block {
 	public CitizenAccountPreferences() {
 	}
 
-	public String getBundleIdentifier() {
-		return IW_BUNDLE_IDENTIFIER;
-	}
-
-	public void main(IWContext iwc) {
+	public void present(IWContext iwc) {
 		if (!iwc.isLoggedOn()) {
 			return;
 		}
@@ -128,13 +133,10 @@ public class CitizenAccountPreferences extends Block {
 			int action = parseAction(iwc);
 			switch (action) {
 				case ACTION_VIEW_FORM:
-					viewPreferencesForm(iwc);
+					viewForm(iwc);
 					break;
 				case ACTION_FORM_SUBMIT:
 					updatePreferences(iwc);
-					break;
-				case ACTION_CANCEL:
-					viewPreferencesForm(iwc);
 					break;
 			}
 		}
@@ -148,311 +150,318 @@ public class CitizenAccountPreferences extends Block {
 		if (iwc.isParameterSet(PARAMETER_FORM_SUBMIT)) {
 			action = ACTION_FORM_SUBMIT;
 		}
-		else if (iwc.isParameterSet(PARAMETER_CANCEL)) {
-			action = ACTION_CANCEL;
-		}
 		return action;
 	}
 
-	private void viewPreferencesForm(IWContext iwc) throws java.rmi.RemoteException {
-		drawForm(iwc);
-	}
-
-	private void drawForm(IWContext iwc) throws RemoteException {
+	private void viewForm(IWContext iwc) throws java.rmi.RemoteException {
 		Form form = new Form();
-		Table table = new Table();
-		// table.setWidth(getWidth());
-		table.setCellpadding(2);
-		form.add(table);
-		int row = 1;
-		UserBusiness ub = (UserBusiness) IBOLookup.getServiceInstance(iwc, UserBusiness.class);
-		table.add(new Text(iwrb.getLocalizedString(KEY_NAME, DEFAULT_NAME)), 1, row);
-		String userName = user.getName();
-		table.add(new Text(userName), 2, row);
-		row++;
-		table.add(new Text(iwrb.getLocalizedString(KEY_ADDRESS, DEFAULT_ADDRESS)), 1, row);
-		Address mainAddress = ub.getUsersMainAddress(user);
-		String addressText = "";
-		if (mainAddress != null) {
-			addressText = mainAddress.getStreetAddress() + ", " + mainAddress.getPostalAddress();
-		}
-		table.add(new Text(addressText), 2, row);
-		String valueEmail = iwc.getParameter(PARAMETER_EMAIL);
-		/*
-		 * if the entered address is invalid show the orignal from database if
-		 * exists
-		 */
-		boolean isLegalEmail = false;
-		try {
-			isLegalEmail = validateEmail(valueEmail);
-		}
-		catch (Exception e1) {
-			isLegalEmail = false;
-		}
-		if (valueEmail == null || !isLegalEmail) {
-			Email userMail = ub.getUserMail(user);
-			if (userMail != null) {
-				valueEmail = userMail.getEmailAddress();
-			}
-			else {
-				valueEmail = "";
-				try {
-					MessageSession messageSession = getMessageSession(iwc);
-					messageSession.setIfUserPreferesMessageByEmail(false);
-				}
-				catch (RemoteException e) {
-					e.printStackTrace();
-				}
-				catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		String valuePhoneHome = iwc.getParameter(PARAMETER_PHONE_HOME);
-		if (valuePhoneHome == null) {
-			try {
-				Phone p = ub.getUsersHomePhone(user);
-				valuePhoneHome = p.getNumber();
-			}
-			catch (NoPhoneFoundException npfe) {
-				valuePhoneHome = "";
-			}
-		}
-		String valuePhoneMobile = iwc.getParameter(PARAMETER_PHONE_MOBILE);
-		if (valuePhoneMobile == null) {
-			try {
-				Phone p = ub.getUsersMobilePhone(user);
-				valuePhoneMobile = p.getNumber();
-			}
-			catch (NoPhoneFoundException npfe) {
-				valuePhoneMobile = "";
-			}
-		}
-		String valuePhoneWork = iwc.getParameter(PARAMETER_PHONE_WORK);
-		if (valuePhoneWork == null) {
-			try {
-				Phone p = ub.getUsersWorkPhone(user);
-				valuePhoneWork = p.getNumber();
-			}
-			catch (NoPhoneFoundException npfe) {
-				valuePhoneWork = "";
-			}
-		}
-		String valueCOAddressSelect = iwc.getParameter(PARAMETER_CO_ADDRESS_SELECT);
-		Address coAddress = getCOAddress(iwc);
-		String valueCOStreetAddress = iwc.getParameter(PARAMETER_CO_STREET_ADDRESS);
-		if (valueCOStreetAddress == null) {
-			valueCOStreetAddress = coAddress.getStreetAddress();
-			if (valueCOStreetAddress == null) {
-				valueCOStreetAddress = "";
-			}
-		}
-		String valueCOPostalCode = iwc.getParameter(PARAMETER_CO_POSTAL_CODE);
-		if (valueCOPostalCode == null) {
-			PostalCode pc = null;
-			pc = coAddress.getPostalCode();
-			if (pc != null) {
-				valueCOPostalCode = pc.getPostalCode();
-				if (valueCOPostalCode == null) {
-					valueCOPostalCode = "";
-				}
-			}
-			else {
-				valueCOPostalCode = "";
-			}
-		}
-		String valueCOCity = iwc.getParameter(PARAMETER_CO_CITY);
-		if (valueCOCity == null) {
-			valueCOCity = coAddress.getCity();
-			if (valueCOCity == null) {
-				valueCOCity = "";
-			}
-		}
-		String valueMessagesViaEmail = iwc.getParameter(PARAMETER_MESSAGES_VIA_EMAIL);
-		Text tEmail = new Text(iwrb.getLocalizedString(KEY_EMAIL, DEFAULT_EMAIL));
-		// Text tLogin = new Text(iwrb.getLocalizedString(KEY_LOGIN, DEFAULT_LOGIN));
-		Text tPhoneHome = new Text(iwrb.getLocalizedString(KEY_PHONE_HOME, DEFAULT_PHONE_HOME));
-		Text tPhoneWork = new Text(iwrb.getLocalizedString(KEY_PHONE_WORK, DEFAULT_PHONE_WORK));
-		Text tPhoneMobile = new Text(iwrb.getLocalizedString(KEY_PHONE_MOBILE, DEFAULT_PHONE_MOBILE));
-		Text tCOAddressSelect = new Text(" " + iwrb.getLocalizedString(KEY_CO_ADDRESS_SELECT, DEFAULT_CO_ADDRESS_SELECT));
-		Text tCOStreetAddress = new Text(iwrb.getLocalizedString(KEY_CO_STREET_ADDRESS, DEFAULT_CO_STREET_ADDRESS));
-		Text tCOPostalCode = new Text(iwrb.getLocalizedString(KEY_CO_POSTAL_CODE, DEFAULT_CO_POSTAL_CODE));
-		Text tCOCity = new Text(iwrb.getLocalizedString(KEY_CO_CITY, DEFAULT_CO_CITY));
-		Text tMessagesViaEmail = new Text(" " + iwrb.getLocalizedString(KEY_MESSAGES_VIA_EMAIL, DEFAULT_MESSAGES_VIA_EMAIL));
-		// TextInput tiLogin = (TextInput) getStyledInterface(new
-		// TextInput(PARAMETER_LOGIN));
-		TextInput tiEmail = new TextInput(PARAMETER_EMAIL);
-		if (valueEmail != null) {
-			tiEmail.setValue(valueEmail);
-		}
-		tiEmail.setAsEmail(iwrb.getLocalizedString(KEY_EMAIL_INVALID, DEFAULT_EMAIL_INVALID));
-		TextInput tiPhoneHome = new TextInput(PARAMETER_PHONE_HOME);
-		if (valuePhoneHome != null) {
-			tiPhoneHome.setValue(valuePhoneHome);
-		}
-		TextInput tiPhoneMobile = new TextInput(PARAMETER_PHONE_MOBILE);
-		if (tiPhoneMobile != null) {
-			tiPhoneMobile.setValue(valuePhoneMobile);
-		}
-		TextInput tiPhoneWork = new TextInput(PARAMETER_PHONE_WORK);
-		if (valuePhoneWork != null) {
-			tiPhoneWork.setValue(valuePhoneWork);
-		}
-		TextInput tiCOStreetAddress = new TextInput(PARAMETER_CO_STREET_ADDRESS);
-		if (valueCOStreetAddress != null) {
-			tiCOStreetAddress.setValue(valueCOStreetAddress);
-		}
-		TextInput tiCOPostalCode = new TextInput(PARAMETER_CO_POSTAL_CODE);
-		if (valueCOPostalCode != null) {
-			tiCOPostalCode.setValue(valueCOPostalCode);
-		}
-		TextInput tiCOCity = new TextInput(PARAMETER_CO_CITY);
-		if (valueCOCity != null) {
-			tiCOCity.setValue(valueCOCity);
-		}
-		CheckBox cbCOAddressSelect = new CheckBox(PARAMETER_CO_ADDRESS_SELECT, "true");
-		if (valueCOAddressSelect != null) {
-			if (valueCOAddressSelect.length() > 0)
-				cbCOAddressSelect.setChecked(true);
-		}
-		else {
-			if (iwc.getParameter(PARAMETER_FORM_SUBMIT) == null) {
-				try {
-					CitizenAccountSession cas = getCitizenAccountSession(iwc);
-					cbCOAddressSelect.setChecked(cas.getIfUserUsesCOAddress());
-				}
-				catch (Exception e) {
-				}
-			}
-			else {
-				cbCOAddressSelect.setChecked(false);
-			}
-		}
-		CheckBox cbMessagesViaEmail = new CheckBox(PARAMETER_MESSAGES_VIA_EMAIL, "true");
-		if (valueMessagesViaEmail != null) {
-			cbMessagesViaEmail.setChecked(true);
-		}
-		else {
-			if (iwc.getParameter(PARAMETER_FORM_SUBMIT) == null) {
-				try {
-					MessageSession messageSession = getMessageSession(iwc);
-					cbMessagesViaEmail.setChecked(messageSession.getIfUserPreferesMessageByEmail());
-				}
-				catch (Exception e) {
-				}
-			}
-			else {
-				cbMessagesViaEmail.setChecked(false);
-			}
-		}
-		SubmitButton sbUpdate = new SubmitButton(iwrb.getLocalizedString(KEY_UPDATE, DEFAULT_UPDATE), PARAMETER_FORM_SUBMIT, "true");
-		row++;
-		table.setHeight(row, 12);
-		table.add(tEmail, 1, row);
-		table.add(tiEmail, 2, row);
-		row++;
-		table.add(tPhoneHome, 1, row);
-		table.add(tiPhoneHome, 2, row);
-		row++;
-		table.add(tPhoneMobile, 1, row);
-		table.add(tiPhoneMobile, 2, row);
-		row++;
-		table.add(tPhoneWork, 1, row);
-		table.add(tiPhoneWork, 2, row);
-		row++;
-		table.setHeight(row, 12);
-		row++;
-		table.add(tCOStreetAddress, 1, row);
-		table.add(tiCOStreetAddress, 2, row);
-		row++;
-		table.add(tCOPostalCode, 1, row);
-		table.add(tiCOPostalCode, 2, row);
-		row++;
-		table.add(tCOCity, 1, row);
-		table.add(tiCOCity, 2, row);
-		row++;
-		table.setHeight(row, 12);
-		row++;
-		table.mergeCells(1, row, 2, row);
-		table.add(cbCOAddressSelect, 1, row);
-		table.add(tCOAddressSelect, 1, row);
-		row++;
-		table.mergeCells(1, row, 2, row);
-		table.add(cbMessagesViaEmail, 1, row);
-		table.add(tMessagesViaEmail, 1, row);
-		row++;
-		table.setHeight(row, 12);
-		ICPage homepage = null;
-		try {
-			homepage = ub.getHomePageForUser(user);
-		}
-		catch (FinderException fe) {
-			// No page found
-			homepage = null;
-		}
-		row++;
+		form.setMultiPart();
+		form.addParameter(PARAMETER_FORM_SUBMIT, Boolean.TRUE.toString());
+		form.setID("accountApplicationForm");
+		form.setStyleClass("citizenForm");
 		
-		table.mergeCells(1, row, table.getColumns(), row);
-		table.add(sbUpdate, 1, row);
-		if (iPasswordPage != null) {
-			table.add(new Text(Text.NON_BREAKING_SPACE), 1, row);
-			GenericButton changePassword = new GenericButton("change_password", iwrb.getLocalizedString("change_password", "Change password"));
-			changePassword.setPageToOpen(iPasswordPage);
-			table.add(changePassword, 1, row);
+		Layer header = new Layer(Layer.DIV);
+		header.setStyleClass("header");
+		form.add(header);
+		
+		Heading1 heading = new Heading1(iwrb.getLocalizedString("citizen_preferences", "Citizen preferences"));
+		header.add(heading);
+		
+		Layer section = new Layer(Layer.DIV);
+		section.setStyleClass("formSection");
+		form.add(section);
+		
+		UserBusiness ub = (UserBusiness) IBOLookup.getServiceInstance(iwc, UserBusiness.class);
+
+		Image image = null;
+		if (user.getSystemImageID() > 0) {
+			try {
+				image = new Image(user.getSystemImageID());
+			}
+			catch (SQLException e) {
+				e.printStackTrace();
+			}
 		}
-		if (homepage != null) {
-			table.add(new Text(Text.NON_BREAKING_SPACE), 1, row);
-			GenericButton home = new GenericButton("home", iwrb.getLocalizedString("my_page", "Back to My Page"));
-			home.setPageToOpen(homepage);
-			table.add(home, 1, row);
+		
+		Email mail = ub.getUserMail(user);
+		Phone homePhone = null;
+		try {
+			homePhone = ub.getUsersHomePhone(user);
 		}
+		catch (NoPhoneFoundException e) {
+			e.printStackTrace();
+		}
+		Phone mobilePhone = null;
+		try {
+			mobilePhone = ub.getUsersMobilePhone(user);
+		}
+		catch (NoPhoneFoundException e) {
+			e.printStackTrace();
+		}
+		Phone workPhone = null;
+		try {
+			workPhone = ub.getUsersWorkPhone(user);
+		}
+		catch (NoPhoneFoundException e) {
+			e.printStackTrace();
+		}
+		Address coAddress = getCOAddress(iwc);
+		PostalCode postal = null;
+		if (coAddress != null) {
+			postal = coAddress.getPostalCode();
+		}
+
+		FileInput file = new FileInput();
+
+		TextInput tiEmail = new TextInput(PARAMETER_EMAIL);
+		if (mail != null && mail.getEmailAddress() != null) {
+			tiEmail.setContent(mail.getEmailAddress());
+		}
+
+		TextInput tiPhoneHome = new TextInput(PARAMETER_PHONE_HOME);
+		if (homePhone != null && homePhone.getNumber() != null) {
+			tiPhoneHome.setContent(homePhone.getNumber());
+		}
+		
+		TextInput tiPhoneMobile = new TextInput(PARAMETER_PHONE_MOBILE);
+		if (mobilePhone != null && mobilePhone.getNumber() != null) {
+			tiPhoneMobile.setContent(mobilePhone.getNumber());
+		}
+		
+		TextInput tiPhoneWork = new TextInput(PARAMETER_PHONE_WORK);
+		if (workPhone != null && workPhone.getNumber() != null) {
+			tiPhoneWork.setContent(workPhone.getNumber());
+		}
+		
+		TextInput tiCOStreetAddress = new TextInput(PARAMETER_CO_STREET_ADDRESS);
+		if (coAddress != null && coAddress.getStreetAddress() != null) {
+			tiCOStreetAddress.setContent(coAddress.getStreetAddress());
+		}
+		
+		TextInput tiCOPostalCode = new TextInput(PARAMETER_CO_POSTAL_CODE);
+		if (postal != null && postal.getPostalAddress() != null) {
+			tiCOPostalCode.setValue(postal.getPostalAddress());
+		}
+		
+		TextInput tiCOCity = new TextInput(PARAMETER_CO_CITY);
+		if (coAddress != null && coAddress.getCity() != null) {
+			tiCOCity.setValue(coAddress.getCity());
+		}
+		
+		CitizenAccountSession cas = getCitizenAccountSession(iwc);
+		CheckBox useCOAddress = new CheckBox(PARAMETER_CO_ADDRESS_SELECT, "true");
+		useCOAddress.setStyleClass("checkbox");
+		useCOAddress.setChecked(cas.getIfUserUsesCOAddress());
+		useCOAddress.keepStatusOnAction(true);
+
+		MessageSession messageSession = getMessageSession(iwc);
+		CheckBox messagesViaEmail = new CheckBox(PARAMETER_MESSAGES_VIA_EMAIL, "true");
+		messagesViaEmail.setStyleClass("checkbox");
+		messagesViaEmail.keepStatusOnAction(true);
+		messagesViaEmail.setChecked(messageSession.getIfUserPreferesMessageByEmail());
+
+		CheckBox removeImage = new CheckBox(PARAMETER_REMOVE_IMAGE, "true");
+		removeImage.setStyleClass("checkbox");
+		removeImage.keepStatusOnAction(true);
+		
+		Layer formItem;
+		Label label;
+		
+		if (image != null) {
+			formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			label = new Label();
+			label.add(new Text(iwrb.getLocalizedString("image", "Image")));
+			formItem.add(label);
+			formItem.add(image);
+			section.add(formItem);
+			
+			formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			formItem.setStyleClass("indentedCheckbox");
+			formItem.setID("removeImage");
+			label = new Label(iwrb.getLocalizedString("remove_image", "Remove image"), removeImage);
+			formItem.add(removeImage);
+			formItem.add(label);
+			section.add(formItem);
+		}
+		
+		Layer clearLayer = new Layer(Layer.DIV);
+		clearLayer.setStyleClass("Clear");
+		section.add(clearLayer);
+
+		formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		formItem.setID("imageUpload");
+		label = new Label(iwrb.getLocalizedString("image_upload", "Image upload"), file);
+		formItem.add(label);
+		formItem.add(file);
+		section.add(formItem);
+		
+		section.add(clearLayer);
+
+		formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		label = new Label(iwrb.getLocalizedString(KEY_EMAIL, DEFAULT_EMAIL), tiEmail);
+		formItem.add(label);
+		formItem.add(tiEmail);
+		section.add(formItem);
+		
+		formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		formItem.setStyleClass("indentedCheckbox");
+		formItem.setID("messagesViaEmail");
+		label = new Label(iwrb.getLocalizedString(KEY_MESSAGES_VIA_EMAIL, DEFAULT_MESSAGES_VIA_EMAIL), messagesViaEmail);
+		formItem.add(messagesViaEmail);
+		formItem.add(label);
+		section.add(formItem);
+		
+		section.add(clearLayer);
+
+		formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		label = new Label(iwrb.getLocalizedString(KEY_PHONE_HOME, DEFAULT_PHONE_HOME), tiPhoneHome);
+		formItem.add(label);
+		formItem.add(tiPhoneHome);
+		section.add(formItem);
+		
+		formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		label = new Label(iwrb.getLocalizedString(KEY_PHONE_WORK, DEFAULT_PHONE_WORK), tiPhoneWork);
+		formItem.add(label);
+		formItem.add(tiPhoneWork);
+		section.add(formItem);
+		
+		formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		formItem.setID("mobilePhone");
+		label = new Label(iwrb.getLocalizedString(KEY_PHONE_MOBILE, DEFAULT_PHONE_MOBILE), tiPhoneMobile);
+		formItem.add(label);
+		formItem.add(tiPhoneMobile);
+		section.add(formItem);
+		
+		section.add(clearLayer);
+
+		formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		label = new Label(iwrb.getLocalizedString(KEY_CO_STREET_ADDRESS, DEFAULT_CO_STREET_ADDRESS), tiCOStreetAddress);
+		formItem.add(label);
+		formItem.add(tiCOStreetAddress);
+		section.add(formItem);
+		
+		formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		label = new Label(iwrb.getLocalizedString(KEY_CO_POSTAL_CODE, DEFAULT_CO_POSTAL_CODE), tiCOPostalCode);
+		formItem.add(label);
+		formItem.add(tiCOPostalCode);
+		section.add(formItem);
+		
+		formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		label = new Label(iwrb.getLocalizedString(KEY_CO_CITY, DEFAULT_CO_CITY), tiCOCity);
+		formItem.add(label);
+		formItem.add(tiCOCity);
+		section.add(formItem);
+		
+		formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		formItem.setStyleClass("indentedCheckbox");
+		label = new Label(iwrb.getLocalizedString(KEY_CO_ADDRESS_SELECT, DEFAULT_CO_ADDRESS_SELECT), useCOAddress);
+		formItem.add(useCOAddress);
+		formItem.add(label);
+		section.add(formItem);
+		
+		Layer buttonLayer = new Layer(Layer.DIV);
+		buttonLayer.setStyleClass("buttonLayer");
+		form.add(buttonLayer);
+		
+		Link send = new Link(iwrb.getLocalizedString(KEY_UPDATE, DEFAULT_UPDATE));
+		send.setToFormSubmit(form);
+		buttonLayer.add(send);
+		
 		add(form);
 	}
 
 	private void updatePreferences(IWContext iwc) throws Exception {
-		String sEmail = iwc.getParameter(PARAMETER_EMAIL);
+		boolean hasErrors = false;
+		Collection errors = new ArrayList();
+		
+		int fileID = -1;
+		UploadFile uploadFile = iwc.getUploadedFile();
+		if (uploadFile != null && uploadFile.getName() != null && uploadFile.getName().length() > 0) {
+			try {
+				FileInputStream input = new FileInputStream(uploadFile.getRealPath());
+
+				ICFile file = ((com.idega.core.file.data.ICFileHome)com.idega.data.IDOLookup.getHome(ICFile.class)).create();
+				file.setName(uploadFile.getName());
+				file.setMimeType(uploadFile.getMimeType());
+				file.setFileValue(input);
+				file.setFileSize((int)uploadFile.getSize());
+				file.store();
+				
+				fileID = ((Integer) file.getPrimaryKey()).intValue();
+				uploadFile.setId(fileID);
+				try {
+					FileUtil.delete(uploadFile);
+				}
+				catch (Exception ex) {
+					System.err.println("MediaBusiness: deleting the temporary file at " + uploadFile.getRealPath() + " failed.");
+				}
+			}
+			catch (RemoteException e) {
+				e.printStackTrace(System.err);
+				uploadFile.setId(-1);
+			}
+		}
+
+		String sEmail = iwc.isParameterSet(PARAMETER_EMAIL) ? iwc.getParameter(PARAMETER_EMAIL) : null;
 		String phoneHome = iwc.getParameter(PARAMETER_PHONE_HOME);
 		String phoneMobile = iwc.getParameter(PARAMETER_PHONE_MOBILE);
 		String phoneWork = iwc.getParameter(PARAMETER_PHONE_WORK);
 		String coStreetAddress = iwc.getParameter(PARAMETER_CO_STREET_ADDRESS);
 		String coPostalCode = iwc.getParameter(PARAMETER_CO_POSTAL_CODE);
 		String coCity = iwc.getParameter(PARAMETER_CO_CITY);
-		boolean useCOAddress = iwc.getParameter(PARAMETER_CO_ADDRESS_SELECT) != null;
-		boolean messagesViaEmail = iwc.getParameter(PARAMETER_MESSAGES_VIA_EMAIL) != null;
-		String errorMessage = null;
+		boolean useCOAddress = iwc.isParameterSet(PARAMETER_CO_ADDRESS_SELECT);
+		boolean messagesViaEmail = iwc.isParameterSet(PARAMETER_MESSAGES_VIA_EMAIL);
+		boolean removeImage = iwc.isParameterSet(PARAMETER_REMOVE_IMAGE);
+
 		boolean updateEmail = false;
 		boolean updateCOAddress = false;
 
-		try {
-			updateEmail = validateEmail(sEmail);
-			/*
-			 * IF user checks that he wants all letters sent by email but doesn't
-			 * enter a valid email address he should get a warning
-			 */
-			if (messagesViaEmail && !updateEmail)
-				throw new Exception(iwrb.getLocalizedString(KEY_NO_EMAIL_FOR_LETTERS, DEFAULT_NO_EMAIL_FOR_LETTERS));
-			
-			// Validate c/o-address
-			if (useCOAddress) {
-				if (coStreetAddress.equals("")) {
-					throw new Exception(iwrb.getLocalizedString(KEY_CO_STREET_ADDRESS_MISSING, DEFAULT_CO_STREET_ADDRESS_MISSING));
-				}
-				if (coPostalCode.equals("")) {
-					throw new Exception(iwrb.getLocalizedString(KEY_CO_POSTAL_CODE_MISSING, DEFAULT_CO_POSTAL_CODE_MISSING));
-				}
-				if (coCity.equals("")) {
-					throw new Exception(iwrb.getLocalizedString(KEY_CO_CITY_MISSING, DEFAULT_CO_CITY_MISSING));
-				}
-				updateCOAddress = true;
+		if (sEmail != null) {
+			updateEmail = EmailValidator.getInstance().validateEmail(sEmail);
+			if (!updateEmail) {
+				errors.add(iwrb.getLocalizedString(KEY_EMAIL_INVALID, DEFAULT_EMAIL_INVALID));
+				hasErrors = true;
 			}
 		}
-		catch (Exception e) {
-			errorMessage = e.getMessage();
+		/*
+		 * IF user checks that he wants all letters sent by email but doesn't
+		 * enter a valid email address he should get a warning
+		 */
+		if (messagesViaEmail && !updateEmail) {
+			errors.add(iwrb.getLocalizedString(KEY_NO_EMAIL_FOR_LETTERS, DEFAULT_NO_EMAIL_FOR_LETTERS));
+			hasErrors = true;
 		}
-		if (errorMessage != null) {
-			add(new Text(" " + errorMessage));
+		
+		// Validate c/o-address
+		if (useCOAddress) {
+			if (coStreetAddress.equals("")) {
+				errors.add(iwrb.getLocalizedString(KEY_CO_STREET_ADDRESS_MISSING, DEFAULT_CO_STREET_ADDRESS_MISSING));
+				hasErrors = true;
+			}
+			if (coPostalCode.equals("")) {
+				errors.add(iwrb.getLocalizedString(KEY_CO_POSTAL_CODE_MISSING, DEFAULT_CO_POSTAL_CODE_MISSING));
+				hasErrors = true;
+			}
+			if (coCity.equals("")) {
+				errors.add(iwrb.getLocalizedString(KEY_CO_CITY_MISSING, DEFAULT_CO_CITY_MISSING));
+				hasErrors = true;
+			}
+			updateCOAddress = true;
 		}
-		else {
+
+		if (!hasErrors) {
 			UserBusiness ub = (UserBusiness) IBOLookup.getServiceInstance(iwc, UserBusiness.class);
 			if (updateEmail) {
 				ub.storeUserEmail(user, sEmail, true);
@@ -478,16 +487,40 @@ public class CitizenAccountPreferences extends Block {
 			messageSession.setIfUserPreferesMessageByEmail(messagesViaEmail);
 			CitizenAccountSession cas = getCitizenAccountSession(iwc);
 			cas.setIfUserUsesCOAddress(useCOAddress);
+			
+			if (removeImage) {
+				user.setSystemImageID(null);
+				user.store();
+			}
+			if (fileID != -1) {
+				user.setSystemImageID(fileID);
+				user.store();
+			}
+
+			Layer header = new Layer(Layer.DIV);
+			header.setStyleClass("header");
+			add(header);
+			
+			Heading1 heading = new Heading1(iwrb.getLocalizedString("citizen_preferences", "Citizen preferences"));
+			header.add(heading);
+			
+			Layer layer = new Layer(Layer.DIV);
+			layer.setStyleClass("receipt");
+			
+			Layer image = new Layer(Layer.DIV);
+			image.setStyleClass("receiptImage");
+			layer.add(image);
+			
+			heading = new Heading1(iwrb.getLocalizedString(KEY_PREFERENCES_SAVED, DEFAULT_PREFERENCES_SAVED));
+			layer.add(heading);
+			
+			layer.add(new Text(iwrb.getLocalizedString(KEY_PREFERENCES_SAVED + "_text", DEFAULT_PREFERENCES_SAVED + " info")));
+			
+			add(layer);
 		}
-		drawForm(iwc);
-		if (errorMessage == null) {
-			if (getParentPage() != null) {
-				getParentPage().setAlertOnLoad(iwrb.getLocalizedString(KEY_PREFERENCES_SAVED, DEFAULT_PREFERENCES_SAVED));
-			}
-			else {
-				add(new Break());
-				add(iwrb.getLocalizedString(KEY_PREFERENCES_SAVED, DEFAULT_PREFERENCES_SAVED));
-			}
+		else {
+			showErrors(iwc, errors);
+			viewForm(iwc);
 		}
 	}
 
@@ -512,54 +545,12 @@ public class CitizenAccountPreferences extends Block {
 		return coAddress;
 	}
 
-	private MessageSession getMessageSession(IWContext iwc) throws Exception {
+	private MessageSession getMessageSession(IWContext iwc) throws RemoteException {
 		return (MessageSession) com.idega.business.IBOLookup.getSessionInstance(iwc, MessageSession.class);
 	}
 
-	private CitizenAccountSession getCitizenAccountSession(IWContext iwc) throws Exception {
+	private CitizenAccountSession getCitizenAccountSession(IWContext iwc) throws RemoteException {
 		return (CitizenAccountSession) com.idega.business.IBOLookup.getSessionInstance(iwc, CitizenAccountSession.class);
-	}
-
-	/**
-	 * @param sEmail
-	 *          an email address, valid or not, to check
-	 * @return boolean true if there is no problem with all characters and is not
-	 *         empty. False if it is an empty string.
-	 * @throws Exception
-	 *           if the sEmail is a non empty string and contains erroneous
-	 *           characters.
-	 */
-	private boolean validateEmail(String sEmail) throws Exception {
-		boolean validEmail = false;
-		if (null == sEmail || 0 == sEmail.trim().length()) {
-			return removeEmailWhenEmpty;
-		}
-		else {
-			// Validate e-mail address
-			if (sEmail.equals("")) {
-				throw new Exception(iwrb.getLocalizedString(KEY_EMAIL_EMPTY, DEFAULT_EMAIL_EMPTY));
-			}
-			if (sEmail.length() < 6) {
-				throw new Exception(iwrb.getLocalizedString(KEY_EMAIL_INVALID, DEFAULT_EMAIL_INVALID));
-			}
-			if (sEmail.indexOf('.') == -1) {
-				throw new Exception(iwrb.getLocalizedString(KEY_EMAIL_INVALID, DEFAULT_EMAIL_INVALID));
-			}
-			if (sEmail.indexOf('@') == -1) {
-				throw new Exception(iwrb.getLocalizedString(KEY_EMAIL_INVALID, DEFAULT_EMAIL_INVALID));
-			}
-			String testEmail = sEmail.toLowerCase();
-			for (int i = 0; i < testEmail.length(); i++) {
-				char c = testEmail.charAt(i);
-				if ((c < 'a') || (c > 'z')) {
-					if ((c != '.') && (c != '@') && (c != '-') && (c != '_') && ((c < '0') || (c > '9'))) {
-						throw new Exception(iwrb.getLocalizedString(KEY_EMAIL_INVALID, DEFAULT_EMAIL_INVALID));
-					}
-				}
-			}
-			validEmail = true;
-		}
-		return validEmail;
 	}
 
 	public void setToRemoveEmailWhenEmpty(boolean flag) {

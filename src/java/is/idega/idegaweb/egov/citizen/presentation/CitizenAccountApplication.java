@@ -30,14 +30,11 @@ import com.idega.core.location.data.Commune;
 import com.idega.data.IDOLookup;
 import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWResourceBundle;
-import com.idega.presentation.Block;
 import com.idega.presentation.ExceptionWrapper;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
 import com.idega.presentation.text.Heading1;
 import com.idega.presentation.text.Link;
-import com.idega.presentation.text.ListItem;
-import com.idega.presentation.text.Lists;
 import com.idega.presentation.text.Text;
 import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.Label;
@@ -61,9 +58,7 @@ import com.idega.util.text.SocialSecurityNumber;
  * @author <a href="mail:malin.anulf@agurait.com">Malin Anulf </a>
  * @version $Revision$
  */
-public class CitizenAccountApplication extends Block {
-
-	private final static String IW_BUNDLE_IDENTIFIER = "is.idega.idegaweb.egov.citizen";
+public class CitizenAccountApplication extends CitizenBlock {
 
 	private final static int ACTION_VIEW_FORM = 0;
 	private final static int ACTION_SUBMIT_SIMPLE_FORM = 1;
@@ -84,7 +79,7 @@ public class CitizenAccountApplication extends Block {
 	private String communeUniqueIdsCSV;
 
 	private final static String SSN_DEFAULT = "Personal ID";
-	private 	final static String SSN_KEY = "personal_id";
+	protected 	final static String SSN_KEY = "personal_id";
 	private final static String TEXT_APPLICATION_SUBMITTED_DEFAULT = "Application is submitted.";
 	private final static String TEXT_APPLICATION_SUBMITTED_KEY = "application_submitted";
 
@@ -106,7 +101,7 @@ public class CitizenAccountApplication extends Block {
 	private IWResourceBundle iwrb;
 	private ICPage iResponsePage;
 	
-	public void main(IWContext iwc) {
+	public void present(IWContext iwc) {
 		iwrb = getResourceBundle(iwc);
 
 		try {
@@ -125,15 +120,11 @@ public class CitizenAccountApplication extends Block {
 		}
 	}
 
-	public String getBundleIdentifier() {
-		return IW_BUNDLE_IDENTIFIER;
-	}
-
 	private void viewSimpleApplicationForm(IWContext iwc) {
 		Form form = new Form();
 		form.addParameter(SIMPLE_FORM_SUBMIT_KEY, Boolean.TRUE.toString());
-		form.setID("applicationForm");
-		form.setStyleClass("accountApplicationForm");
+		form.setID("accountApplicationForm");
+		form.setStyleClass("citizenForm");
 		
 		Layer header = new Layer(Layer.DIV);
 		header.setStyleClass("header");
@@ -352,37 +343,6 @@ public class CitizenAccountApplication extends Block {
 				add(layer);
 			}
 		}
-	}
-
-	/**
-	 * Adds the errors encountered
-	 * @param iwc
-	 * @param errors
-	 */
-	private void showErrors(IWContext iwc, Collection errors) {
-		Layer layer = new Layer(Layer.DIV);
-		layer.setStyleClass("errorLayer");
-		
-		Layer image = new Layer(Layer.DIV);
-		image.setStyleClass("errorImage");
-		layer.add(image);
-		
-		Heading1 heading = new Heading1(iwrb.getLocalizedString("application_errors_occured", "There was a problem with the following items"));
-		layer.add(heading);
-		
-		Lists list = new Lists();
-		layer.add(list);
-		
-		Iterator iter = errors.iterator();
-		while (iter.hasNext()) {
-			String element = (String) iter.next();
-			ListItem item = new ListItem();
-			item.add(new Text(element));
-			
-			list.add(item);
-		}
-		
-		add(layer);
 	}
 
 	/**

@@ -10,29 +10,30 @@
 package is.idega.idegaweb.egov.citizen.presentation;
 
 import java.rmi.RemoteException;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collection;
 import javax.ejb.FinderException;
 import com.idega.business.IBOLookup;
+import com.idega.business.IBORuntimeException;
 import com.idega.core.accesscontrol.business.LoginDBHandler;
 import com.idega.core.accesscontrol.data.LoginTable;
 import com.idega.core.builder.data.ICPage;
 import com.idega.idegaweb.IWResourceBundle;
-import com.idega.presentation.Block;
-import com.idega.presentation.ExceptionWrapper;
 import com.idega.presentation.IWContext;
-import com.idega.presentation.Table;
-import com.idega.presentation.text.Break;
+import com.idega.presentation.Layer;
+import com.idega.presentation.text.Heading1;
+import com.idega.presentation.text.Link;
+import com.idega.presentation.text.Paragraph;
 import com.idega.presentation.text.Text;
 import com.idega.presentation.ui.Form;
-import com.idega.presentation.ui.GenericButton;
+import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.PasswordInput;
-import com.idega.presentation.ui.SubmitButton;
 import com.idega.user.business.UserBusiness;
 import com.idega.user.data.User;
 
 
-public class ChangePassword extends Block {
-
-	private final static String IW_BUNDLE_IDENTIFIER = "se.idega.idegaweb.commune";
+public class ChangePassword extends CitizenBlock {
 
 	private final static int ACTION_VIEW_FORM = 1;
 	private final static int ACTION_FORM_SUBMIT = 2;
@@ -68,17 +69,13 @@ public class ChangePassword extends Block {
 	private final static String DEFAULT_PASSWORD_REPEATED_EMPTY = "Repeated password cannot be empty.";		
 	private final static String DEFAULT_PASSWORDS_NOT_SAME = "New passwords not the same.";		
 	private final static String DEFAULT_PASSWORD_INVALID = "Invalid password.";		
-	private final static String DEFAULT_PASSWORD_TOO_SHORT = "Password too short.";		
+	private final static String DEFAULT_PASSWORD_TOO_SHORT = "Password too short. Must be at least {0}Êletters/digits.";		
 	private final static String DEFAULT_PASSWORD_CHAR_ILLEGAL = "Password contains illegal character(s).";		
 	private final static String DEFAULT_PASSWORD_SAVED = "Your password has been saved.";	
 
 	private User user = null;
 	private IWResourceBundle iwrb;
 		
-	public String getBundleIdentifier() {
-		return IW_BUNDLE_IDENTIFIER;
-	}
-
 	private int parseAction (final IWContext iwc) {
 		if (iwc.isParameterSet(PARAMETER_FORM_SUBMIT)) {
 			return ACTION_FORM_SUBMIT;
@@ -88,170 +85,186 @@ public class ChangePassword extends Block {
 		}
 	}
 	
-	public void main(IWContext iwc) {
+	public void present(IWContext iwc) {
 		if (!iwc.isLoggedOn()) {
 			return;
 		}
 		iwrb = getResourceBundle(iwc);
 		user = iwc.getCurrentUser();
 
-		try {
-			int action = parseAction(iwc);
-			switch (action) {
-				case ACTION_VIEW_FORM:
-					drawForm(iwc);
-					break;
-				case ACTION_FORM_SUBMIT:
-					updatePassword(iwc);
-					break;
-			}
+		int action = parseAction(iwc);
+		switch (action) {
+			case ACTION_VIEW_FORM:
+				drawForm(iwc);
+				break;
+			case ACTION_FORM_SUBMIT:
+				updatePassword(iwc);
+				break;
 		}
-		catch (Exception e) {
-			super.add(new ExceptionWrapper(e, this));
-		}    
 	}
 
-	private void drawForm(IWContext iwc) throws RemoteException {
+	private void drawForm(IWContext iwc) {
 		Form form = new Form();
+		form.addParameter(PARAMETER_FORM_SUBMIT, Boolean.TRUE.toString());
+		form.setID("changePasswordForm");
+		form.setStyleClass("citizenForm");
 		
-		Table table = new Table();	
-		table.setColumns(2);
-		table.setCellpadding(2);
-		form.add(table);
-		int row = 1;
-
-		UserBusiness ub = (UserBusiness) IBOLookup.getServiceInstance(iwc, UserBusiness.class);
-
-		String valueCurrentPassword = iwc.getParameter(PARAMETER_CURRENT_PASSWORD) != null ? iwc.getParameter(PARAMETER_CURRENT_PASSWORD) : "";
-		String valueNewPassword = iwc.getParameter(PARAMETER_NEW_PASSWORD) != null ? iwc.getParameter(PARAMETER_NEW_PASSWORD) : "";
-		String valueNewPasswordRepeated = iwc.getParameter(PARAMETER_NEW_PASSWORD_REPEATED) != null ? iwc.getParameter(PARAMETER_NEW_PASSWORD_REPEATED) : "";
-
-		Text tCurrentPassword = new Text(iwrb.getLocalizedString(KEY_CURRENT_PASSWORD, DEFAULT_CURRENT_PASSWORD));
-		Text tNewPassword = new Text(iwrb.getLocalizedString(KEY_NEW_PASSWORD, DEFAULT_NEW_PASSWORD));
-		Text tNewPasswordRepeated = new Text(iwrb.getLocalizedString(KEY_NEW_PASSWORD_REPEATED, DEFAULT_NEW_PASSWORD_REPEATED));
-
-		PasswordInput tiCurrentPassword = new PasswordInput(PARAMETER_CURRENT_PASSWORD);	
-		if(valueCurrentPassword!=null){
-			tiCurrentPassword.setValue(valueCurrentPassword);
-		}
-
-		PasswordInput tiNewPassword = new PasswordInput(PARAMETER_NEW_PASSWORD);
-		if(valueNewPassword!=null){
-			tiNewPassword.setValue(valueNewPassword);
-		}
+		Layer header = new Layer(Layer.DIV);
+		header.setStyleClass("header");
+		form.add(header);
 		
-		PasswordInput tiNewPasswordRepeated = new PasswordInput(PARAMETER_NEW_PASSWORD_REPEATED);
-		if(valueNewPasswordRepeated!=null){
-			tiNewPasswordRepeated.setValue(valueNewPasswordRepeated);
-		}
+		Heading1 heading = new Heading1(iwrb.getLocalizedString("change_password", "Change password"));
+		header.add(heading);
+		
+		Layer section = new Layer(Layer.DIV);
+		section.setStyleClass("formSection");
+		form.add(section);
+		
+		Paragraph paragraph = new Paragraph();
+		paragraph.add(new Text(iwrb.getLocalizedString("change_password_helper_text", "Please fill in your current password and enter the new desired one.")));
+		section.add(paragraph);
+		
+		PasswordInput currentPassword = new PasswordInput(PARAMETER_CURRENT_PASSWORD);	
+		currentPassword.keepStatusOnAction(true);
 
-		SubmitButton sbUpdate = new SubmitButton(iwrb.getLocalizedString(KEY_UPDATE, DEFAULT_UPDATE), PARAMETER_FORM_SUBMIT, "true");
-		
-		table.add(tCurrentPassword, 1, row);
-		table.add(tiCurrentPassword, 2, row++);
+		PasswordInput newPassword = new PasswordInput(PARAMETER_NEW_PASSWORD);
+		newPassword.keepStatusOnAction(true);
 
-		table.add(tNewPassword, 1, row);
-		table.add(tiNewPassword, 2, row++);
+		PasswordInput newPasswordRepeat = new PasswordInput(PARAMETER_NEW_PASSWORD_REPEATED);
+		newPasswordRepeat.keepStatusOnAction(true);
 
-		table.add(tNewPasswordRepeated, 1, row);
-		table.add(tiNewPasswordRepeated, 2, row++);
+		Layer formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		Label label = new Label(iwrb.getLocalizedString(KEY_CURRENT_PASSWORD, DEFAULT_CURRENT_PASSWORD), currentPassword);
+		formItem.add(label);
+		formItem.add(currentPassword);
+		section.add(formItem);
 		
-		table.setHeight(row++, 12);
+		formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		label = new Label(iwrb.getLocalizedString(KEY_NEW_PASSWORD, DEFAULT_NEW_PASSWORD), newPassword);
+		formItem.add(label);
+		formItem.add(newPassword);
+		section.add(formItem);
 		
-		ICPage homepage = null;
-		try {
-			homepage = ub.getHomePageForUser(user);
-		}
-		catch (FinderException fe) {
-			homepage = null;
-		}
+		formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		label = new Label(iwrb.getLocalizedString(KEY_NEW_PASSWORD_REPEATED, DEFAULT_NEW_PASSWORD_REPEATED), newPasswordRepeat);
+		formItem.add(label);
+		formItem.add(newPasswordRepeat);
+		section.add(formItem);
 		
-		table.add(sbUpdate, 1, row);
-		if (homepage != null) {
-			table.add(new Text(Text.NON_BREAKING_SPACE), 1, row);
-			GenericButton home = new GenericButton("home", iwrb.getLocalizedString("my_page", "Back to My Page"));
-			home.setPageToOpen(homepage);
-			table.add(home, 1, row);
-		}
-		table.add(new Text(Text.NON_BREAKING_SPACE), 1, row);
+		Layer clearLayer = new Layer(Layer.DIV);
+		clearLayer.setStyleClass("Clear");
+		section.add(clearLayer);
+
+		Layer buttonLayer = new Layer(Layer.DIV);
+		buttonLayer.setStyleClass("buttonLayer");
+		form.add(buttonLayer);
+		
+		Link send = new Link(iwrb.getLocalizedString(KEY_UPDATE, DEFAULT_UPDATE));
+		send.setStyleClass("sendLink");
+		send.setToFormSubmit(form);
+		buttonLayer.add(send);
 		
 		add(form);
 	}
 	
-	private void updatePassword(IWContext iwc)  throws Exception {
+	private void updatePassword(IWContext iwc) {
 		LoginTable loginTable = LoginDBHandler.getUserLogin(((Integer) user.getPrimaryKey()).intValue());
-		String login    = loginTable.getUserLogin();
+		String login = loginTable.getUserLogin();
 		String currentPassword = iwc.getParameter(PARAMETER_CURRENT_PASSWORD);
 		String newPassword1 = iwc.getParameter(PARAMETER_NEW_PASSWORD);
 		String newPassword2 = iwc.getParameter(PARAMETER_NEW_PASSWORD_REPEATED);		
 
-		String errorMessage = null;
-		boolean updatePassword = false;
+		boolean hasErrors = false;
+		Collection errors = new ArrayList();
 		
-		try {
-			if (!LoginDBHandler.verifyPassword(login, currentPassword)) {
-				throw new Exception(iwrb.getLocalizedString(KEY_PASSWORD_INVALID, DEFAULT_PASSWORD_INVALID));
-			}
+		if (!LoginDBHandler.verifyPassword(login, currentPassword)) {
+			hasErrors = true;
+			errors.add(iwrb.getLocalizedString(KEY_PASSWORD_INVALID, DEFAULT_PASSWORD_INVALID));
+		}
 
-			// Validate new password
-			if (!newPassword1.equals("") || !newPassword2.equals("")) {
-				if (newPassword1.equals("")) {
-					throw new Exception(iwrb.getLocalizedString(KEY_PASSWORD_EMPTY, DEFAULT_PASSWORD_EMPTY));
-				}
-				if (newPassword2.equals("")) {
-					throw new Exception(iwrb.getLocalizedString(KEY_PASSWORD_REPEATED_EMPTY, DEFAULT_PASSWORD_REPEATED_EMPTY));
-				}
-				if (!newPassword1.equals(newPassword2)) {
-					throw new Exception(iwrb.getLocalizedString(KEY_PASSWORDS_NOT_SAME, DEFAULT_PASSWORDS_NOT_SAME));
-				}
-				if (newPassword1.length() < MIN_PASSWORD_LENGTH) {
-					throw new Exception(iwrb.getLocalizedString(KEY_PASSWORD_TOO_SHORT, DEFAULT_PASSWORD_TOO_SHORT));
-				}
-				for (int i = 0; i < newPassword1.length(); i++) {
-					char c = newPassword1.charAt(i);
-					boolean isPasswordCharOK = false;
-					if ((c >= 'a') && (c <= 'z')) {
-						isPasswordCharOK = true;
-					} else if ((c >= 'A') && (c <= 'Z')) {
-						isPasswordCharOK = true;
-					} else if ((c >= '0') && (c <= '9')) {
-						isPasswordCharOK = true;
-					} else if ((c == 'Œ') || (c == 'Š') || (c == 'š')) {
-						isPasswordCharOK = true;
-					} else if ((c == '') || (c == '€') || (c == '…')) {
-						isPasswordCharOK = true;
-					}
-					if (!isPasswordCharOK) {
-						throw new Exception(iwrb.getLocalizedString(KEY_PASSWORD_CHAR_ILLEGAL, DEFAULT_PASSWORD_CHAR_ILLEGAL));
-					}
-				}
-				updatePassword = true;
+		// Validate new password
+		if (!newPassword1.equals("") || !newPassword2.equals("")) {
+			if (newPassword1.equals("")) {
+				hasErrors = true;
+				errors.add(iwrb.getLocalizedString(KEY_PASSWORD_EMPTY, DEFAULT_PASSWORD_EMPTY));
+			}
+			if (newPassword2.equals("")) {
+				hasErrors = true;
+				errors.add(iwrb.getLocalizedString(KEY_PASSWORD_REPEATED_EMPTY, DEFAULT_PASSWORD_REPEATED_EMPTY));
+			}
+			if (!newPassword1.equals(newPassword2)) {
+				hasErrors = true;
+				errors.add(iwrb.getLocalizedString(KEY_PASSWORDS_NOT_SAME, DEFAULT_PASSWORDS_NOT_SAME));
+			}
+			if (newPassword1.length() < MIN_PASSWORD_LENGTH) {
+				Object[] arguments = { String.valueOf(MIN_PASSWORD_LENGTH) };
+				hasErrors = true;
+				errors.add(MessageFormat.format(iwrb.getLocalizedString(KEY_PASSWORD_TOO_SHORT, DEFAULT_PASSWORD_TOO_SHORT), arguments));
 			}
 		}
-		catch (Exception e) {
-			errorMessage = e.getMessage();
-		}
 
-
-		if (errorMessage != null) {
-			add(new Text(" " + errorMessage));
-		}
-		else {
-			// Ok to update password
-			if (updatePassword) {
+		if (!hasErrors) {
+			try {
 				LoginDBHandler.updateLogin(((Integer)user.getPrimaryKey()).intValue(), login, newPassword1);
 			}
-			
-			drawForm(iwc);
-			if (errorMessage == null) {
-				if (getParentPage() != null) {
-					getParentPage().setAlertOnLoad(iwrb.getLocalizedString(KEY_PASSWORD_SAVED, DEFAULT_PASSWORD_SAVED));
-				}
-				else {
-					add(new Break());
-					add(iwrb.getLocalizedString(KEY_PASSWORD_SAVED, DEFAULT_PASSWORD_SAVED));
-				}
+			catch (Exception e) {
+				hasErrors = true;
+				errors.add(iwrb.getLocalizedString("citizen.password_update_failed", "Password update failed"));
 			}
+		}
+			// Ok to update password
+		if (!hasErrors) {
+
+			Layer header = new Layer(Layer.DIV);
+			header.setStyleClass("header");
+			add(header);
+			
+			Heading1 heading = new Heading1(iwrb.getLocalizedString("change_password", "Change password"));
+			header.add(heading);
+			
+			Layer layer = new Layer(Layer.DIV);
+			layer.setStyleClass("receipt");
+			
+			Layer image = new Layer(Layer.DIV);
+			image.setStyleClass("receiptImage");
+			layer.add(image);
+			
+			heading = new Heading1(iwrb.getLocalizedString(KEY_PASSWORD_SAVED, DEFAULT_PASSWORD_SAVED));
+			layer.add(heading);
+			
+			layer.add(new Text(iwrb.getLocalizedString(KEY_PASSWORD_SAVED + "_text", DEFAULT_PASSWORD_SAVED + " info")));
+			
+			ICPage userHomePage = null;
+			try {
+				UserBusiness ub = (UserBusiness) IBOLookup.getServiceInstance(iwc, UserBusiness.class);
+				userHomePage = ub.getHomePageForUser(user);
+			}
+			catch (FinderException fe) {
+				//No page found...
+			}
+			catch (RemoteException re) {
+				throw new IBORuntimeException(re);
+			}
+			
+			if (userHomePage != null) {
+				Layer buttonLayer = new Layer(Layer.DIV);
+				buttonLayer.setStyleClass("buttonLayer");
+				layer.add(buttonLayer);
+				
+				Link link = new Link(iwrb.getLocalizedString("back_to_home_page", "Back to home page"));
+				link.setStyleClass("homeLink");
+				link.setPage(userHomePage);
+				buttonLayer.add(link);
+			}
+			
+			add(layer);
+		}
+		else {
+			showErrors(iwc, errors);
+			drawForm(iwc);
 		}
 	}
 	
