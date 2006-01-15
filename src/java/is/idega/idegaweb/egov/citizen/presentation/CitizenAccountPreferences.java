@@ -371,6 +371,8 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		formItem.add(label);
 		section.add(formItem);
 		
+		section.add(clearLayer);
+
 		Layer buttonLayer = new Layer(Layer.DIV);
 		buttonLayer.setStyleClass("buttonLayer");
 		form.add(buttonLayer);
