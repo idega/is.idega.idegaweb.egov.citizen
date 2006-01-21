@@ -255,6 +255,8 @@ public class CitizenAccountApplication extends CitizenBlock {
 		CitizenAccountBusiness business = (CitizenAccountBusiness) IBOLookup.getServiceInstance(iwc, CitizenAccountBusiness.class);
 		User user = business.getUserIcelandic(ssn);
 		
+		boolean userHasLogin = false;
+		Collection userLoginError = new ArrayList();
 		if (user == null && (ssn != null && SocialSecurityNumber.isValidIcelandicSocialSecurityNumber(ssn))) {
 			errors.add(iwrb.getLocalizedString(UNKNOWN_CITIZEN_KEY, UNKNOWN_CITIZEN_DEFAULT));
 			hasErrors = true;
@@ -290,13 +292,13 @@ public class CitizenAccountApplication extends CitizenBlock {
 				}
 			}
 			
-			
 			try {
 				Collection logins = new ArrayList();
 				logins.addAll(getLoginTableHome().findLoginsForUser(user));
 				if (!logins.isEmpty()) { 
-					errors.add(iwrb.getLocalizedString(USER_ALLREADY_HAS_A_LOGIN_KEY, USER_ALLREADY_HAS_A_LOGIN_DEFAULT));
+					userLoginError.add(iwrb.getLocalizedString(USER_ALLREADY_HAS_A_LOGIN_KEY, USER_ALLREADY_HAS_A_LOGIN_DEFAULT));
 					hasErrors = true;
+					userHasLogin = true;
 				}	
 			}
 			catch (Exception e) {
@@ -325,7 +327,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		}
 		
 		if (hasErrors) {
-			showErrors(iwc, errors);
+			showErrors(iwc, userHasLogin ? userLoginError : errors);
 			viewSimpleApplicationForm(iwc);
 		}
 		else {
