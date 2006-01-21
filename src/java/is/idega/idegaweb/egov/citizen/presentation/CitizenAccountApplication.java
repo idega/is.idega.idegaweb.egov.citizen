@@ -35,6 +35,7 @@ import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
 import com.idega.presentation.text.Heading1;
 import com.idega.presentation.text.Link;
+import com.idega.presentation.text.Paragraph;
 import com.idega.presentation.text.Text;
 import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.Label;
@@ -137,6 +138,11 @@ public class CitizenAccountApplication extends CitizenBlock {
 		section.setStyleClass("formSection");
 		form.add(section);
 		
+		Layer helpLayer = new Layer(Layer.DIV);
+		helpLayer.setStyleClass("helperText");
+		helpLayer.add(new Text(iwrb.getLocalizedString("citizen_registraction_help", "Please fill in your personal ID as well as your e-mail.  Your e-mail is required so that you can be contacted directly about changes to you ongoing cases.  If you don't have an e-mail account please contact the commune offices.")));
+		section.add(helpLayer);
+		
 		TextInput personalID = new TextInput(SSN_KEY);
 		personalID.keepStatusOnAction(true);
 
@@ -200,6 +206,12 @@ public class CitizenAccountApplication extends CitizenBlock {
 		Layer clearLayer = new Layer(Layer.DIV);
 		clearLayer.setStyleClass("Clear");
 		section.add(clearLayer);
+		
+		Paragraph paragraph = new Paragraph();
+		paragraph.setStyleClass("requiredInfo");
+		paragraph.add(required);
+		paragraph.add(new Text(iwrb.getLocalizedString("required_information", "Required information")));
+		form.add(paragraph);
 
 		Layer buttonLayer = new Layer(Layer.DIV);
 		buttonLayer.setStyleClass("buttonLayer");
