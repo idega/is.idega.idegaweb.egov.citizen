@@ -24,8 +24,10 @@ import com.idega.presentation.ExceptionWrapper;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Image;
 import com.idega.presentation.Layer;
+import com.idega.presentation.text.Break;
 import com.idega.presentation.text.Heading1;
 import com.idega.presentation.text.Link;
+import com.idega.presentation.text.Paragraph;
 import com.idega.presentation.text.Text;
 import com.idega.presentation.ui.CheckBox;
 import com.idega.presentation.ui.FileInput;
@@ -516,7 +518,19 @@ public class CitizenAccountPreferences extends CitizenBlock {
 			heading = new Heading1(iwrb.getLocalizedString(KEY_PREFERENCES_SAVED, DEFAULT_PREFERENCES_SAVED));
 			layer.add(heading);
 			
-			layer.add(new Text(iwrb.getLocalizedString(KEY_PREFERENCES_SAVED + "_text", DEFAULT_PREFERENCES_SAVED + " info")));
+			Paragraph paragraph = new Paragraph();
+			paragraph.add(new Text(iwrb.getLocalizedString(KEY_PREFERENCES_SAVED + "_text", DEFAULT_PREFERENCES_SAVED + " info")));
+			layer.add(paragraph);
+			
+			ICPage page = ub.getHomePageForUser(user);
+			if (page != null) {
+				paragraph.add(new Break(2));
+				
+				Link link = new Link(iwrb.getLocalizedString("my_page", "My page"));
+				link.setStyleClass("homeLink");
+				link.setPage(page);
+				paragraph.add(link);
+			}
 			
 			add(layer);
 		}

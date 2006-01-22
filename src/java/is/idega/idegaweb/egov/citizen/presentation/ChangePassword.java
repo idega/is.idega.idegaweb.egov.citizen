@@ -235,7 +235,9 @@ public class ChangePassword extends CitizenBlock {
 			heading = new Heading1(iwrb.getLocalizedString(KEY_PASSWORD_SAVED, DEFAULT_PASSWORD_SAVED));
 			layer.add(heading);
 			
-			layer.add(new Text(iwrb.getLocalizedString(KEY_PASSWORD_SAVED + "_text", DEFAULT_PASSWORD_SAVED + " info")));
+			Paragraph paragraph = new Paragraph();
+			paragraph.add(new Text(iwrb.getLocalizedString(KEY_PASSWORD_SAVED + "_text", DEFAULT_PASSWORD_SAVED + " info")));
+			layer.add(paragraph);
 			
 			ICPage userHomePage = null;
 			try {
@@ -250,14 +252,10 @@ public class ChangePassword extends CitizenBlock {
 			}
 			
 			if (userHomePage != null) {
-				Layer buttonLayer = new Layer(Layer.DIV);
-				buttonLayer.setStyleClass("buttonLayer");
-				layer.add(buttonLayer);
-				
 				Link link = new Link(iwrb.getLocalizedString("back_to_home_page", "Back to home page"));
 				link.setStyleClass("homeLink");
 				link.setPage(userHomePage);
-				buttonLayer.add(link);
+				paragraph.add(link);
 			}
 			
 			add(layer);
