@@ -45,18 +45,9 @@ import com.idega.util.Age;
 import com.idega.util.text.SocialSecurityNumber;
 
 /**
- * SimpleCitizenAccountApplication is an IdegaWeb block that inputs and handles
- * applications for citizen accounts. It is based on CitizenAccountApplication
- * but in a simplier version. To use this all the applicants needs to be in the
- * database. It is based on session ejb classes in
- * {@link se.idega.idegaweb.commune.account.citizen.business}and entity ejb
- * classes in {@link se.idega.idegaweb.commune.account.citizen.business.data}.
- * <p>
  * Last modified: $Date$ by $Author$
  * 
- * @author <a href="mail:palli@idega.is">Pall Helgason </a>
- * @author <a href="http://www.staffannoteberg.com">Staffan Nöteberg </a>
- * @author <a href="mail:malin.anulf@agurait.com">Malin Anulf </a>
+ * @author <a href="mail:laddi@idega.is">Laddi</a>
  * @version $Revision$
  */
 public class CitizenAccountApplication extends CitizenBlock {
@@ -349,10 +340,12 @@ public class CitizenAccountApplication extends CitizenBlock {
 				image.setStyleClass("receiptImage");
 				layer.add(image);
 				
-				heading = new Heading1(iwrb.getLocalizedString(TEXT_APPLICATION_SUBMITTED_KEY, TEXT_APPLICATION_SUBMITTED_DEFAULT));
+				String serverName = iwc.getApplicationSettings().getProperty("server_name", "");
+
+				heading = new Heading1(iwrb.getLocalizedString(TEXT_APPLICATION_SUBMITTED_KEY + (serverName.length() > 0 ? ("_" + serverName) : ""), TEXT_APPLICATION_SUBMITTED_DEFAULT));
 				layer.add(heading);
 				
-				layer.add(new Text(iwrb.getLocalizedString(TEXT_APPLICATION_SUBMITTED_KEY + "_text", TEXT_APPLICATION_SUBMITTED_DEFAULT + " info")));
+				layer.add(new Text(iwrb.getLocalizedString(TEXT_APPLICATION_SUBMITTED_KEY + "_text" + (serverName.length() > 0 ? ("_" + serverName) : ""), TEXT_APPLICATION_SUBMITTED_DEFAULT + " info")));
 				
 				add(layer);
 			}
