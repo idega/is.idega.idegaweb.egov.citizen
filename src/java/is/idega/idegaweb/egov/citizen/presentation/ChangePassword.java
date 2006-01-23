@@ -22,6 +22,7 @@ import com.idega.core.builder.data.ICPage;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
+import com.idega.presentation.text.Break;
 import com.idega.presentation.text.Heading1;
 import com.idega.presentation.text.Link;
 import com.idega.presentation.text.Paragraph;
@@ -252,9 +253,10 @@ public class ChangePassword extends CitizenBlock {
 			}
 			
 			if (userHomePage != null) {
-				Link link = new Link(iwrb.getLocalizedString("back_to_home_page", "Back to home page"));
+				Link link = new Link(iwrb.getLocalizedString("my_page", "My page"));
 				link.setStyleClass("homeLink");
 				link.setPage(userHomePage);
+				paragraph.add(new Break(2));
 				paragraph.add(link);
 			}
 			
