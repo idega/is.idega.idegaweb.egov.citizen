@@ -59,6 +59,7 @@ new_email=N\u00FDtt netfang
 new_email_saved=Netfangi breytt
 new_email_saved_text=N\u00FDja netfangi\u00F0 hefur veri\u00F0 vista\u00F0.
 next=\u00C1fram
+no_login_found_for_user=\u00CDb\u00FAi me\u00F0 \u00FEessa kennit\u00F6lu hefur ekki a\u00F0gang a\u00F0 Rafr\u00E6nni Reykjav\u00EDk. 
 not_a_valid_email=Ekki leyfilegt netfang
 not_a_valid_personal_id=Kennitalan er ekki r\u00E9tt
 password_was_created=N\u00FDtt lykilor\u00F0 b\u00FAi\u00F0 til

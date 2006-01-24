@@ -67,6 +67,7 @@ new_email=New e-mail
 new_email_saved=New e-mail saved
 new_email_saved_text=The new e-mail has been saved.
 next=Next
+no_login_found_for_user=No login was found for the user with the personal ID you entered.
 not_a_valid_email=The e-mail address you have entered is not valid.
 not_a_valid_personal_id=The personal ID you've entered is not valid.
 password_was_created=A new password was generated.
