@@ -16,6 +16,8 @@ import javax.ejb.FinderException;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.business.IBORuntimeException;
+import com.idega.core.accesscontrol.business.LoginDBHandler;
+import com.idega.core.accesscontrol.data.LoginTable;
 import com.idega.core.builder.data.ICPage;
 import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWResourceBundle;
@@ -40,6 +42,7 @@ public class ChangeEmail extends CitizenBlock {
 
 	private final static String PARAMETER_ACTION = "prm_action";
 	private final static String PARAMETER_EMAIL = "prm_email";
+	private final static String PARAMETER_EMAIL_REPEAT = "prm_email_repeat";
 	
 	private final static String ACTION_VIEW_FORM = "action_view_form";
 	private final static String ACTION_FORM_SUBMIT = "action_form_submit";
@@ -81,6 +84,7 @@ public class ChangeEmail extends CitizenBlock {
 
 	private void submitForm(IWContext iwc) throws RemoteException {
 		String email = iwc.getParameter(PARAMETER_EMAIL);
+		String emailRepeat = iwc.getParameter(PARAMETER_EMAIL_REPEAT);
 
 		boolean hasErrors = false;
 		Collection errors = new ArrayList();
@@ -93,9 +97,18 @@ public class ChangeEmail extends CitizenBlock {
 			errors.add(iwrb.getLocalizedString("not_a_valid_email", "The e-mail address you have entered is not valid."));
 			hasErrors = true;
 		}
+		
+		if (emailRepeat == null || emailRepeat.length() == 0) {
+			errors.add(iwrb.getLocalizedString("must_provide_email_repeat", "You have to enter repeat e-mail address."));
+			hasErrors = true;
+		}
+		else if (!email.equals(emailRepeat)) {
+			errors.add(iwrb.getLocalizedString("emails_dont_match", "The e-mail addresses you have entered don't match."));
+			hasErrors = true;
+		}
 
 		User user = getUser(iwc);
-		if (user != null) {
+		if (user != null && !hasErrors) {
 			getUserBusiness(iwc).storeUserEmail(user, email, true);
 		}
 		
@@ -155,50 +168,89 @@ public class ChangeEmail extends CitizenBlock {
 	 * 
 	 * @param iwc
 	 */
-	private void viewForm(final IWContext iwc) {
+	private void viewForm(final IWContext iwc) throws RemoteException {
 		Form form = new Form();
 		form.addParameter(PARAMETER_ACTION, Boolean.TRUE.toString());
 		form.setID("changeEmailForm");
 		form.setStyleClass("citizenForm");
 		
-		Layer header = new Layer(Layer.DIV);
-		header.setStyleClass("header");
-		form.add(header);
-		
-		Heading1 heading = new Heading1(iwrb.getLocalizedString("change_email", "Change e-mail"));
-		header.add(heading);
-		
-		Layer section = new Layer(Layer.DIV);
-		section.setStyleClass("formSection");
-		form.add(section);
-		
-		Paragraph paragraph = new Paragraph();
-		paragraph.add(new Text(iwrb.getLocalizedString("change_email_helper_text", "Please enter the new e-mail and click 'Save'.")));
-		section.add(paragraph);
-		
-		TextInput input = new TextInput(PARAMETER_EMAIL);
-		input.keepStatusOnAction(true);
+		User user = getUser(iwc);
+		if (user != null) {
+			LoginTable loginTable = LoginDBHandler.getUserLogin(user);
+			if (loginTable == null) {
+				Layer layer = new Layer(Layer.DIV);
+				layer.setStyleClass("stop");
+				
+				Layer image = new Layer(Layer.DIV);
+				image.setStyleClass("stopImage");
+				layer.add(image);
+				
+				Heading1 heading = new Heading1(iwrb.getLocalizedString("user_has_no_account", "User has no account"));
+				layer.add(heading);
+				
+				Paragraph paragraph = new Paragraph();
+				paragraph.add(new Text(iwrb.getLocalizedString("user_has_no_login", "The user you are trying to change e-mail for doesn't have an account.")));
+				layer.add(paragraph);
+				
+				Link link = new Link(iwrb.getLocalizedString("back", "Back"));
+				link.setStyleClass("homeLink");
+				link.setAsBackLink();
+				paragraph.add(new Break(2));
+				paragraph.add(link);
+				
+				form.add(layer);
+			}
+			else {
+				Layer header = new Layer(Layer.DIV);
+				header.setStyleClass("header");
+				form.add(header);
+				
+				Heading1 heading = new Heading1(iwrb.getLocalizedString("change_email", "Change e-mail"));
+				header.add(heading);
+				
+				Layer section = new Layer(Layer.DIV);
+				section.setStyleClass("formSection");
+				form.add(section);
+				
+				Paragraph paragraph = new Paragraph();
+				paragraph.add(new Text(iwrb.getLocalizedString("change_email_helper_text", "Please enter the new e-mail and click 'Save'.")));
+				section.add(paragraph);
+				
+				TextInput email = new TextInput(PARAMETER_EMAIL);
+				email.keepStatusOnAction(true);
 
-		Layer formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		Label label = new Label(iwrb.getLocalizedString("new_email", "New e-mail"), input);
-		formItem.add(label);
-		formItem.add(input);
-		section.add(formItem);
-		
-		Layer clearLayer = new Layer(Layer.DIV);
-		clearLayer.setStyleClass("Clear");
-		section.add(clearLayer);
+				TextInput emailRepeat = new TextInput(PARAMETER_EMAIL_REPEAT);
+				emailRepeat.keepStatusOnAction(true);
 
-		Layer buttonLayer = new Layer(Layer.DIV);
-		buttonLayer.setStyleClass("buttonLayer");
-		form.add(buttonLayer);
-		
-		Link send = new Link(iwrb.getLocalizedString("save", "Save"));
-		send.setStyleClass("sendLink");
-		send.setToFormSubmit(form);
-		buttonLayer.add(send);
-		
+				Layer formItem = new Layer(Layer.DIV);
+				formItem.setStyleClass("formItem");
+				Label label = new Label(iwrb.getLocalizedString("new_email", "New e-mail"), email);
+				formItem.add(label);
+				formItem.add(email);
+				section.add(formItem);
+				
+				formItem = new Layer(Layer.DIV);
+				formItem.setStyleClass("formItem");
+				label = new Label(iwrb.getLocalizedString("new_email_repeat", "New e-mail repeat"), emailRepeat);
+				formItem.add(label);
+				formItem.add(emailRepeat);
+				section.add(formItem);
+				
+				Layer clearLayer = new Layer(Layer.DIV);
+				clearLayer.setStyleClass("Clear");
+				section.add(clearLayer);
+
+				Layer buttonLayer = new Layer(Layer.DIV);
+				buttonLayer.setStyleClass("buttonLayer");
+				form.add(buttonLayer);
+				
+				Link send = new Link(iwrb.getLocalizedString("save", "Save"));
+				send.setStyleClass("sendLink");
+				send.setToFormSubmit(form);
+				buttonLayer.add(send);
+			}
+		}
+
 		add(form);
 	}
 
