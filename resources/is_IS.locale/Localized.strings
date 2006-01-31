@@ -56,6 +56,7 @@ must_provide_personal_id=Vinsamlegast gef\u00F0u upp kennit\u00F6lu
 my_page=S\u00ED\u00F0an m\u00EDn
 name=Nafn
 new_email=N\u00FDtt netfang
+new_email_repeat=N\u00FDtt netfang (endurteki\u00F0)
 new_email_saved=Netfangi breytt
 new_email_saved_text=N\u00FDja netfangi\u00F0 hefur veri\u00F0 vista\u00F0.
 next=\u00C1fram

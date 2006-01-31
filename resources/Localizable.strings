@@ -64,6 +64,7 @@ must_provide_personal_id=You have to enter a personal ID.
 my_page=My page
 name=Name
 new_email=New e-mail
+new_email_repeat=New e-mail repeat
 new_email_saved=New e-mail saved
 new_email_saved_text=The new e-mail has been saved.
 next=Next
