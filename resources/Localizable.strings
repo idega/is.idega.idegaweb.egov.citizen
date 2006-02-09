@@ -71,6 +71,7 @@ next=Next
 no_login_found_for_user=No login was found for the user with the personal ID you entered.
 not_a_valid_email=The e-mail address you have entered is not valid.
 not_a_valid_personal_id=The personal ID you've entered is not valid.
+not_valid_citizen_account_age=You have to be {0} to apply for a citizen account.
 password_was_created=A new password was generated.
 password_was_created_text=A new password was generated. info
 personalID=Personal ID

@@ -15,6 +15,7 @@
 package is.idega.idegaweb.egov.citizen.presentation;
 
 import java.rmi.RemoteException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -42,6 +43,7 @@ import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.TextInput;
 import com.idega.user.data.User;
 import com.idega.util.Age;
+import com.idega.util.IWTimestamp;
 import com.idega.util.text.SocialSecurityNumber;
 
 /**
@@ -54,6 +56,9 @@ public class CitizenAccountApplication extends CitizenBlock {
 
 	private final static int ACTION_VIEW_FORM = 0;
 	private final static int ACTION_SUBMIT_SIMPLE_FORM = 1;
+	
+	private static final String ATTRIBUTE_VALID_ACCOUNT_AGE = "citizen_account_minimum_age";
+	private static final String ATTRIBUTE_VALID_ACCOUNT_AGE_YEAR = "citizen_account_minimum_age_this_year";
 
 	private final static String EMAIL_DEFAULT = "Email";
 	private final static String EMAIL_KEY = "email";
@@ -65,8 +70,8 @@ public class CitizenAccountApplication extends CitizenBlock {
 	private final static String PHONE_CELL_DEFAULT = "Cell phone";
 	private final static String UNKNOWN_CITIZEN_KEY = "unknown_citizen";
 	private final static String UNKNOWN_CITIZEN_DEFAULT = "Something is wrong with your personal id. Please try again or contact the responsible";
-	private final static String YOU_MUST_BE_18_KEY = "must_be_18_years";
-	private final static String YOU_MUST_BE_18_DEFAULT = "You have to be 18 to apply for a citizen account";
+	private final static String NOT_VALID_ACCOUNT_AGE_KEY = "not_valid_citizen_account_age";
+	private final static String NOT_VALID_ACCOUNT_AGE_DEFAULT = "You have to be {0} to apply for a citizen account";
 
 	private String communeUniqueIdsCSV;
 
@@ -229,8 +234,9 @@ public class CitizenAccountApplication extends CitizenBlock {
 			errors.add(iwrb.getLocalizedString("not_a_valid_personal_id", "The personal ID you've entered is not valid."));
 			hasErrors = true;
 		}
-		if (!isOver18(ssn)) { 
-			errors.add(iwrb.getLocalizedString(YOU_MUST_BE_18_KEY, YOU_MUST_BE_18_DEFAULT));
+		if (!isValidAge(iwc, ssn)) { 
+			Object[] arguments = { iwc.getApplicationSettings().getProperty(ATTRIBUTE_VALID_ACCOUNT_AGE, String.valueOf(18)) };
+			errors.add(MessageFormat.format(iwrb.getLocalizedString(NOT_VALID_ACCOUNT_AGE_KEY, NOT_VALID_ACCOUNT_AGE_DEFAULT), arguments));
 			hasErrors = true;
 		}
 		
@@ -368,10 +374,19 @@ public class CitizenAccountApplication extends CitizenBlock {
 		this.communeUniqueIdsCSV = communeUniqueIdsCSV;
 	}
 	
-	private boolean isOver18(final String ssn) {
+	private boolean isValidAge(IWContext iwc, String ssn) {
+		int validAge = Integer.parseInt(iwc.getApplicationSettings().getProperty(ATTRIBUTE_VALID_ACCOUNT_AGE, String.valueOf(18)));
+		boolean validAgeYear = iwc.getApplicationSettings().getBoolean(ATTRIBUTE_VALID_ACCOUNT_AGE_YEAR);
+		
 		if (ssn != null && SocialSecurityNumber.isValidIcelandicSocialSecurityNumber(ssn)) {
-			Age age = new Age(SocialSecurityNumber.getDateFromSocialSecurityNumber(ssn));
-			return age.getYears() >= 18;
+			IWTimestamp dateOfBirth = new IWTimestamp(SocialSecurityNumber.getDateFromSocialSecurityNumber(ssn));
+			if (validAgeYear) {
+				dateOfBirth.setDay(1);
+				dateOfBirth.setMonth(1);
+			}
+			
+			Age age = new Age(dateOfBirth.getDate());
+			return age.getYears() >= validAge;
 		}
 		return true;
 	}
