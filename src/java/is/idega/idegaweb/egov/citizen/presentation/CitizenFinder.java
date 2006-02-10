@@ -46,18 +46,18 @@ import com.idega.util.text.TextSoap;
 
 public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 
-	private static final String PARAMETER_FIRST_NAME = "cul_pfn";
-	private static final String PARAMETER_MIDDLE_NAME = "cul_pmn";
-	private static final String PARAMETER_LAST_NAME = "cul_pln";
-	private static final String PARAMETER_PERSONAL_ID = "cul_pid";
-	private static final String PARAMETER_SEARCH = "cul_search";
+	protected static final String PARAMETER_FIRST_NAME = "cul_pfn";
+	protected static final String PARAMETER_MIDDLE_NAME = "cul_pmn";
+	protected static final String PARAMETER_LAST_NAME = "cul_pln";
+	protected static final String PARAMETER_PERSONAL_ID = "cul_pid";
+	protected static final String PARAMETER_SEARCH = "cul_search";
 
 	private static final String PARAMETER_USER_PK = "cf_user_pk";
 	private static final String PARAMETER_USER_UNIQUE_ID = "cf_user_unique_id";
 	
 	private ICPage iPage;
 	private Collection users;
-	private IWResourceBundle iwrb;
+	protected IWResourceBundle iwrb;
 	
 	public void present(IWContext iwc) {
 		iwrb = getResourceBundle(iwc);
@@ -73,7 +73,7 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 		return getUserBusiness(iwc).findUsersByConditions(firstName, middleName, lastName, pid);
 	}
 	
-	private Form getSearchForm(IWContext iwc) {
+	protected Form getSearchForm(IWContext iwc) {
 		Form form = new Form();
 		form.setID("citizenFinderForm");
 		form.setStyleClass("citizenForm");
@@ -267,12 +267,17 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 			pid = pid.replaceAll("-", "");
 			
 			try {
-				users = getUsers(iwc, first, middle, last, pid);	
+				users = getUsers(iwc, first, middle, last, pid);
+				users = filterResults(iwc, users);
 			}
 			catch (RemoteException re) {
 				throw new IBORuntimeException(re);
 			}
 		}
+	}
+	
+	protected Collection filterResults(IWContext iwc, Collection users) {
+		return users;
 	}
 	
 	public boolean actionPerformed(IWContext iwc) throws IWException {
