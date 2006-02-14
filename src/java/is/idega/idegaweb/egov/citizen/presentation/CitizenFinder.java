@@ -73,6 +73,10 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 		return getUserBusiness(iwc).findUsersByConditions(firstName, middleName, lastName, pid);
 	}
 	
+	protected String getHeading(IWContext iwc) {
+		return iwrb.getLocalizedString("citizen_finder", "Citizen finder");
+	}
+	
 	protected Form getSearchForm(IWContext iwc) {
 		Form form = new Form();
 		form.setID("citizenFinderForm");
@@ -82,7 +86,7 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 		header.setStyleClass("header");
 		form.add(header);
 		
-		Heading1 heading = new Heading1(iwrb.getLocalizedString("citizen_finder", "Citizen finder"));
+		Heading1 heading = new Heading1(getHeading(iwc));
 		header.add(heading);
 		
 		Layer section = new Layer(Layer.DIV);
