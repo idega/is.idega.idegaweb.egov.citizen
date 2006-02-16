@@ -96,7 +96,8 @@ public class CitizenAccountApplication extends CitizenBlock {
 	private static final String ERROR_APPLYING_FOR_WRONG_COMMUNE_DEFAULT = "You do not belong to the commune you are applying for according to our records and the application cannot be finished. Please contact your commune if you think this is an error.";
 
 	private IWResourceBundle iwrb;
-	private ICPage iResponsePage;
+	private ICPage iPage;
+	private int iRedirectDelay = 15;
 	
 	public void present(IWContext iwc) {
 		iwrb = getResourceBundle(iwc);
@@ -328,32 +329,31 @@ public class CitizenAccountApplication extends CitizenBlock {
 			viewSimpleApplicationForm(iwc);
 		}
 		else {
-			if (iResponsePage != null) {
-				iwc.forwardToIBPage(getParentPage(), iResponsePage);
-			}
-			else {
-				Layer header = new Layer(Layer.DIV);
-				header.setStyleClass("header");
-				add(header);
-				
-				Heading1 heading = new Heading1(iwrb.getLocalizedString("citizen_registration", "Citizen registration"));
-				header.add(heading);
-				
-				Layer layer = new Layer(Layer.DIV);
-				layer.setStyleClass("receipt");
-				
-				Layer image = new Layer(Layer.DIV);
-				image.setStyleClass("receiptImage");
-				layer.add(image);
-				
-				String serverName = iwc.getApplicationSettings().getProperty("server_name", "");
+			Layer header = new Layer(Layer.DIV);
+			header.setStyleClass("header");
+			add(header);
+			
+			Heading1 heading = new Heading1(iwrb.getLocalizedString("citizen_registration", "Citizen registration"));
+			header.add(heading);
+			
+			Layer layer = new Layer(Layer.DIV);
+			layer.setStyleClass("receipt");
+			
+			Layer image = new Layer(Layer.DIV);
+			image.setStyleClass("receiptImage");
+			layer.add(image);
+			
+			String serverName = iwc.getApplicationSettings().getProperty("server_name", "");
 
-				heading = new Heading1(iwrb.getLocalizedString(TEXT_APPLICATION_SUBMITTED_KEY + (serverName.length() > 0 ? ("_" + serverName) : ""), TEXT_APPLICATION_SUBMITTED_DEFAULT));
-				layer.add(heading);
-				
-				layer.add(new Text(iwrb.getLocalizedString(TEXT_APPLICATION_SUBMITTED_KEY + "_text" + (serverName.length() > 0 ? ("_" + serverName) : ""), TEXT_APPLICATION_SUBMITTED_DEFAULT + " info")));
-				
-				add(layer);
+			heading = new Heading1(iwrb.getLocalizedString(TEXT_APPLICATION_SUBMITTED_KEY + (serverName.length() > 0 ? ("_" + serverName) : ""), TEXT_APPLICATION_SUBMITTED_DEFAULT));
+			layer.add(heading);
+			
+			layer.add(new Text(iwrb.getLocalizedString(TEXT_APPLICATION_SUBMITTED_KEY + "_text" + (serverName.length() > 0 ? ("_" + serverName) : ""), TEXT_APPLICATION_SUBMITTED_DEFAULT + " info")));
+			
+			add(layer);
+			
+			if (iPage != null) {
+				iwc.forwardToIBPage(getParentPage(), iPage, iRedirectDelay, false);
 			}
 		}
 	}
@@ -413,5 +413,13 @@ public class CitizenAccountApplication extends CitizenBlock {
 			e.printStackTrace();
 			return null;
 		}
+	}
+
+	public void setPage(ICPage page) {
+		iPage = page;
+	}
+	
+	public void setRedirectDelay(int redirectDelay) {
+		iRedirectDelay = redirectDelay;
 	}
 }

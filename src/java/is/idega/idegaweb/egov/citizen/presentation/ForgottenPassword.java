@@ -11,6 +11,7 @@ import com.idega.business.IBOLookupException;
 import com.idega.business.IBORuntimeException;
 import com.idega.core.accesscontrol.business.LoginDBHandler;
 import com.idega.core.accesscontrol.data.LoginTable;
+import com.idega.core.builder.data.ICPage;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
@@ -68,6 +69,8 @@ public class ForgottenPassword extends CitizenBlock {
 	private static final String hasAppliedForPsw = "has_applied_before";
 	
 	private IWResourceBundle iwrb;
+	private ICPage iPage;
+	private int iRedirectDelay = 15;
 
 	public void present(IWContext iwc) {
 		iwrb = getResourceBundle(iwc);
@@ -170,6 +173,10 @@ public class ForgottenPassword extends CitizenBlock {
 			layer.add(new Text(iwrb.getLocalizedString(PASSWORD_CREATED_KEY + "_text", PASSWORD_CREATED_DEFAULT + " info")));
 			
 			add(layer);
+			
+			if (iPage != null) {
+				iwc.forwardToIBPage(getParentPage(), iPage, iRedirectDelay, false);
+			}
 		}
 		else {
 			showErrors(iwc, errors);
@@ -266,5 +273,13 @@ public class ForgottenPassword extends CitizenBlock {
 	 */
 	private String createNewPassword() {
 		return LoginDBHandler.getGeneratedPasswordForUser();
+	}
+	
+	public void setPage(ICPage page) {
+		iPage = page;
+	}
+	
+	public void setRedirectDelay(int redirectDelay) {
+		iRedirectDelay = redirectDelay;
 	}
 }
