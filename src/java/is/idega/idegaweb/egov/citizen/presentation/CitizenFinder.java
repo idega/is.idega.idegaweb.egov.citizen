@@ -22,7 +22,6 @@ import com.idega.core.location.data.Address;
 import com.idega.core.location.data.PostalCode;
 import com.idega.event.IWPageEventListener;
 import com.idega.idegaweb.IWApplicationContext;
-import com.idega.idegaweb.IWException;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.idegaweb.IWUserContext;
 import com.idega.presentation.IWContext;
@@ -284,7 +283,7 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 		return users;
 	}
 	
-	public boolean actionPerformed(IWContext iwc) throws IWException {
+	public boolean actionPerformed(IWContext iwc) {
 		try {
 			if (iwc.isParameterSet(PARAMETER_USER_UNIQUE_ID)) {
 				getUserSession(iwc).setUser(getUserBusiness(iwc).getUserByUniqueId(iwc.getParameter(PARAMETER_USER_UNIQUE_ID)));
