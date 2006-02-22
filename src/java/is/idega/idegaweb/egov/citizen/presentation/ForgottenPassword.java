@@ -56,12 +56,6 @@ public class ForgottenPassword extends CitizenBlock {
 	private final static String SSN_DEFAULT = "Personal ID";
 	private final static String PASSWORD_CREATED_KEY = "password_was_created";
 	private final static String PASSWORD_CREATED_DEFAULT = "A new password was generated.";
-	private final static String EMAIL_SENT_KEY = "email_was_sent";
-	private final static String EMAIL_SENT_DEFAULT = "An email containing the new password is sent to you.";
-	private final static String ACCOUNT_APPLICATION_KEY = "no_citizen_account";
-	private final static String ACCOUNT_APPLICATION_DEFAULT = "You have not applied for a citizen account yet.";
-	private final static String FORMAT_ERROR_KEY = "format_error";
-	private final static String FORMAT_ERROR_DEFAULT = "Format error";
 	private final static String FORM_SUBMIT_KEY = "form_submit_key";
 	private final static String FORM_SUBMIT_DEFAULT = "Forgot my password";
 	private final static String ACTION_VIEW_FORM = "action_view_form";

@@ -86,12 +86,9 @@ public class CitizenAccountApplication extends CitizenBlock {
 	private final static String SIMPLE_FORM_SUBMIT_KEY = "scaa_simpleSubmit";
 	private final static String SIMPLE_FORM_SUBMIT_DEFAULT = "Forward >>";
 
-	private final static String ERROR_NO_INSERT_DEFAULT = "Application could not be stored";
 	private final static String ERROR_NO_INSERT_KEY = "unable_to_store";
 	private final static String ERROR_EMAILS_DONT_MATCH = "emails_dont_match";
 	private final static String ERROR_EMAILS_DONT_MATCH_DEFAULT = "Emails don't match";
-	private final static String ERROR_NOT_VALID_PERSONAL_ID = "not_valid_personal_id";
-	private final static String ERROR_NOT_VALID_PERSONAL_ID_DEFAULT = "The personal ID is not valid";
 	private static final String ERROR_APPLYING_FOR_WRONG_COMMUNE = "user_in_wrong_commune";
 	private static final String ERROR_APPLYING_FOR_WRONG_COMMUNE_DEFAULT = "You do not belong to the commune you are applying for according to our records and the application cannot be finished. Please contact your commune if you think this is an error.";
 

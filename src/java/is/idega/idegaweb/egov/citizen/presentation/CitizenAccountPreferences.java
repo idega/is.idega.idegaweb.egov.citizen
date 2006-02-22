@@ -75,8 +75,6 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	private final static String KEY_PREFIX = "citizen.";
 	private final static String KEY_EMAIL = KEY_PREFIX + "email";
 	private final static String KEY_UPDATE = KEY_PREFIX + "update";
-	private final static String KEY_NAME = KEY_PREFIX + "name";
-	private final static String KEY_ADDRESS = KEY_PREFIX + "address";
 	private final static String KEY_PHONE_HOME = KEY_PREFIX + "phone_home";
 	private final static String KEY_PHONE_MOBILE = KEY_PREFIX + "phone_mobile";
 	private final static String KEY_PHONE_WORK = KEY_PREFIX + "phone_work";
@@ -86,7 +84,6 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	private final static String KEY_CO_CITY = KEY_PREFIX + "co_city";
 	private final static String KEY_MESSAGES_VIA_EMAIL = KEY_PREFIX + "messages_via_email";
 	private final static String KEY_EMAIL_INVALID = KEY_PREFIX + "email_invalid";
-	private final static String KEY_EMAIL_EMPTY = KEY_PREFIX + "email_empty";
 	private final static String KEY_CO_STREET_ADDRESS_MISSING = KEY_PREFIX + "co_street_address_missing";
 	private final static String KEY_CO_POSTAL_CODE_MISSING = KEY_PREFIX + "co_postal_code_missing";
 	private final static String KEY_CO_CITY_MISSING = KEY_PREFIX + "co_city_missing";
@@ -95,8 +92,6 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	
 	private final static String DEFAULT_EMAIL = "E-mail";
 	private final static String DEFAULT_UPDATE = "Update";
-	private final static String DEFAULT_NAME = "Name";
-	private final static String DEFAULT_ADDRESS = "Address";
 	private final static String DEFAULT_PHONE_HOME = "Phone (home)";
 	private final static String DEFAULT_PHONE_MOBILE = "Phone (mobile)";
 	private final static String DEFAULT_PHONE_WORK = "Phone (work)";
@@ -106,7 +101,6 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	private final static String DEFAULT_CO_CITY = "City c/o";
 	private final static String DEFAULT_MESSAGES_VIA_EMAIL = "I want to get my messages via e-mail";
 	private final static String DEFAULT_EMAIL_INVALID = "Email address invalid.";
-	private final static String DEFAULT_EMAIL_EMPTY = "Email address cannot be empty.";
 	private final static String DEFAULT_CO_STREET_ADDRESS_MISSING = "Street address c/o must be entered.";
 	private final static String DEFAULT_CO_POSTAL_CODE_MISSING = "Postal code c/o must be entered.";
 	private final static String DEFAULT_CO_CITY_MISSING = "City c/o must be entered.";
@@ -117,9 +111,6 @@ public class CitizenAccountPreferences extends CitizenBlock {
 
 	private User user = null;
 
-	private boolean removeEmailWhenEmpty = true;
-	
-	private ICPage iPasswordPage;
 	private IWResourceBundle iwrb;
 
 	public CitizenAccountPreferences() {
@@ -570,6 +561,5 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	}
 
 	public void setToRemoveEmailWhenEmpty(boolean flag) {
-		this.removeEmailWhenEmpty = flag;
 	}
 }

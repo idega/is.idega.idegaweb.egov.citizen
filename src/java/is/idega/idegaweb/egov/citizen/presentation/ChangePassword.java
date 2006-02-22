@@ -58,7 +58,6 @@ public class ChangePassword extends CitizenBlock {
 	private final static String KEY_PASSWORDS_NOT_SAME = KEY_PREFIX + "passwords_not_same";
 	private final static String KEY_PASSWORD_INVALID = KEY_PREFIX + "invalid_password";	
 	private final static String KEY_PASSWORD_TOO_SHORT = KEY_PREFIX + "password_too_short";	
-	private final static String KEY_PASSWORD_CHAR_ILLEGAL = KEY_PREFIX + "password_char_illegal";	
 	private final static String KEY_PASSWORD_SAVED = KEY_PREFIX + "password_saved";	
 
 	private final static String DEFAULT_CURRENT_PASSWORD = "Current password";	
@@ -71,7 +70,6 @@ public class ChangePassword extends CitizenBlock {
 	private final static String DEFAULT_PASSWORDS_NOT_SAME = "New passwords not the same.";		
 	private final static String DEFAULT_PASSWORD_INVALID = "Invalid password.";		
 	private final static String DEFAULT_PASSWORD_TOO_SHORT = "Password too short. Must be at least {0}Êletters/digits.";		
-	private final static String DEFAULT_PASSWORD_CHAR_ILLEGAL = "Password contains illegal character(s).";		
 	private final static String DEFAULT_PASSWORD_SAVED = "Your password has been saved.";	
 
 	private User user = null;
