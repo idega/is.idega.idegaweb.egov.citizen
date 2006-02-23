@@ -211,7 +211,9 @@ public class CitizenAccountApplication extends CitizenBlock {
 		buttonLayer.setStyleClass("buttonLayer");
 		form.add(buttonLayer);
 		
-		Link send = new Link(iwrb.getLocalizedString(SIMPLE_FORM_SUBMIT_KEY + "_button", SIMPLE_FORM_SUBMIT_DEFAULT));
+		Layer span = new Layer(Layer.SPAN);
+		span.add(new Text(iwrb.getLocalizedString(SIMPLE_FORM_SUBMIT_KEY + "_button", SIMPLE_FORM_SUBMIT_DEFAULT)));
+		Link send = new Link(span);
 		send.setToFormSubmit(form);
 		buttonLayer.add(send);
 		

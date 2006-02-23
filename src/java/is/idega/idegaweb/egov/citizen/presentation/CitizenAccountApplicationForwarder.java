@@ -45,7 +45,9 @@ public class CitizenAccountApplicationForwarder extends Block {
 		layer.add(new Text(iwrb.getLocalizedString("account_application.example", "(Example 0110012230)")));
 		form.add(layer);
 		
-		Link link = new Link(iwrb.getLocalizedString("next", "Next"));
+		Layer span = new Layer(Layer.SPAN);
+		span.add(new Text(iwrb.getLocalizedString("next", "Next")));
+		Link link = new Link(span);
 		if (iForwardPage != null) {
 			form.setPageToSubmitTo(iForwardPage);
 			link.setToFormSubmit(form);

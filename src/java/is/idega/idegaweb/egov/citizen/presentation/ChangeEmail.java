@@ -147,7 +147,9 @@ public class ChangeEmail extends CitizenBlock {
 			}
 			
 			if (userHomePage != null) {
-				Link link = new Link(iwrb.getLocalizedString("my_page", "My page"));
+				Layer span = new Layer(Layer.SPAN);
+				span.add(new Text(iwrb.getLocalizedString("my_page", "My page")));
+				Link link = new Link(span);
 				link.setStyleClass("homeLink");
 				link.setPage(userHomePage);
 				paragraph.add(new Break(2));
@@ -244,7 +246,9 @@ public class ChangeEmail extends CitizenBlock {
 				buttonLayer.setStyleClass("buttonLayer");
 				form.add(buttonLayer);
 				
-				Link send = new Link(iwrb.getLocalizedString("save", "Save"));
+				Layer span = new Layer(Layer.SPAN);
+				span.add(new Text(iwrb.getLocalizedString("save", "Save")));
+				Link send = new Link(span);
 				send.setStyleClass("sendLink");
 				send.setToFormSubmit(form);
 				buttonLayer.add(send);

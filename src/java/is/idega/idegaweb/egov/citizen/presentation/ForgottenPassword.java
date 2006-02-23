@@ -223,7 +223,9 @@ public class ForgottenPassword extends CitizenBlock {
 		buttonLayer.setStyleClass("buttonLayer");
 		form.add(buttonLayer);
 		
-		Link send = new Link(iwrb.getLocalizedString(FORM_SUBMIT_KEY + "_button", FORM_SUBMIT_DEFAULT));
+		Layer span = new Layer(Layer.SPAN);
+		span.add(new Text(iwrb.getLocalizedString(FORM_SUBMIT_KEY + "_button", FORM_SUBMIT_DEFAULT)));
+		Link send = new Link(span);
 		send.setStyleClass("sendLink");
 		send.setToFormSubmit(form);
 		buttonLayer.add(send);

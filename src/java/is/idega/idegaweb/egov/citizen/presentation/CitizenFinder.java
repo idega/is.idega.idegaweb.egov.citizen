@@ -145,7 +145,9 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 		buttonLayer.setStyleClass("buttonLayer");
 		form.add(buttonLayer);
 		
-		Link send = new Link(iwrb.getLocalizedString("search", "Search"));
+		Layer span = new Layer(Layer.SPAN);
+		span.add(new Text(iwrb.getLocalizedString("search", "Search")));
+		Link send = new Link(span);
 		send.setStyleClass("sendLink");
 		send.setToFormSubmit(form);
 		buttonLayer.add(send);
