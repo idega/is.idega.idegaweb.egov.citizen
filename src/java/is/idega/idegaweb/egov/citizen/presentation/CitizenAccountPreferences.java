@@ -5,6 +5,9 @@ import java.rmi.RemoteException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+
+import javax.ejb.FinderException;
+
 import se.idega.idegaweb.commune.account.citizen.business.CitizenAccountSession;
 import se.idega.idegaweb.commune.message.business.MessageSession;
 import com.idega.business.IBOLookup;
@@ -232,8 +235,8 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		}
 		
 		TextInput tiCOPostalCode = new TextInput(PARAMETER_CO_POSTAL_CODE);
-		if (postal != null && postal.getPostalAddress() != null) {
-			tiCOPostalCode.setValue(postal.getPostalAddress());
+		if (postal != null && postal.getPostalCode() != null) {
+			tiCOPostalCode.setValue(postal.getPostalCode());
 		}
 		
 		TextInput tiCOCity = new TextInput(PARAMETER_CO_CITY);
@@ -474,6 +477,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 					PostalCodeHome ph = (PostalCodeHome) IDOLookup.getHome(PostalCode.class);
 					pc = ph.create();
 				}
+				pc.setName(coCity);
 				pc.setPostalCode(coPostalCode);
 				pc.store();
 				coAddress.setPostalCode(pc);
@@ -515,8 +519,8 @@ public class CitizenAccountPreferences extends CitizenBlock {
 			paragraph.add(new Text(iwrb.getLocalizedString(KEY_PREFERENCES_SAVED + "_text", DEFAULT_PREFERENCES_SAVED + " info")));
 			layer.add(paragraph);
 			
-			ICPage page = ub.getHomePageForUser(user);
-			if (page != null) {
+			try {
+				ICPage page = ub.getHomePageForUser(user);
 				paragraph.add(new Break(2));
 				
 				Layer span = new Layer(Layer.SPAN);
@@ -525,6 +529,9 @@ public class CitizenAccountPreferences extends CitizenBlock {
 				link.setStyleClass("homeLink");
 				link.setPage(page);
 				paragraph.add(link);
+			}
+			catch (FinderException fe) {
+				//No homepage found...
 			}
 			
 			add(layer);
