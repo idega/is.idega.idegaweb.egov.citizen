@@ -10,17 +10,18 @@ import javax.ejb.FinderException;
 
 import se.idega.idegaweb.commune.account.citizen.business.CitizenAccountSession;
 import se.idega.idegaweb.commune.message.business.MessageSession;
+
 import com.idega.business.IBOLookup;
 import com.idega.core.builder.data.ICPage;
 import com.idega.core.contact.data.Email;
 import com.idega.core.contact.data.Phone;
 import com.idega.core.file.data.ICFile;
+import com.idega.core.location.business.AddressBusiness;
 import com.idega.core.location.data.Address;
 import com.idega.core.location.data.AddressHome;
 import com.idega.core.location.data.AddressType;
+import com.idega.core.location.data.Country;
 import com.idega.core.location.data.PostalCode;
-import com.idega.core.location.data.PostalCodeHome;
-import com.idega.data.IDOLookup;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.io.UploadFile;
 import com.idega.presentation.ExceptionWrapper;
@@ -33,6 +34,7 @@ import com.idega.presentation.text.Link;
 import com.idega.presentation.text.Paragraph;
 import com.idega.presentation.text.Text;
 import com.idega.presentation.ui.CheckBox;
+import com.idega.presentation.ui.CountryDropdownMenu;
 import com.idega.presentation.ui.FileInput;
 import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.Label;
@@ -72,6 +74,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	private final static String PARAMETER_CO_STREET_ADDRESS = "cap_co_sa";
 	private final static String PARAMETER_CO_POSTAL_CODE = "cap_co_pc";
 	private final static String PARAMETER_CO_CITY = "cap_co_ct";
+	private final static String PARAMETER_CO_COUNTRY = "cap_co_country";
 	private final static String PARAMETER_MESSAGES_VIA_EMAIL = "cap_m_v_e";
 	private final static String PARAMETER_REMOVE_IMAGE = "cap_remove_image";
 	
@@ -85,6 +88,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	private final static String KEY_CO_STREET_ADDRESS = KEY_PREFIX + "co_street_address";
 	private final static String KEY_CO_POSTAL_CODE = KEY_PREFIX + "co_postal_code";
 	private final static String KEY_CO_CITY = KEY_PREFIX + "co_city";
+	private final static String KEY_CO_COUNTRY = KEY_PREFIX + "co_country";
 	private final static String KEY_MESSAGES_VIA_EMAIL = KEY_PREFIX + "messages_via_email";
 	private final static String KEY_EMAIL_INVALID = KEY_PREFIX + "email_invalid";
 	private final static String KEY_CO_STREET_ADDRESS_MISSING = KEY_PREFIX + "co_street_address_missing";
@@ -102,6 +106,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	private final static String DEFAULT_CO_STREET_ADDRESS = "Street address c/o";
 	private final static String DEFAULT_CO_POSTAL_CODE = "Postal code c/o";
 	private final static String DEFAULT_CO_CITY = "City c/o";
+	private final static String DEFAULT_CO_COUNTRY = "Country c/o";
 	private final static String DEFAULT_MESSAGES_VIA_EMAIL = "I want to get my messages via e-mail";
 	private final static String DEFAULT_EMAIL_INVALID = "Email address invalid.";
 	private final static String DEFAULT_CO_STREET_ADDRESS_MISSING = "Street address c/o must be entered.";
@@ -244,6 +249,11 @@ public class CitizenAccountPreferences extends CitizenBlock {
 			tiCOCity.setValue(coAddress.getCity());
 		}
 		
+		CountryDropdownMenu tiCOCountry = new CountryDropdownMenu(PARAMETER_CO_COUNTRY);
+		if (postal != null && postal.getCountryID() > -1) {
+			tiCOCountry.setSelectedCountry(postal.getCountry());
+		}
+		
 		CitizenAccountSession cas = getCitizenAccountSession(iwc);
 		CheckBox useCOAddress = new CheckBox(PARAMETER_CO_ADDRESS_SELECT, "true");
 		useCOAddress.setStyleClass("checkbox");
@@ -361,6 +371,13 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
+		label = new Label(iwrb.getLocalizedString(KEY_CO_COUNTRY, DEFAULT_CO_COUNTRY), tiCOCountry);
+		formItem.add(label);
+		formItem.add(tiCOCountry);
+		section.add(formItem);
+		
+		formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
 		formItem.setStyleClass("indentedCheckbox");
 		label = new Label(iwrb.getLocalizedString(KEY_CO_ADDRESS_SELECT, DEFAULT_CO_ADDRESS_SELECT), useCOAddress);
 		formItem.add(useCOAddress);
@@ -421,6 +438,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		String coStreetAddress = iwc.getParameter(PARAMETER_CO_STREET_ADDRESS);
 		String coPostalCode = iwc.getParameter(PARAMETER_CO_POSTAL_CODE);
 		String coCity = iwc.getParameter(PARAMETER_CO_CITY);
+		String coCountry = iwc.getParameter(PARAMETER_CO_COUNTRY);
 		boolean useCOAddress = iwc.isParameterSet(PARAMETER_CO_ADDRESS_SELECT);
 		boolean messagesViaEmail = iwc.isParameterSet(PARAMETER_MESSAGES_VIA_EMAIL);
 		boolean removeImage = iwc.isParameterSet(PARAMETER_REMOVE_IMAGE);
@@ -472,14 +490,11 @@ public class CitizenAccountPreferences extends CitizenBlock {
 			if (updateCOAddress) {
 				Address coAddress = getCOAddress(iwc);
 				coAddress.setStreetName(coStreetAddress);
-				PostalCode pc = coAddress.getPostalCode();
-				if (pc == null) {
-					PostalCodeHome ph = (PostalCodeHome) IDOLookup.getHome(PostalCode.class);
-					pc = ph.create();
-				}
-				pc.setName(coCity);
-				pc.setPostalCode(coPostalCode);
-				pc.store();
+
+				AddressBusiness addressBusiness = (AddressBusiness) IBOLookup.getServiceInstance(iwc, AddressBusiness.class);
+				Country country = addressBusiness.getCountry(coCountry);
+				PostalCode pc = addressBusiness.getPostalCodeAndCreateIfDoesNotExist(coPostalCode, coCity, country);
+
 				coAddress.setPostalCode(pc);
 				coAddress.setCity(coCity);
 				coAddress.store();

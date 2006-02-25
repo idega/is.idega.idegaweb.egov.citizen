@@ -14,6 +14,7 @@ change_password=Breyta lykilor\u00F0i
 change_password_helper_text=Vinsamlega skr\u00E1\u00F0u inn n\u00FAverandi lykilor\u00F0 og s\u00ED\u00F0an \u00FEa\u00F0 n\u00FDja \u00FEar fyrir ne\u00F0an. <br>\r\nAthugi\u00F0 a\u00F0 n\u00FDtt lykilor\u00F0 ver\u00F0ur a\u00F0 vera minnst 8 stafir.
 citizen.co_address_select=\u00C9g vil f\u00E1 p\u00F3st sendan \u00E1 a\u00F0setur
 citizen.co_city=A\u00F0setur\: Sta\u00F0ur
+citizen.co_country=A\u00F0setur\: Land
 citizen.co_postal_code=A\u00F0setur\: P\u00F3stnr
 citizen.co_street_address=A\u00F0setur\: Heimilisfang
 citizen.current_password=N\u00FAverandi lykilor\u00F0
