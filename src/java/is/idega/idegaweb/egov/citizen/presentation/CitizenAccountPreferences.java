@@ -158,7 +158,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		Form form = new Form();
 		form.setMultiPart();
 		form.addParameter(PARAMETER_FORM_SUBMIT, Boolean.TRUE.toString());
-		form.setID("accountApplicationForm");
+		form.setID("citizenAccountPreferences");
 		form.setStyleClass("citizenForm");
 		
 		Layer header = new Layer(Layer.DIV);
