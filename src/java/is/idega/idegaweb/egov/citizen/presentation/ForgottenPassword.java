@@ -3,6 +3,10 @@ package is.idega.idegaweb.egov.citizen.presentation;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import se.idega.idegaweb.commune.account.citizen.business.CitizenAccountBusiness;
@@ -19,6 +23,7 @@ import com.idega.presentation.text.Heading1;
 import com.idega.presentation.text.Link;
 import com.idega.presentation.text.Paragraph;
 import com.idega.presentation.text.Text;
+import com.idega.presentation.ui.DropdownMenu;
 import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.TextInput;
@@ -54,6 +59,8 @@ public class ForgottenPassword extends CitizenBlock {
 
 	private final static String SSN_KEY = "personal_id";
 	private final static String SSN_DEFAULT = "Personal ID";
+	private final static String COMMUNE_DEFAULT = "Commune";
+	private final static String COMMUNE_KEY = "commmune";
 	private final static String PASSWORD_CREATED_KEY = "password_was_created";
 	private final static String PASSWORD_CREATED_DEFAULT = "A new password was generated.";
 	private final static String FORM_SUBMIT_KEY = "form_submit_key";
@@ -65,6 +72,9 @@ public class ForgottenPassword extends CitizenBlock {
 	private IWResourceBundle iwrb;
 	private ICPage iPage;
 	private int iRedirectDelay = 15;
+
+	private boolean iForwardToURL = false;
+	private Map iCommuneMap;
 
 	public void present(IWContext iwc) {
 		iwrb = getResourceBundle(iwc);
@@ -84,6 +94,11 @@ public class ForgottenPassword extends CitizenBlock {
 	 * @param iwc
 	 */
 	private void submitForm(IWContext iwc) {
+		if (iwc.isParameterSet(COMMUNE_KEY) && iForwardToURL) {
+			iwc.forwardToURL(getParentPage(), iwc.getParameter(COMMUNE_KEY), true);
+			return;
+		}
+
 		String ssn = iwc.getParameter(SSN_KEY);
 
 		boolean hasErrors = false;
@@ -208,6 +223,23 @@ public class ForgottenPassword extends CitizenBlock {
 		TextInput input = new TextInput(SSN_KEY);
 		input.keepStatusOnAction(true);
 
+		if (iCommuneMap != null) {
+			DropdownMenu communes = new DropdownMenu(COMMUNE_KEY);
+			Iterator iter = iCommuneMap.keySet().iterator();
+			while (iter.hasNext()) {
+				String commune = (String) iter.next();
+				communes.addMenuElement((String) iCommuneMap.get(commune), commune);
+			}
+
+			Layer formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			Label label = new Label(communes);
+			label.add(new Text(iwrb.getLocalizedString(COMMUNE_KEY, COMMUNE_DEFAULT)));
+			formItem.add(label);
+			formItem.add(communes);
+			section.add(formItem);
+		}
+
 		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		Label label = new Label(iwrb.getLocalizedString(SSN_KEY, SSN_DEFAULT), input);
@@ -277,5 +309,13 @@ public class ForgottenPassword extends CitizenBlock {
 	
 	public void setRedirectDelay(int redirectDelay) {
 		iRedirectDelay = redirectDelay;
+	}
+
+	public void setCommunePage(String name, String URL) {
+		if (iCommuneMap == null) {
+			iCommuneMap = new HashMap();
+		}
+		iCommuneMap.put(name, URL);
+		iForwardToURL = true;
 	}
 }

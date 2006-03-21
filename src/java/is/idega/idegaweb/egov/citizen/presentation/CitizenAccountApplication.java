@@ -18,7 +18,10 @@ import java.rmi.RemoteException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+
 import se.idega.idegaweb.commune.account.citizen.business.CitizenAccountBusiness;
 import com.idega.business.IBOLookup;
 import com.idega.core.accesscontrol.business.UserHasLoginException;
@@ -38,6 +41,7 @@ import com.idega.presentation.text.Heading1;
 import com.idega.presentation.text.Link;
 import com.idega.presentation.text.Paragraph;
 import com.idega.presentation.text.Text;
+import com.idega.presentation.ui.DropdownMenu;
 import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.TextInput;
@@ -72,6 +76,8 @@ public class CitizenAccountApplication extends CitizenBlock {
 	private final static String UNKNOWN_CITIZEN_DEFAULT = "Something is wrong with your personal id. Please try again or contact the responsible";
 	private final static String NOT_VALID_ACCOUNT_AGE_KEY = "not_valid_citizen_account_age";
 	private final static String NOT_VALID_ACCOUNT_AGE_DEFAULT = "You have to be {0} to apply for a citizen account";
+	private final static String COMMUNE_DEFAULT = "Commune";
+	private final static String COMMUNE_KEY = "commmune";
 
 	private String communeUniqueIdsCSV;
 
@@ -95,6 +101,9 @@ public class CitizenAccountApplication extends CitizenBlock {
 	private IWResourceBundle iwrb;
 	private ICPage iPage;
 	private int iRedirectDelay = 15;
+	
+	private boolean iForwardToURL = false;
+	private Map iCommuneMap;
 	
 	public void present(IWContext iwc) {
 		iwrb = getResourceBundle(iwc);
@@ -155,6 +164,23 @@ public class CitizenAccountApplication extends CitizenBlock {
 		Layer required = new Layer(Layer.SPAN);
 		required.setStyleClass("required");
 		required.add(new Text("*"));
+		
+		if (iCommuneMap != null) {
+			DropdownMenu communes = new DropdownMenu(COMMUNE_KEY);
+			Iterator iter = iCommuneMap.keySet().iterator();
+			while (iter.hasNext()) {
+				String commune = (String) iter.next();
+				communes.addMenuElement((String) iCommuneMap.get(commune), commune);
+			}
+
+			Layer formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			Label label = new Label(communes);
+			label.add(new Text(iwrb.getLocalizedString(COMMUNE_KEY, COMMUNE_DEFAULT)));
+			formItem.add(label);
+			formItem.add(communes);
+			section.add(formItem);
+		}
 
 		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
@@ -221,6 +247,11 @@ public class CitizenAccountApplication extends CitizenBlock {
 	}
 
 	private void submitSimpleForm(IWContext iwc) throws RemoteException {
+		if (iwc.isParameterSet(COMMUNE_KEY) && iForwardToURL) {
+			iwc.forwardToURL(getParentPage(), iwc.getParameter(COMMUNE_KEY), true);
+			return;
+		}
+		
 		String ssn = iwc.getParameter(SSN_KEY);
 		
 		boolean hasErrors = false;
@@ -420,5 +451,13 @@ public class CitizenAccountApplication extends CitizenBlock {
 	
 	public void setRedirectDelay(int redirectDelay) {
 		iRedirectDelay = redirectDelay;
+	}
+	
+	public void setCommunePage(String name, String URL) {
+		if (iCommuneMap == null) {
+			iCommuneMap = new HashMap();
+		}
+		iCommuneMap.put(name, URL);
+		iForwardToURL = true;
 	}
 }
