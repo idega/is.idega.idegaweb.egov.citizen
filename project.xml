@@ -87,6 +87,26 @@
       </properties>
     </dependency>
     <dependency>
+      <groupId>wss4j</groupId>
+      <artifactId>wss4j</artifactId>
+      <version>1.1.0</version>
+      <type>jar</type>
+      <url>http://ws.apache.org/wss4j/</url>
+      <properties>
+        <idegaweb.bundle.include>true</idegaweb.bundle.include>
+      </properties>
+    </dependency>
+    <dependency>
+      <groupId>xmlsec</groupId>
+      <artifactId>xmlsec</artifactId>
+      <version>1.2.1</version>
+      <type>jar</type>
+      <url>http://ws.apache.org/wss4j/</url>
+      <properties>
+        <idegaweb.bundle.include>true</idegaweb.bundle.include>
+      </properties>
+    </dependency>
+    <dependency>
       <groupId>bundles</groupId>
       <artifactId>se.idega.idegaweb.commune</artifactId>
       <!--version>1.0.1</version-->
