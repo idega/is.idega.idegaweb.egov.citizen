@@ -14,6 +14,8 @@
 
 package is.idega.idegaweb.egov.citizen.presentation;
 
+import is.idega.idegaweb.egov.citizen.business.WSCitizenAccountBusiness;
+
 import java.rmi.RemoteException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -23,12 +25,12 @@ import java.util.Iterator;
 import java.util.Map;
 
 import se.idega.idegaweb.commune.account.citizen.business.CitizenAccountBusiness;
+
 import com.idega.business.IBOLookup;
 import com.idega.core.accesscontrol.business.UserHasLoginException;
 import com.idega.core.accesscontrol.data.LoginTable;
 import com.idega.core.accesscontrol.data.LoginTableHome;
 import com.idega.core.builder.data.ICPage;
-import com.idega.core.location.business.CommuneBusiness;
 import com.idega.core.location.data.Address;
 import com.idega.core.location.data.Commune;
 import com.idega.data.IDOLookup;
@@ -431,8 +433,8 @@ public class CitizenAccountApplication extends CitizenBlock {
 		return action;
 	}
 
-	protected CommuneBusiness getCommuneBusiness(IWApplicationContext iwac) throws RemoteException {
-		return (CommuneBusiness) IBOLookup.getServiceInstance(iwac, CommuneBusiness.class);
+	protected WSCitizenAccountBusiness getBusiness(IWApplicationContext iwac) throws RemoteException {
+		return (WSCitizenAccountBusiness) IBOLookup.getServiceInstance(iwac, WSCitizenAccountBusiness.class);
 	}
 
 	private LoginTableHome getLoginTableHome() {
