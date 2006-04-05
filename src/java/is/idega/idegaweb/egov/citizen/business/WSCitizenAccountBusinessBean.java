@@ -118,10 +118,6 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 					password);
 			String messageSubject = this.getAcceptMessageSubject();
 
-			if (createUserMessage) {
-				this.getMessageBusiness().createUserMessage(citizen,
-						messageSubject, messageBody, sendLetter);
-			}
 			if (createPasswordMessage) {
 				this.getMessageBusiness().createPasswordMessage(citizen, login,
 						password);
@@ -137,6 +133,11 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 				String xml = getXML(login, password, "pagelink", "logolink");
 				encodeAndSendXML(xml, "filename", citizen.getPersonalID());
 			}
+			else if (createUserMessage) {
+				this.getMessageBusiness().createUserMessage(citizen,
+						messageSubject, messageBody, sendLetter);
+			}
+			
 		} catch (PasswordNotKnown e) {
 			// e.printStackTrace();
 			throw new IDOCreateException(e);
