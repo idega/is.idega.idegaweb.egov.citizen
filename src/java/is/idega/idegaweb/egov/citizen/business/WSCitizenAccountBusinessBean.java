@@ -50,8 +50,6 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 	
 	private static final String TEST_USER_PW = "iwccJi432s";
 	
-	private static final String TEST_USER_PIN = "0904649069";
-
 	private static final String XML_ROOT = "XML-S";
 	
 	private static final String XML_STATEMENT = "Statement";
@@ -61,16 +59,6 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 	private static final String XML_STATEMENT_DATE = "Date";
 	
 	private static final String XML_STATEMENT_XKEY = "XKey";
-	
-	private static final String XML_BGLS = "?bgls.Bluegill.com";
-
-	private static final String XML_BGLS_DEFINITION = "DefinitionName";
-
-	private static final String XML_BGLS_USER1 = "User1";
-
-	private static final String XML_BGLS_USER3 = "User3";
-
-	private static final String XML_BGLS_USER4 = "User4";
 	
 	private static final String XML_SECTION = "Section";
 

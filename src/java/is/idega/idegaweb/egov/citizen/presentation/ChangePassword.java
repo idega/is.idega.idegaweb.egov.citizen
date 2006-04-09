@@ -88,8 +88,8 @@ public class ChangePassword extends CitizenBlock {
 		if (!iwc.isLoggedOn()) {
 			return;
 		}
-		iwrb = getResourceBundle(iwc);
-		user = iwc.getCurrentUser();
+		this.iwrb = getResourceBundle(iwc);
+		this.user = iwc.getCurrentUser();
 
 		int action = parseAction(iwc);
 		switch (action) {
@@ -112,7 +112,7 @@ public class ChangePassword extends CitizenBlock {
 		header.setStyleClass("header");
 		form.add(header);
 		
-		Heading1 heading = new Heading1(iwrb.getLocalizedString("change_password", "Change password"));
+		Heading1 heading = new Heading1(this.iwrb.getLocalizedString("change_password", "Change password"));
 		header.add(heading);
 		
 		Layer section = new Layer(Layer.DIV);
@@ -120,7 +120,7 @@ public class ChangePassword extends CitizenBlock {
 		form.add(section);
 		
 		Paragraph paragraph = new Paragraph();
-		paragraph.add(new Text(iwrb.getLocalizedString("change_password_helper_text", "Please fill in your current password and enter the new desired one.")));
+		paragraph.add(new Text(this.iwrb.getLocalizedString("change_password_helper_text", "Please fill in your current password and enter the new desired one.")));
 		section.add(paragraph);
 		
 		PasswordInput currentPassword = new PasswordInput(PARAMETER_CURRENT_PASSWORD);	
@@ -134,21 +134,21 @@ public class ChangePassword extends CitizenBlock {
 
 		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		Label label = new Label(iwrb.getLocalizedString(KEY_CURRENT_PASSWORD, DEFAULT_CURRENT_PASSWORD), currentPassword);
+		Label label = new Label(this.iwrb.getLocalizedString(KEY_CURRENT_PASSWORD, DEFAULT_CURRENT_PASSWORD), currentPassword);
 		formItem.add(label);
 		formItem.add(currentPassword);
 		section.add(formItem);
 		
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		label = new Label(iwrb.getLocalizedString(KEY_NEW_PASSWORD, DEFAULT_NEW_PASSWORD), newPassword);
+		label = new Label(this.iwrb.getLocalizedString(KEY_NEW_PASSWORD, DEFAULT_NEW_PASSWORD), newPassword);
 		formItem.add(label);
 		formItem.add(newPassword);
 		section.add(formItem);
 		
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		label = new Label(iwrb.getLocalizedString(KEY_NEW_PASSWORD_REPEATED, DEFAULT_NEW_PASSWORD_REPEATED), newPasswordRepeat);
+		label = new Label(this.iwrb.getLocalizedString(KEY_NEW_PASSWORD_REPEATED, DEFAULT_NEW_PASSWORD_REPEATED), newPasswordRepeat);
 		formItem.add(label);
 		formItem.add(newPasswordRepeat);
 		section.add(formItem);
@@ -162,7 +162,7 @@ public class ChangePassword extends CitizenBlock {
 		form.add(buttonLayer);
 		
 		Layer span = new Layer(Layer.SPAN);
-		span.add(new Text(iwrb.getLocalizedString(KEY_UPDATE, DEFAULT_UPDATE)));
+		span.add(new Text(this.iwrb.getLocalizedString(KEY_UPDATE, DEFAULT_UPDATE)));
 		Link send = new Link(span);
 		send.setStyleClass("sendLink");
 		send.setToFormSubmit(form);
@@ -172,7 +172,7 @@ public class ChangePassword extends CitizenBlock {
 	}
 	
 	private void updatePassword(IWContext iwc) {
-		LoginTable loginTable = LoginDBHandler.getUserLogin(((Integer) user.getPrimaryKey()).intValue());
+		LoginTable loginTable = LoginDBHandler.getUserLogin(((Integer) this.user.getPrimaryKey()).intValue());
 		String login = loginTable.getUserLogin();
 		String currentPassword = iwc.getParameter(PARAMETER_CURRENT_PASSWORD);
 		String newPassword1 = iwc.getParameter(PARAMETER_NEW_PASSWORD);
@@ -183,37 +183,37 @@ public class ChangePassword extends CitizenBlock {
 		
 		if (!LoginDBHandler.verifyPassword(login, currentPassword)) {
 			hasErrors = true;
-			errors.add(iwrb.getLocalizedString(KEY_PASSWORD_INVALID, DEFAULT_PASSWORD_INVALID));
+			errors.add(this.iwrb.getLocalizedString(KEY_PASSWORD_INVALID, DEFAULT_PASSWORD_INVALID));
 		}
 
 		// Validate new password
 		if (!newPassword1.equals("") || !newPassword2.equals("")) {
 			if (newPassword1.equals("")) {
 				hasErrors = true;
-				errors.add(iwrb.getLocalizedString(KEY_PASSWORD_EMPTY, DEFAULT_PASSWORD_EMPTY));
+				errors.add(this.iwrb.getLocalizedString(KEY_PASSWORD_EMPTY, DEFAULT_PASSWORD_EMPTY));
 			}
 			if (newPassword2.equals("")) {
 				hasErrors = true;
-				errors.add(iwrb.getLocalizedString(KEY_PASSWORD_REPEATED_EMPTY, DEFAULT_PASSWORD_REPEATED_EMPTY));
+				errors.add(this.iwrb.getLocalizedString(KEY_PASSWORD_REPEATED_EMPTY, DEFAULT_PASSWORD_REPEATED_EMPTY));
 			}
 			if (!newPassword1.equals(newPassword2)) {
 				hasErrors = true;
-				errors.add(iwrb.getLocalizedString(KEY_PASSWORDS_NOT_SAME, DEFAULT_PASSWORDS_NOT_SAME));
+				errors.add(this.iwrb.getLocalizedString(KEY_PASSWORDS_NOT_SAME, DEFAULT_PASSWORDS_NOT_SAME));
 			}
-			if (newPassword1.length() < MIN_PASSWORD_LENGTH) {
-				Object[] arguments = { String.valueOf(MIN_PASSWORD_LENGTH) };
+			if (newPassword1.length() < this.MIN_PASSWORD_LENGTH) {
+				Object[] arguments = { String.valueOf(this.MIN_PASSWORD_LENGTH) };
 				hasErrors = true;
-				errors.add(MessageFormat.format(iwrb.getLocalizedString(KEY_PASSWORD_TOO_SHORT, DEFAULT_PASSWORD_TOO_SHORT), arguments));
+				errors.add(MessageFormat.format(this.iwrb.getLocalizedString(KEY_PASSWORD_TOO_SHORT, DEFAULT_PASSWORD_TOO_SHORT), arguments));
 			}
 		}
 
 		if (!hasErrors) {
 			try {
-				LoginDBHandler.updateLogin(((Integer)user.getPrimaryKey()).intValue(), login, newPassword1);
+				LoginDBHandler.updateLogin(((Integer)this.user.getPrimaryKey()).intValue(), login, newPassword1);
 			}
 			catch (Exception e) {
 				hasErrors = true;
-				errors.add(iwrb.getLocalizedString("citizen.password_update_failed", "Password update failed"));
+				errors.add(this.iwrb.getLocalizedString("citizen.password_update_failed", "Password update failed"));
 			}
 		}
 			// Ok to update password
@@ -223,7 +223,7 @@ public class ChangePassword extends CitizenBlock {
 			header.setStyleClass("header");
 			add(header);
 			
-			Heading1 heading = new Heading1(iwrb.getLocalizedString("change_password", "Change password"));
+			Heading1 heading = new Heading1(this.iwrb.getLocalizedString("change_password", "Change password"));
 			header.add(heading);
 			
 			Layer layer = new Layer(Layer.DIV);
@@ -233,17 +233,17 @@ public class ChangePassword extends CitizenBlock {
 			image.setStyleClass("receiptImage");
 			layer.add(image);
 			
-			heading = new Heading1(iwrb.getLocalizedString(KEY_PASSWORD_SAVED, DEFAULT_PASSWORD_SAVED));
+			heading = new Heading1(this.iwrb.getLocalizedString(KEY_PASSWORD_SAVED, DEFAULT_PASSWORD_SAVED));
 			layer.add(heading);
 			
 			Paragraph paragraph = new Paragraph();
-			paragraph.add(new Text(iwrb.getLocalizedString(KEY_PASSWORD_SAVED + "_text", DEFAULT_PASSWORD_SAVED + " info")));
+			paragraph.add(new Text(this.iwrb.getLocalizedString(KEY_PASSWORD_SAVED + "_text", DEFAULT_PASSWORD_SAVED + " info")));
 			layer.add(paragraph);
 			
 			ICPage userHomePage = null;
 			try {
 				UserBusiness ub = (UserBusiness) IBOLookup.getServiceInstance(iwc, UserBusiness.class);
-				userHomePage = ub.getHomePageForUser(user);
+				userHomePage = ub.getHomePageForUser(this.user);
 			}
 			catch (FinderException fe) {
 				//No page found...
@@ -254,7 +254,7 @@ public class ChangePassword extends CitizenBlock {
 			
 			if (userHomePage != null) {
 				Layer span = new Layer(Layer.SPAN);
-				span.add(new Text(iwrb.getLocalizedString("my_page", "My page")));
+				span.add(new Text(this.iwrb.getLocalizedString("my_page", "My page")));
 				Link link = new Link(span);
 				link.setStyleClass("homeLink");
 				link.setPage(userHomePage);
@@ -271,6 +271,6 @@ public class ChangePassword extends CitizenBlock {
 	}
 	
 	public void setMinimumPasswordLength(int length) {
-		MIN_PASSWORD_LENGTH = length;
+		this.MIN_PASSWORD_LENGTH = length;
 	}
 }

@@ -128,7 +128,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		if (!iwc.isLoggedOn()) {
 			return;
 		}
-		iwrb = getResourceBundle(iwc);
+		this.iwrb = getResourceBundle(iwc);
 		this.user = iwc.getCurrentUser();
 		try {
 			int action = parseAction(iwc);
@@ -165,7 +165,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		header.setStyleClass("header");
 		form.add(header);
 		
-		Heading1 heading = new Heading1(iwrb.getLocalizedString("citizen_preferences", "Citizen preferences"));
+		Heading1 heading = new Heading1(this.iwrb.getLocalizedString("citizen_preferences", "Citizen preferences"));
 		header.add(heading);
 		
 		Layer section = new Layer(Layer.DIV);
@@ -175,33 +175,33 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		UserBusiness ub = (UserBusiness) IBOLookup.getServiceInstance(iwc, UserBusiness.class);
 
 		Image image = null;
-		if (user.getSystemImageID() > 0) {
+		if (this.user.getSystemImageID() > 0) {
 			try {
-				image = new Image(user.getSystemImageID());
+				image = new Image(this.user.getSystemImageID());
 			}
 			catch (SQLException e) {
 				e.printStackTrace();
 			}
 		}
 		
-		Email mail = ub.getUserMail(user);
+		Email mail = ub.getUserMail(this.user);
 		Phone homePhone = null;
 		try {
-			homePhone = ub.getUsersHomePhone(user);
+			homePhone = ub.getUsersHomePhone(this.user);
 		}
 		catch (NoPhoneFoundException e) {
 			e.printStackTrace();
 		}
 		Phone mobilePhone = null;
 		try {
-			mobilePhone = ub.getUsersMobilePhone(user);
+			mobilePhone = ub.getUsersMobilePhone(this.user);
 		}
 		catch (NoPhoneFoundException e) {
 			e.printStackTrace();
 		}
 		Phone workPhone = null;
 		try {
-			workPhone = ub.getUsersWorkPhone(user);
+			workPhone = ub.getUsersWorkPhone(this.user);
 		}
 		catch (NoPhoneFoundException e) {
 			e.printStackTrace();
@@ -277,7 +277,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 			formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
 			label = new Label();
-			label.add(new Text(iwrb.getLocalizedString("image", "Image")));
+			label.add(new Text(this.iwrb.getLocalizedString("image", "Image")));
 			formItem.add(label);
 			formItem.add(image);
 			section.add(formItem);
@@ -286,7 +286,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 			formItem.setStyleClass("formItem");
 			formItem.setStyleClass("indentedCheckbox");
 			formItem.setID("removeImage");
-			label = new Label(iwrb.getLocalizedString("remove_image", "Remove image"), removeImage);
+			label = new Label(this.iwrb.getLocalizedString("remove_image", "Remove image"), removeImage);
 			formItem.add(removeImage);
 			formItem.add(label);
 			section.add(formItem);
@@ -299,7 +299,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		formItem.setID("imageUpload");
-		label = new Label(iwrb.getLocalizedString("image_upload", "Image upload"), file);
+		label = new Label(this.iwrb.getLocalizedString("image_upload", "Image upload"), file);
 		formItem.add(label);
 		formItem.add(file);
 		section.add(formItem);
@@ -308,7 +308,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		label = new Label(iwrb.getLocalizedString(KEY_EMAIL, DEFAULT_EMAIL), tiEmail);
+		label = new Label(this.iwrb.getLocalizedString(KEY_EMAIL, DEFAULT_EMAIL), tiEmail);
 		formItem.add(label);
 		formItem.add(tiEmail);
 		section.add(formItem);
@@ -317,7 +317,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		formItem.setStyleClass("formItem");
 		formItem.setStyleClass("indentedCheckbox");
 		formItem.setID("messagesViaEmail");
-		label = new Label(iwrb.getLocalizedString(KEY_MESSAGES_VIA_EMAIL, DEFAULT_MESSAGES_VIA_EMAIL), messagesViaEmail);
+		label = new Label(this.iwrb.getLocalizedString(KEY_MESSAGES_VIA_EMAIL, DEFAULT_MESSAGES_VIA_EMAIL), messagesViaEmail);
 		formItem.add(messagesViaEmail);
 		formItem.add(label);
 		section.add(formItem);
@@ -326,14 +326,14 @@ public class CitizenAccountPreferences extends CitizenBlock {
 
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		label = new Label(iwrb.getLocalizedString(KEY_PHONE_HOME, DEFAULT_PHONE_HOME), tiPhoneHome);
+		label = new Label(this.iwrb.getLocalizedString(KEY_PHONE_HOME, DEFAULT_PHONE_HOME), tiPhoneHome);
 		formItem.add(label);
 		formItem.add(tiPhoneHome);
 		section.add(formItem);
 		
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		label = new Label(iwrb.getLocalizedString(KEY_PHONE_WORK, DEFAULT_PHONE_WORK), tiPhoneWork);
+		label = new Label(this.iwrb.getLocalizedString(KEY_PHONE_WORK, DEFAULT_PHONE_WORK), tiPhoneWork);
 		formItem.add(label);
 		formItem.add(tiPhoneWork);
 		section.add(formItem);
@@ -341,7 +341,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		formItem.setID("mobilePhone");
-		label = new Label(iwrb.getLocalizedString(KEY_PHONE_MOBILE, DEFAULT_PHONE_MOBILE), tiPhoneMobile);
+		label = new Label(this.iwrb.getLocalizedString(KEY_PHONE_MOBILE, DEFAULT_PHONE_MOBILE), tiPhoneMobile);
 		formItem.add(label);
 		formItem.add(tiPhoneMobile);
 		section.add(formItem);
@@ -350,28 +350,28 @@ public class CitizenAccountPreferences extends CitizenBlock {
 
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		label = new Label(iwrb.getLocalizedString(KEY_CO_STREET_ADDRESS, DEFAULT_CO_STREET_ADDRESS), tiCOStreetAddress);
+		label = new Label(this.iwrb.getLocalizedString(KEY_CO_STREET_ADDRESS, DEFAULT_CO_STREET_ADDRESS), tiCOStreetAddress);
 		formItem.add(label);
 		formItem.add(tiCOStreetAddress);
 		section.add(formItem);
 		
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		label = new Label(iwrb.getLocalizedString(KEY_CO_POSTAL_CODE, DEFAULT_CO_POSTAL_CODE), tiCOPostalCode);
+		label = new Label(this.iwrb.getLocalizedString(KEY_CO_POSTAL_CODE, DEFAULT_CO_POSTAL_CODE), tiCOPostalCode);
 		formItem.add(label);
 		formItem.add(tiCOPostalCode);
 		section.add(formItem);
 		
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		label = new Label(iwrb.getLocalizedString(KEY_CO_CITY, DEFAULT_CO_CITY), tiCOCity);
+		label = new Label(this.iwrb.getLocalizedString(KEY_CO_CITY, DEFAULT_CO_CITY), tiCOCity);
 		formItem.add(label);
 		formItem.add(tiCOCity);
 		section.add(formItem);
 		
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		label = new Label(iwrb.getLocalizedString(KEY_CO_COUNTRY, DEFAULT_CO_COUNTRY), tiCOCountry);
+		label = new Label(this.iwrb.getLocalizedString(KEY_CO_COUNTRY, DEFAULT_CO_COUNTRY), tiCOCountry);
 		formItem.add(label);
 		formItem.add(tiCOCountry);
 		section.add(formItem);
@@ -379,7 +379,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		formItem.setStyleClass("indentedCheckbox");
-		label = new Label(iwrb.getLocalizedString(KEY_CO_ADDRESS_SELECT, DEFAULT_CO_ADDRESS_SELECT), useCOAddress);
+		label = new Label(this.iwrb.getLocalizedString(KEY_CO_ADDRESS_SELECT, DEFAULT_CO_ADDRESS_SELECT), useCOAddress);
 		formItem.add(useCOAddress);
 		formItem.add(label);
 		section.add(formItem);
@@ -391,7 +391,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		form.add(buttonLayer);
 		
 		Layer span = new Layer(Layer.SPAN);
-		span.add(new Text(iwrb.getLocalizedString(KEY_UPDATE, DEFAULT_UPDATE)));
+		span.add(new Text(this.iwrb.getLocalizedString(KEY_UPDATE, DEFAULT_UPDATE)));
 		Link send = new Link(span);
 		send.setToFormSubmit(form);
 		buttonLayer.add(send);
@@ -449,7 +449,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		if (sEmail != null) {
 			updateEmail = EmailValidator.getInstance().validateEmail(sEmail);
 			if (!updateEmail) {
-				errors.add(iwrb.getLocalizedString(KEY_EMAIL_INVALID, DEFAULT_EMAIL_INVALID));
+				errors.add(this.iwrb.getLocalizedString(KEY_EMAIL_INVALID, DEFAULT_EMAIL_INVALID));
 				hasErrors = true;
 			}
 		}
@@ -458,22 +458,22 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		 * enter a valid email address he should get a warning
 		 */
 		if (messagesViaEmail && !updateEmail) {
-			errors.add(iwrb.getLocalizedString(KEY_NO_EMAIL_FOR_LETTERS, DEFAULT_NO_EMAIL_FOR_LETTERS));
+			errors.add(this.iwrb.getLocalizedString(KEY_NO_EMAIL_FOR_LETTERS, DEFAULT_NO_EMAIL_FOR_LETTERS));
 			hasErrors = true;
 		}
 		
 		// Validate c/o-address
 		if (useCOAddress) {
 			if (coStreetAddress.equals("")) {
-				errors.add(iwrb.getLocalizedString(KEY_CO_STREET_ADDRESS_MISSING, DEFAULT_CO_STREET_ADDRESS_MISSING));
+				errors.add(this.iwrb.getLocalizedString(KEY_CO_STREET_ADDRESS_MISSING, DEFAULT_CO_STREET_ADDRESS_MISSING));
 				hasErrors = true;
 			}
 			if (coPostalCode.equals("")) {
-				errors.add(iwrb.getLocalizedString(KEY_CO_POSTAL_CODE_MISSING, DEFAULT_CO_POSTAL_CODE_MISSING));
+				errors.add(this.iwrb.getLocalizedString(KEY_CO_POSTAL_CODE_MISSING, DEFAULT_CO_POSTAL_CODE_MISSING));
 				hasErrors = true;
 			}
 			if (coCity.equals("")) {
-				errors.add(iwrb.getLocalizedString(KEY_CO_CITY_MISSING, DEFAULT_CO_CITY_MISSING));
+				errors.add(this.iwrb.getLocalizedString(KEY_CO_CITY_MISSING, DEFAULT_CO_CITY_MISSING));
 				hasErrors = true;
 			}
 			updateCOAddress = true;
@@ -482,11 +482,11 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		if (!hasErrors) {
 			UserBusiness ub = (UserBusiness) IBOLookup.getServiceInstance(iwc, UserBusiness.class);
 			if (updateEmail) {
-				ub.storeUserEmail(user, sEmail, true);
+				ub.storeUserEmail(this.user, sEmail, true);
 			}
-			ub.updateUserHomePhone(user, phoneHome);
-			ub.updateUserWorkPhone(user, phoneWork);
-			ub.updateUserMobilePhone(user, phoneMobile);
+			ub.updateUserHomePhone(this.user, phoneHome);
+			ub.updateUserWorkPhone(this.user, phoneWork);
+			ub.updateUserMobilePhone(this.user, phoneMobile);
 			if (updateCOAddress) {
 				Address coAddress = getCOAddress(iwc);
 				coAddress.setStreetName(coStreetAddress);
@@ -505,19 +505,19 @@ public class CitizenAccountPreferences extends CitizenBlock {
 			cas.setIfUserUsesCOAddress(useCOAddress);
 			
 			if (removeImage) {
-				user.setSystemImageID(null);
-				user.store();
+				this.user.setSystemImageID(null);
+				this.user.store();
 			}
 			if (fileID != -1) {
-				user.setSystemImageID(fileID);
-				user.store();
+				this.user.setSystemImageID(fileID);
+				this.user.store();
 			}
 
 			Layer header = new Layer(Layer.DIV);
 			header.setStyleClass("header");
 			add(header);
 			
-			Heading1 heading = new Heading1(iwrb.getLocalizedString("citizen_preferences", "Citizen preferences"));
+			Heading1 heading = new Heading1(this.iwrb.getLocalizedString("citizen_preferences", "Citizen preferences"));
 			header.add(heading);
 			
 			Layer layer = new Layer(Layer.DIV);
@@ -527,19 +527,19 @@ public class CitizenAccountPreferences extends CitizenBlock {
 			image.setStyleClass("receiptImage");
 			layer.add(image);
 			
-			heading = new Heading1(iwrb.getLocalizedString(KEY_PREFERENCES_SAVED, DEFAULT_PREFERENCES_SAVED));
+			heading = new Heading1(this.iwrb.getLocalizedString(KEY_PREFERENCES_SAVED, DEFAULT_PREFERENCES_SAVED));
 			layer.add(heading);
 			
 			Paragraph paragraph = new Paragraph();
-			paragraph.add(new Text(iwrb.getLocalizedString(KEY_PREFERENCES_SAVED + "_text", DEFAULT_PREFERENCES_SAVED + " info")));
+			paragraph.add(new Text(this.iwrb.getLocalizedString(KEY_PREFERENCES_SAVED + "_text", DEFAULT_PREFERENCES_SAVED + " info")));
 			layer.add(paragraph);
 			
 			try {
-				ICPage page = ub.getHomePageForUser(user);
+				ICPage page = ub.getHomePageForUser(this.user);
 				paragraph.add(new Break(2));
 				
 				Layer span = new Layer(Layer.SPAN);
-				span.add(new Text(iwrb.getLocalizedString("my_page", "My page")));
+				span.add(new Text(this.iwrb.getLocalizedString("my_page", "My page")));
 				Link link = new Link(span);
 				link.setStyleClass("homeLink");
 				link.setPage(page);
@@ -565,12 +565,13 @@ public class CitizenAccountPreferences extends CitizenBlock {
 			AddressType coType = ah.getAddressType2();
 
 			Address address = ub.getUserAddressByAddressType(iwc.getCurrentUserId(), coType);
-			if (address != null)
+			if (address != null) {
 				return address;
+			}
 			coAddress = ah.create();
 			coAddress.setAddressType(coType);
 			coAddress.store();
-			user.addAddress(coAddress);
+			this.user.addAddress(coAddress);
 		}
 		catch (Exception e) {
 			super.add(new ExceptionWrapper(e, this));

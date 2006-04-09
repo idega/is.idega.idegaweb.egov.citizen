@@ -25,24 +25,24 @@ public class BirtingakerfiWSLocator extends org.apache.axis.client.Service imple
     private java.lang.String BirtingakerfiWSSoap_address = "https://ws.isb.is/adgerdirv1/birtingakerfi.asmx";
 
     public java.lang.String getBirtingakerfiWSSoapAddress() {
-        return BirtingakerfiWSSoap_address;
+        return this.BirtingakerfiWSSoap_address;
     }
 
     // The WSDD service name defaults to the port name.
     private java.lang.String BirtingakerfiWSSoapWSDDServiceName = "BirtingakerfiWSSoap";
 
     public java.lang.String getBirtingakerfiWSSoapWSDDServiceName() {
-        return BirtingakerfiWSSoapWSDDServiceName;
+        return this.BirtingakerfiWSSoapWSDDServiceName;
     }
 
     public void setBirtingakerfiWSSoapWSDDServiceName(java.lang.String name) {
-        BirtingakerfiWSSoapWSDDServiceName = name;
+        this.BirtingakerfiWSSoapWSDDServiceName = name;
     }
 
     public is.idega.idegaweb.egov.citizen.wsclient.BirtingakerfiWSSoap_PortType getBirtingakerfiWSSoap() throws javax.xml.rpc.ServiceException {
        java.net.URL endpoint;
         try {
-            endpoint = new java.net.URL(BirtingakerfiWSSoap_address);
+            endpoint = new java.net.URL(this.BirtingakerfiWSSoap_address);
         }
         catch (java.net.MalformedURLException e) {
             throw new javax.xml.rpc.ServiceException(e);
@@ -62,7 +62,7 @@ public class BirtingakerfiWSLocator extends org.apache.axis.client.Service imple
     }
 
     public void setBirtingakerfiWSSoapEndpointAddress(java.lang.String address) {
-        BirtingakerfiWSSoap_address = address;
+        this.BirtingakerfiWSSoap_address = address;
     }
 
     /**
@@ -73,7 +73,7 @@ public class BirtingakerfiWSLocator extends org.apache.axis.client.Service imple
     public java.rmi.Remote getPort(Class serviceEndpointInterface) throws javax.xml.rpc.ServiceException {
         try {
             if (is.idega.idegaweb.egov.citizen.wsclient.BirtingakerfiWSSoap_PortType.class.isAssignableFrom(serviceEndpointInterface)) {
-                is.idega.idegaweb.egov.citizen.wsclient.BirtingakerfiWSSoap_BindingStub _stub = new is.idega.idegaweb.egov.citizen.wsclient.BirtingakerfiWSSoap_BindingStub(new java.net.URL(BirtingakerfiWSSoap_address), this);
+                is.idega.idegaweb.egov.citizen.wsclient.BirtingakerfiWSSoap_BindingStub _stub = new is.idega.idegaweb.egov.citizen.wsclient.BirtingakerfiWSSoap_BindingStub(new java.net.URL(this.BirtingakerfiWSSoap_address), this);
                 _stub.setPortName(getBirtingakerfiWSSoapWSDDServiceName());
                 return _stub;
             }
@@ -111,11 +111,11 @@ public class BirtingakerfiWSLocator extends org.apache.axis.client.Service imple
     private java.util.HashSet ports = null;
 
     public java.util.Iterator getPorts() {
-        if (ports == null) {
-            ports = new java.util.HashSet();
-            ports.add(new javax.xml.namespace.QName("http://ws.isb.is", "BirtingakerfiWSSoap"));
+        if (this.ports == null) {
+            this.ports = new java.util.HashSet();
+            this.ports.add(new javax.xml.namespace.QName("http://ws.isb.is", "BirtingakerfiWSSoap"));
         }
-        return ports.iterator();
+        return this.ports.iterator();
     }
 
     /**

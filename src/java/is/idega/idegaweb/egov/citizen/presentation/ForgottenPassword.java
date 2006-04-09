@@ -77,11 +77,12 @@ public class ForgottenPassword extends CitizenBlock {
 	private Map iCommuneMap;
 
 	public void present(IWContext iwc) {
-		iwrb = getResourceBundle(iwc);
+		this.iwrb = getResourceBundle(iwc);
 
 		String action = parseAction(iwc);
-		if (ACTION_VIEW_FORM.equals(action))
+		if (ACTION_VIEW_FORM.equals(action)) {
 			viewForm(iwc);
+		}
 		else if (ACTION_FORM_SUBMIT.equals(action)) {
 			submitForm(iwc);
 		}
@@ -94,7 +95,7 @@ public class ForgottenPassword extends CitizenBlock {
 	 * @param iwc
 	 */
 	private void submitForm(IWContext iwc) {
-		if (iwc.isParameterSet(COMMUNE_KEY) && iForwardToURL) {
+		if (iwc.isParameterSet(COMMUNE_KEY) && this.iForwardToURL) {
 			iwc.forwardToURL(getParentPage(), iwc.getParameter(COMMUNE_KEY), true);
 			return;
 		}
@@ -106,18 +107,18 @@ public class ForgottenPassword extends CitizenBlock {
 		Collection errors = new ArrayList();
 		
 		if (ssn == null ||ssn.length() == 0) {
-			errors.add(iwrb.getLocalizedString("must_provide_personal_id", "You have to enter a personal ID."));
+			errors.add(this.iwrb.getLocalizedString("must_provide_personal_id", "You have to enter a personal ID."));
 			hasErrors = true;
 			invalidPersonalID = true;
 		}
 		else if (!SocialSecurityNumber.isValidIcelandicSocialSecurityNumber(ssn)) {
-			errors.add(iwrb.getLocalizedString("not_a_valid_personal_id", "The personal ID you've entered is not valid."));
+			errors.add(this.iwrb.getLocalizedString("not_a_valid_personal_id", "The personal ID you've entered is not valid."));
 			hasErrors = true;
 			invalidPersonalID = true;
 		}
 
 		if (iwc.getSessionAttribute(hasAppliedForPsw) != null) {
-			errors.add(iwrb.getLocalizedString("already_applied_for_password", "You have already requested a new password."));
+			errors.add(this.iwrb.getLocalizedString("already_applied_for_password", "You have already requested a new password."));
 			hasErrors = true;
 		}
 
@@ -131,7 +132,7 @@ public class ForgottenPassword extends CitizenBlock {
 				throw new IBORuntimeException(re);
 			}
 			catch (FinderException ex) {
-				errors.add(iwrb.getLocalizedString("no_user_found_with_personal_id", "No user was found with the personal ID you entered."));
+				errors.add(this.iwrb.getLocalizedString("no_user_found_with_personal_id", "No user was found with the personal ID you entered."));
 				hasErrors = true;
 			}
 		}
@@ -139,7 +140,7 @@ public class ForgottenPassword extends CitizenBlock {
 		if (user != null) {
 			LoginTable loginTable = LoginDBHandler.getUserLogin(user);
 			if (loginTable == null) {
-				errors.add(iwrb.getLocalizedString("no_login_found_for_user", "No login was found for the user with the personal ID you entered."));
+				errors.add(this.iwrb.getLocalizedString("no_login_found_for_user", "No login was found for the user with the personal ID you entered."));
 				hasErrors = true;
 			}
 			else {
@@ -153,7 +154,7 @@ public class ForgottenPassword extends CitizenBlock {
 				}
 				catch (CreateException ce) {
 					ce.printStackTrace();
-					errors.add(iwrb.getLocalizedString("password_creation_failed", "Password creation failed."));
+					errors.add(this.iwrb.getLocalizedString("password_creation_failed", "Password creation failed."));
 					hasErrors = true;
 				}
 			}
@@ -166,7 +167,7 @@ public class ForgottenPassword extends CitizenBlock {
 			header.setStyleClass("header");
 			add(header);
 			
-			Heading1 heading = new Heading1(iwrb.getLocalizedString("forgotten_password", "Forgotten password"));
+			Heading1 heading = new Heading1(this.iwrb.getLocalizedString("forgotten_password", "Forgotten password"));
 			header.add(heading);
 			
 			Layer layer = new Layer(Layer.DIV);
@@ -176,15 +177,15 @@ public class ForgottenPassword extends CitizenBlock {
 			image.setStyleClass("receiptImage");
 			layer.add(image);
 			
-			heading = new Heading1(iwrb.getLocalizedString(PASSWORD_CREATED_KEY, PASSWORD_CREATED_DEFAULT));
+			heading = new Heading1(this.iwrb.getLocalizedString(PASSWORD_CREATED_KEY, PASSWORD_CREATED_DEFAULT));
 			layer.add(heading);
 			
-			layer.add(new Text(iwrb.getLocalizedString(PASSWORD_CREATED_KEY + "_text", PASSWORD_CREATED_DEFAULT + " info")));
+			layer.add(new Text(this.iwrb.getLocalizedString(PASSWORD_CREATED_KEY + "_text", PASSWORD_CREATED_DEFAULT + " info")));
 			
 			add(layer);
 			
-			if (iPage != null) {
-				iwc.forwardToIBPage(getParentPage(), iPage, iRedirectDelay, false);
+			if (this.iPage != null) {
+				iwc.forwardToIBPage(getParentPage(), this.iPage, this.iRedirectDelay, false);
 			}
 		}
 		else {
@@ -209,7 +210,7 @@ public class ForgottenPassword extends CitizenBlock {
 		header.setStyleClass("header");
 		form.add(header);
 		
-		Heading1 heading = new Heading1(iwrb.getLocalizedString("forgotten_password", "Forgotten password"));
+		Heading1 heading = new Heading1(this.iwrb.getLocalizedString("forgotten_password", "Forgotten password"));
 		header.add(heading);
 		
 		Layer section = new Layer(Layer.DIV);
@@ -217,24 +218,24 @@ public class ForgottenPassword extends CitizenBlock {
 		form.add(section);
 		
 		Paragraph paragraph = new Paragraph();
-		paragraph.add(new Text(iwrb.getLocalizedString("forgot_password_helper_text", "Please enter your personal ID and click 'Send'.  A new password will be created and sent to your e-mail address.")));
+		paragraph.add(new Text(this.iwrb.getLocalizedString("forgot_password_helper_text", "Please enter your personal ID and click 'Send'.  A new password will be created and sent to your e-mail address.")));
 		section.add(paragraph);
 		
 		TextInput input = new TextInput(SSN_KEY);
 		input.keepStatusOnAction(true);
 
-		if (iCommuneMap != null) {
+		if (this.iCommuneMap != null) {
 			DropdownMenu communes = new DropdownMenu(COMMUNE_KEY);
-			Iterator iter = iCommuneMap.keySet().iterator();
+			Iterator iter = this.iCommuneMap.keySet().iterator();
 			while (iter.hasNext()) {
 				String commune = (String) iter.next();
-				communes.addMenuElement((String) iCommuneMap.get(commune), commune);
+				communes.addMenuElement((String) this.iCommuneMap.get(commune), commune);
 			}
 
 			Layer formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
 			Label label = new Label(communes);
-			label.add(new Text(iwrb.getLocalizedString(COMMUNE_KEY, COMMUNE_DEFAULT)));
+			label.add(new Text(this.iwrb.getLocalizedString(COMMUNE_KEY, COMMUNE_DEFAULT)));
 			formItem.add(label);
 			formItem.add(communes);
 			section.add(formItem);
@@ -242,7 +243,7 @@ public class ForgottenPassword extends CitizenBlock {
 
 		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		Label label = new Label(iwrb.getLocalizedString(SSN_KEY, SSN_DEFAULT), input);
+		Label label = new Label(this.iwrb.getLocalizedString(SSN_KEY, SSN_DEFAULT), input);
 		formItem.add(label);
 		formItem.add(input);
 		section.add(formItem);
@@ -256,7 +257,7 @@ public class ForgottenPassword extends CitizenBlock {
 		form.add(buttonLayer);
 		
 		Layer span = new Layer(Layer.SPAN);
-		span.add(new Text(iwrb.getLocalizedString(FORM_SUBMIT_KEY + "_button", FORM_SUBMIT_DEFAULT)));
+		span.add(new Text(this.iwrb.getLocalizedString(FORM_SUBMIT_KEY + "_button", FORM_SUBMIT_DEFAULT)));
 		Link send = new Link(span);
 		send.setStyleClass("sendLink");
 		send.setToFormSubmit(form);
@@ -274,8 +275,9 @@ public class ForgottenPassword extends CitizenBlock {
 	 */
 	private String parseAction(final IWContext iwc) {
 		String action = ACTION_VIEW_FORM;
-		if (iwc.isParameterSet(FORM_SUBMIT_KEY))
+		if (iwc.isParameterSet(FORM_SUBMIT_KEY)) {
 			action = ACTION_FORM_SUBMIT;
+		}
 		return action;
 	}
 
@@ -304,18 +306,18 @@ public class ForgottenPassword extends CitizenBlock {
 	}
 	
 	public void setPage(ICPage page) {
-		iPage = page;
+		this.iPage = page;
 	}
 	
 	public void setRedirectDelay(int redirectDelay) {
-		iRedirectDelay = redirectDelay;
+		this.iRedirectDelay = redirectDelay;
 	}
 
 	public void setCommunePage(String name, String URL) {
-		if (iCommuneMap == null) {
-			iCommuneMap = new HashMap();
+		if (this.iCommuneMap == null) {
+			this.iCommuneMap = new HashMap();
 		}
-		iCommuneMap.put(name, URL);
-		iForwardToURL = true;
+		this.iCommuneMap.put(name, URL);
+		this.iForwardToURL = true;
 	}
 }

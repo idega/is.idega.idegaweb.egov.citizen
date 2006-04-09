@@ -52,7 +52,7 @@ public class ChangeEmail extends CitizenBlock {
 	private IWResourceBundle iwrb;
 
 	public void present(IWContext iwc) {
-		iwrb = getResourceBundle(iwc);
+		this.iwrb = getResourceBundle(iwc);
 
 		try {
 			String action = parseAction(iwc);
@@ -77,8 +77,9 @@ public class ChangeEmail extends CitizenBlock {
 	 */
 	private String parseAction(final IWContext iwc) {
 		String action = ACTION_VIEW_FORM;
-		if (iwc.isParameterSet(PARAMETER_ACTION))
+		if (iwc.isParameterSet(PARAMETER_ACTION)) {
 			action = ACTION_FORM_SUBMIT;
+		}
 		return action;
 	}
 
@@ -90,20 +91,20 @@ public class ChangeEmail extends CitizenBlock {
 		Collection errors = new ArrayList();
 		
 		if (email == null || email.length() == 0) {
-			errors.add(iwrb.getLocalizedString("must_provide_email", "You have to enter an e-mail address."));
+			errors.add(this.iwrb.getLocalizedString("must_provide_email", "You have to enter an e-mail address."));
 			hasErrors = true;
 		}
 		else if (!EmailValidator.getInstance().validateEmail(email)) {
-			errors.add(iwrb.getLocalizedString("not_a_valid_email", "The e-mail address you have entered is not valid."));
+			errors.add(this.iwrb.getLocalizedString("not_a_valid_email", "The e-mail address you have entered is not valid."));
 			hasErrors = true;
 		}
 		
 		if (emailRepeat == null || emailRepeat.length() == 0) {
-			errors.add(iwrb.getLocalizedString("must_provide_email_repeat", "You have to enter repeat e-mail address."));
+			errors.add(this.iwrb.getLocalizedString("must_provide_email_repeat", "You have to enter repeat e-mail address."));
 			hasErrors = true;
 		}
 		else if (!email.equals(emailRepeat)) {
-			errors.add(iwrb.getLocalizedString("emails_dont_match", "The e-mail addresses you have entered don't match."));
+			errors.add(this.iwrb.getLocalizedString("emails_dont_match", "The e-mail addresses you have entered don't match."));
 			hasErrors = true;
 		}
 
@@ -117,7 +118,7 @@ public class ChangeEmail extends CitizenBlock {
 			header.setStyleClass("header");
 			add(header);
 			
-			Heading1 heading = new Heading1(iwrb.getLocalizedString("change_email", "Change e-mail"));
+			Heading1 heading = new Heading1(this.iwrb.getLocalizedString("change_email", "Change e-mail"));
 			header.add(heading);
 			
 			Layer layer = new Layer(Layer.DIV);
@@ -127,11 +128,11 @@ public class ChangeEmail extends CitizenBlock {
 			image.setStyleClass("receiptImage");
 			layer.add(image);
 			
-			heading = new Heading1(iwrb.getLocalizedString("new_email_saved", "New e-mail saved"));
+			heading = new Heading1(this.iwrb.getLocalizedString("new_email_saved", "New e-mail saved"));
 			layer.add(heading);
 			
 			Paragraph paragraph = new Paragraph();
-			paragraph.add(new Text(iwrb.getLocalizedString("new_email_saved_text", "The new e-mail has been saved.")));
+			paragraph.add(new Text(this.iwrb.getLocalizedString("new_email_saved_text", "The new e-mail has been saved.")));
 			layer.add(paragraph);
 			
 			ICPage userHomePage = null;
@@ -148,7 +149,7 @@ public class ChangeEmail extends CitizenBlock {
 			
 			if (userHomePage != null) {
 				Layer span = new Layer(Layer.SPAN);
-				span.add(new Text(iwrb.getLocalizedString("my_page", "My page")));
+				span.add(new Text(this.iwrb.getLocalizedString("my_page", "My page")));
 				Link link = new Link(span);
 				link.setStyleClass("homeLink");
 				link.setPage(userHomePage);
@@ -187,14 +188,14 @@ public class ChangeEmail extends CitizenBlock {
 				image.setStyleClass("stopImage");
 				layer.add(image);
 				
-				Heading1 heading = new Heading1(iwrb.getLocalizedString("user_has_no_account", "User has no account"));
+				Heading1 heading = new Heading1(this.iwrb.getLocalizedString("user_has_no_account", "User has no account"));
 				layer.add(heading);
 				
 				Paragraph paragraph = new Paragraph();
-				paragraph.add(new Text(iwrb.getLocalizedString("user_has_no_login", "The user you are trying to change e-mail for doesn't have an account.")));
+				paragraph.add(new Text(this.iwrb.getLocalizedString("user_has_no_login", "The user you are trying to change e-mail for doesn't have an account.")));
 				layer.add(paragraph);
 				
-				Link link = new Link(iwrb.getLocalizedString("back", "Back"));
+				Link link = new Link(this.iwrb.getLocalizedString("back", "Back"));
 				link.setStyleClass("homeLink");
 				link.setAsBackLink();
 				paragraph.add(new Break(2));
@@ -207,7 +208,7 @@ public class ChangeEmail extends CitizenBlock {
 				header.setStyleClass("header");
 				form.add(header);
 				
-				Heading1 heading = new Heading1(iwrb.getLocalizedString("change_email", "Change e-mail"));
+				Heading1 heading = new Heading1(this.iwrb.getLocalizedString("change_email", "Change e-mail"));
 				header.add(heading);
 				
 				Layer section = new Layer(Layer.DIV);
@@ -215,7 +216,7 @@ public class ChangeEmail extends CitizenBlock {
 				form.add(section);
 				
 				Paragraph paragraph = new Paragraph();
-				paragraph.add(new Text(iwrb.getLocalizedString("change_email_helper_text", "Please enter the new e-mail and click 'Save'.")));
+				paragraph.add(new Text(this.iwrb.getLocalizedString("change_email_helper_text", "Please enter the new e-mail and click 'Save'.")));
 				section.add(paragraph);
 				
 				TextInput email = new TextInput(PARAMETER_EMAIL);
@@ -226,14 +227,14 @@ public class ChangeEmail extends CitizenBlock {
 
 				Layer formItem = new Layer(Layer.DIV);
 				formItem.setStyleClass("formItem");
-				Label label = new Label(iwrb.getLocalizedString("new_email", "New e-mail"), email);
+				Label label = new Label(this.iwrb.getLocalizedString("new_email", "New e-mail"), email);
 				formItem.add(label);
 				formItem.add(email);
 				section.add(formItem);
 				
 				formItem = new Layer(Layer.DIV);
 				formItem.setStyleClass("formItem");
-				label = new Label(iwrb.getLocalizedString("new_email_repeat", "New e-mail repeat"), emailRepeat);
+				label = new Label(this.iwrb.getLocalizedString("new_email_repeat", "New e-mail repeat"), emailRepeat);
 				formItem.add(label);
 				formItem.add(emailRepeat);
 				section.add(formItem);
@@ -247,7 +248,7 @@ public class ChangeEmail extends CitizenBlock {
 				form.add(buttonLayer);
 				
 				Layer span = new Layer(Layer.SPAN);
-				span.add(new Text(iwrb.getLocalizedString("save", "Save")));
+				span.add(new Text(this.iwrb.getLocalizedString("save", "Save")));
 				Link send = new Link(span);
 				send.setStyleClass("sendLink");
 				send.setToFormSubmit(form);
@@ -259,7 +260,7 @@ public class ChangeEmail extends CitizenBlock {
 	}
 
 	private User getUser(IWContext iwc) throws RemoteException {
-		if (iUseSessionUser) {
+		if (this.iUseSessionUser) {
 			return getUserSession(iwc).getUser();
 		}
 		else {
@@ -286,6 +287,6 @@ public class ChangeEmail extends CitizenBlock {
 	}
 	
 	public void setUseSessionUser(boolean useSessionUser) {
-		iUseSessionUser = useSessionUser;
+		this.iUseSessionUser = useSessionUser;
 	}
 }

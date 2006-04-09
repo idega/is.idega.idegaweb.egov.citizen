@@ -48,8 +48,8 @@ public class CitizenAccountApplicationForwarder extends Block {
 		Layer span = new Layer(Layer.SPAN);
 		span.add(new Text(iwrb.getLocalizedString("next", "Next")));
 		Link link = new Link(span);
-		if (iForwardPage != null) {
-			form.setPageToSubmitTo(iForwardPage);
+		if (this.iForwardPage != null) {
+			form.setPageToSubmitTo(this.iForwardPage);
 			link.setToFormSubmit(form);
 		}
 		else {
@@ -67,7 +67,7 @@ public class CitizenAccountApplicationForwarder extends Block {
 
 	
 	public void setForwardPage(ICPage forwardPage) {
-		iForwardPage = forwardPage;
+		this.iForwardPage = forwardPage;
 	}
 
 }

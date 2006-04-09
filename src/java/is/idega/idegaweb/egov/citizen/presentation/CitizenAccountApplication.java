@@ -108,7 +108,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 	private Map iCommuneMap;
 	
 	public void present(IWContext iwc) {
-		iwrb = getResourceBundle(iwc);
+		this.iwrb = getResourceBundle(iwc);
 
 		try {
 			int action = parseAction(iwc);
@@ -136,7 +136,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		header.setStyleClass("header");
 		form.add(header);
 		
-		Heading1 heading = new Heading1(iwrb.getLocalizedString("citizen_registration", "Citizen registration"));
+		Heading1 heading = new Heading1(this.iwrb.getLocalizedString("citizen_registration", "Citizen registration"));
 		header.add(heading);
 		
 		Layer section = new Layer(Layer.DIV);
@@ -145,7 +145,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		
 		Layer helpLayer = new Layer(Layer.DIV);
 		helpLayer.setStyleClass("helperText");
-		helpLayer.add(new Text(iwrb.getLocalizedString("citizen_registraction_help", "Please fill in your personal ID as well as your e-mail.  Your e-mail is required so that you can be contacted directly about changes to you ongoing cases.  If you don't have an e-mail account please contact the commune offices.")));
+		helpLayer.add(new Text(this.iwrb.getLocalizedString("citizen_registraction_help", "Please fill in your personal ID as well as your e-mail.  Your e-mail is required so that you can be contacted directly about changes to you ongoing cases.  If you don't have an e-mail account please contact the commune offices.")));
 		section.add(helpLayer);
 		
 		TextInput personalID = new TextInput(SSN_KEY);
@@ -167,18 +167,18 @@ public class CitizenAccountApplication extends CitizenBlock {
 		required.setStyleClass("required");
 		required.add(new Text("*"));
 		
-		if (iCommuneMap != null) {
+		if (this.iCommuneMap != null) {
 			DropdownMenu communes = new DropdownMenu(COMMUNE_KEY);
-			Iterator iter = iCommuneMap.keySet().iterator();
+			Iterator iter = this.iCommuneMap.keySet().iterator();
 			while (iter.hasNext()) {
 				String commune = (String) iter.next();
-				communes.addMenuElement((String) iCommuneMap.get(commune), commune);
+				communes.addMenuElement((String) this.iCommuneMap.get(commune), commune);
 			}
 
 			Layer formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
 			Label label = new Label(communes);
-			label.add(new Text(iwrb.getLocalizedString(COMMUNE_KEY, COMMUNE_DEFAULT)));
+			label.add(new Text(this.iwrb.getLocalizedString(COMMUNE_KEY, COMMUNE_DEFAULT)));
 			formItem.add(label);
 			formItem.add(communes);
 			section.add(formItem);
@@ -187,7 +187,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		Label label = new Label(personalID);
-		label.add(new Text(iwrb.getLocalizedString(SSN_KEY, SSN_DEFAULT)));
+		label.add(new Text(this.iwrb.getLocalizedString(SSN_KEY, SSN_DEFAULT)));
 		label.add(required);
 		formItem.add(label);
 		formItem.add(personalID);
@@ -196,7 +196,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		label = new Label(email);
-		label.add(new Text(iwrb.getLocalizedString(EMAIL_KEY, EMAIL_DEFAULT)));
+		label.add(new Text(this.iwrb.getLocalizedString(EMAIL_KEY, EMAIL_DEFAULT)));
 		label.add(required);
 		formItem.add(label);
 		formItem.add(email);
@@ -205,7 +205,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		label = new Label(emailRepeat);
-		label.add(new Text(iwrb.getLocalizedString(EMAIL_KEY_REPEAT, EMAIL_REPEAT_DEFAULT)));
+		label.add(new Text(this.iwrb.getLocalizedString(EMAIL_KEY_REPEAT, EMAIL_REPEAT_DEFAULT)));
 		label.add(required);
 		formItem.add(label);
 		formItem.add(emailRepeat);
@@ -213,14 +213,14 @@ public class CitizenAccountApplication extends CitizenBlock {
 		
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		label = new Label(iwrb.getLocalizedString(PHONE_CELL_KEY, PHONE_CELL_DEFAULT), mobile);
+		label = new Label(this.iwrb.getLocalizedString(PHONE_CELL_KEY, PHONE_CELL_DEFAULT), mobile);
 		formItem.add(label);
 		formItem.add(mobile);
 		section.add(formItem);
 		
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		label = new Label(iwrb.getLocalizedString(PHONE_HOME_KEY, PHONE_HOME_DEFAULT), homePhone);
+		label = new Label(this.iwrb.getLocalizedString(PHONE_HOME_KEY, PHONE_HOME_DEFAULT), homePhone);
 		formItem.add(label);
 		formItem.add(homePhone);
 		section.add(formItem);
@@ -232,7 +232,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		Paragraph paragraph = new Paragraph();
 		paragraph.setStyleClass("requiredInfo");
 		paragraph.add(required);
-		paragraph.add(new Text(iwrb.getLocalizedString("required_information", "Required information")));
+		paragraph.add(new Text(this.iwrb.getLocalizedString("required_information", "Required information")));
 		form.add(paragraph);
 
 		Layer buttonLayer = new Layer(Layer.DIV);
@@ -240,7 +240,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		form.add(buttonLayer);
 		
 		Layer span = new Layer(Layer.SPAN);
-		span.add(new Text(iwrb.getLocalizedString(SIMPLE_FORM_SUBMIT_KEY + "_button", SIMPLE_FORM_SUBMIT_DEFAULT)));
+		span.add(new Text(this.iwrb.getLocalizedString(SIMPLE_FORM_SUBMIT_KEY + "_button", SIMPLE_FORM_SUBMIT_DEFAULT)));
 		Link send = new Link(span);
 		send.setToFormSubmit(form);
 		buttonLayer.add(send);
@@ -249,7 +249,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 	}
 
 	private void submitSimpleForm(IWContext iwc) throws RemoteException {
-		if (iwc.isParameterSet(COMMUNE_KEY) && iForwardToURL) {
+		if (iwc.isParameterSet(COMMUNE_KEY) && this.iForwardToURL) {
 			iwc.forwardToURL(getParentPage(), iwc.getParameter(COMMUNE_KEY), true);
 			return;
 		}
@@ -260,22 +260,22 @@ public class CitizenAccountApplication extends CitizenBlock {
 		Collection errors = new ArrayList();
 		
 		if (ssn == null ||ssn.length() == 0) {
-			errors.add(iwrb.getLocalizedString("must_provide_personal_id", "You have to enter a personal ID."));
+			errors.add(this.iwrb.getLocalizedString("must_provide_personal_id", "You have to enter a personal ID."));
 			hasErrors = true;
 		}
 		else if (!SocialSecurityNumber.isValidIcelandicSocialSecurityNumber(ssn)) {
-			errors.add(iwrb.getLocalizedString("not_a_valid_personal_id", "The personal ID you've entered is not valid."));
+			errors.add(this.iwrb.getLocalizedString("not_a_valid_personal_id", "The personal ID you've entered is not valid."));
 			hasErrors = true;
 		}
 		if (!isValidAge(iwc, ssn)) { 
 			Object[] arguments = { iwc.getApplicationSettings().getProperty(ATTRIBUTE_VALID_ACCOUNT_AGE, String.valueOf(18)) };
-			errors.add(MessageFormat.format(iwrb.getLocalizedString(NOT_VALID_ACCOUNT_AGE_KEY, NOT_VALID_ACCOUNT_AGE_DEFAULT), arguments));
+			errors.add(MessageFormat.format(this.iwrb.getLocalizedString(NOT_VALID_ACCOUNT_AGE_KEY, NOT_VALID_ACCOUNT_AGE_DEFAULT), arguments));
 			hasErrors = true;
 		}
 		
 		String email = iwc.getParameter(EMAIL_KEY).toString();
 		if (email == null || email.length() == 0) {
-			errors.add(iwrb.getLocalizedString("email_can_not_be_empty", "You must provide a valid e-mail address"));
+			errors.add(this.iwrb.getLocalizedString("email_can_not_be_empty", "You must provide a valid e-mail address"));
 			hasErrors = true;
 		}
 		
@@ -288,7 +288,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		boolean userHasLogin = false;
 		Collection userLoginError = new ArrayList();
 		if (user == null && (ssn != null && SocialSecurityNumber.isValidIcelandicSocialSecurityNumber(ssn))) {
-			errors.add(iwrb.getLocalizedString(UNKNOWN_CITIZEN_KEY, UNKNOWN_CITIZEN_DEFAULT));
+			errors.add(this.iwrb.getLocalizedString(UNKNOWN_CITIZEN_KEY, UNKNOWN_CITIZEN_DEFAULT));
 			hasErrors = true;
 		}
 		else {
@@ -317,7 +317,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 				}
 				
 				if (!inCorrectCommune){
-					errors.add(iwrb.getLocalizedString(ERROR_APPLYING_FOR_WRONG_COMMUNE, ERROR_APPLYING_FOR_WRONG_COMMUNE_DEFAULT));
+					errors.add(this.iwrb.getLocalizedString(ERROR_APPLYING_FOR_WRONG_COMMUNE, ERROR_APPLYING_FOR_WRONG_COMMUNE_DEFAULT));
 					hasErrors = true;
 				}
 			}
@@ -326,7 +326,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 				Collection logins = new ArrayList();
 				logins.addAll(getLoginTableHome().findLoginsForUser(user));
 				if (!logins.isEmpty()) { 
-					userLoginError.add(iwrb.getLocalizedString(USER_ALLREADY_HAS_A_LOGIN_KEY, USER_ALLREADY_HAS_A_LOGIN_DEFAULT));
+					userLoginError.add(this.iwrb.getLocalizedString(USER_ALLREADY_HAS_A_LOGIN_KEY, USER_ALLREADY_HAS_A_LOGIN_DEFAULT));
 					hasErrors = true;
 					userHasLogin = true;
 				}	
@@ -337,7 +337,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 			
 			if (email != null && email.length() > 0) {
 				if (emailRepeat == null || !email.equals(emailRepeat)) {
-					errors.add(iwrb.getLocalizedString(ERROR_EMAILS_DONT_MATCH, ERROR_EMAILS_DONT_MATCH_DEFAULT));
+					errors.add(this.iwrb.getLocalizedString(ERROR_EMAILS_DONT_MATCH, ERROR_EMAILS_DONT_MATCH_DEFAULT));
 					hasErrors = true;
 				}
 			}
@@ -345,13 +345,13 @@ public class CitizenAccountApplication extends CitizenBlock {
 			try {
 				if (!hasErrors) {
 					if (null == business.insertApplication(iwc, user, ssn, email, phoneHome, phoneWork, true)) {
-						errors.add(iwrb.getLocalizedString(ERROR_NO_INSERT_KEY, ERROR_NO_INSERT_KEY));
+						errors.add(this.iwrb.getLocalizedString(ERROR_NO_INSERT_KEY, ERROR_NO_INSERT_KEY));
 						hasErrors = true;
 					}
 				}
 			}
 			catch (UserHasLoginException e) {
-				errors.add(iwrb.getLocalizedString(USER_ALLREADY_HAS_A_LOGIN_KEY, USER_ALLREADY_HAS_A_LOGIN_DEFAULT));
+				errors.add(this.iwrb.getLocalizedString(USER_ALLREADY_HAS_A_LOGIN_KEY, USER_ALLREADY_HAS_A_LOGIN_DEFAULT));
 				hasErrors = true;
 			}
 		}
@@ -365,7 +365,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 			header.setStyleClass("header");
 			add(header);
 			
-			Heading1 heading = new Heading1(iwrb.getLocalizedString("citizen_registration", "Citizen registration"));
+			Heading1 heading = new Heading1(this.iwrb.getLocalizedString("citizen_registration", "Citizen registration"));
 			header.add(heading);
 			
 			Layer layer = new Layer(Layer.DIV);
@@ -377,15 +377,15 @@ public class CitizenAccountApplication extends CitizenBlock {
 			
 			String serverName = iwc.getApplicationSettings().getProperty("server_name", "");
 
-			heading = new Heading1(iwrb.getLocalizedString(TEXT_APPLICATION_SUBMITTED_KEY + (serverName.length() > 0 ? ("_" + serverName) : ""), TEXT_APPLICATION_SUBMITTED_DEFAULT));
+			heading = new Heading1(this.iwrb.getLocalizedString(TEXT_APPLICATION_SUBMITTED_KEY + (serverName.length() > 0 ? ("_" + serverName) : ""), TEXT_APPLICATION_SUBMITTED_DEFAULT));
 			layer.add(heading);
 			
-			layer.add(new Text(iwrb.getLocalizedString(TEXT_APPLICATION_SUBMITTED_KEY + "_text" + (serverName.length() > 0 ? ("_" + serverName) : ""), TEXT_APPLICATION_SUBMITTED_DEFAULT + " info")));
+			layer.add(new Text(this.iwrb.getLocalizedString(TEXT_APPLICATION_SUBMITTED_KEY + "_text" + (serverName.length() > 0 ? ("_" + serverName) : ""), TEXT_APPLICATION_SUBMITTED_DEFAULT + " info")));
 			
 			add(layer);
 			
-			if (iPage != null) {
-				iwc.forwardToIBPage(getParentPage(), iPage, iRedirectDelay, false);
+			if (this.iPage != null) {
+				iwc.forwardToIBPage(getParentPage(), this.iPage, this.iRedirectDelay, false);
 			}
 		}
 	}
@@ -395,7 +395,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 	 * @return a comma seperated values string with unique ids of communes in the IC_COMMUNE table
 	 */
 	public String getCommuneUniqueIdsCSV() {
-		return communeUniqueIdsCSV;
+		return this.communeUniqueIdsCSV;
 	}
 	
 	/**
@@ -448,18 +448,18 @@ public class CitizenAccountApplication extends CitizenBlock {
 	}
 
 	public void setPage(ICPage page) {
-		iPage = page;
+		this.iPage = page;
 	}
 	
 	public void setRedirectDelay(int redirectDelay) {
-		iRedirectDelay = redirectDelay;
+		this.iRedirectDelay = redirectDelay;
 	}
 	
 	public void setCommunePage(String name, String URL) {
-		if (iCommuneMap == null) {
-			iCommuneMap = new HashMap();
+		if (this.iCommuneMap == null) {
+			this.iCommuneMap = new HashMap();
 		}
-		iCommuneMap.put(name, URL);
-		iForwardToURL = true;
+		this.iCommuneMap.put(name, URL);
+		this.iForwardToURL = true;
 	}
 }

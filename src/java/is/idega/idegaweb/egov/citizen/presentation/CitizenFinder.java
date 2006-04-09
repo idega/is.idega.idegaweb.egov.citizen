@@ -59,11 +59,11 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 	protected IWResourceBundle iwrb;
 	
 	public void present(IWContext iwc) {
-		iwrb = getResourceBundle(iwc);
+		this.iwrb = getResourceBundle(iwc);
 		parseAction(iwc);
 		
 		add(getSearchForm(iwc));
-		if (users != null) {
+		if (this.users != null) {
 			add(getUserTable(iwc));
 		}
 	}
@@ -73,7 +73,7 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 	}
 	
 	protected String getHeading(IWContext iwc) {
-		return iwrb.getLocalizedString("citizen_finder", "Citizen finder");
+		return this.iwrb.getLocalizedString("citizen_finder", "Citizen finder");
 	}
 	
 	protected Form getSearchForm(IWContext iwc) {
@@ -106,33 +106,33 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 		
 		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		Label label = new Label(iwrb.getLocalizedString("personalID", "Personal ID"), personalID);
+		Label label = new Label(this.iwrb.getLocalizedString("personalID", "Personal ID"), personalID);
 		formItem.add(label);
 		formItem.add(personalID);
 		section.add(formItem);
 		
 		Layer helpLayer = new Layer(Layer.DIV);
 		helpLayer.setStyleClass("helperText");
-		helpLayer.add(new Text(iwrb.getLocalizedString("citizen_finder_helper_text", "Please fill in personal ID and/or names and click 'Search'.")));
+		helpLayer.add(new Text(this.iwrb.getLocalizedString("citizen_finder_helper_text", "Please fill in personal ID and/or names and click 'Search'.")));
 		section.add(helpLayer);
 		
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		label = new Label(iwrb.getLocalizedString("first_name", "First name"), firstName);
+		label = new Label(this.iwrb.getLocalizedString("first_name", "First name"), firstName);
 		formItem.add(label);
 		formItem.add(firstName);
 		section.add(formItem);
 		
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		label = new Label(iwrb.getLocalizedString("middle_name", "Middle name"), middleName);
+		label = new Label(this.iwrb.getLocalizedString("middle_name", "Middle name"), middleName);
 		formItem.add(label);
 		formItem.add(middleName);
 		section.add(formItem);
 		
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
-		label = new Label(iwrb.getLocalizedString("last_name", "Last name"), lastName);
+		label = new Label(this.iwrb.getLocalizedString("last_name", "Last name"), lastName);
 		formItem.add(label);
 		formItem.add(lastName);
 		section.add(formItem);
@@ -146,7 +146,7 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 		form.add(buttonLayer);
 		
 		Layer span = new Layer(Layer.SPAN);
-		span.add(new Text(iwrb.getLocalizedString("search", "Search")));
+		span.add(new Text(this.iwrb.getLocalizedString("search", "Search")));
 		Link send = new Link(span);
 		send.setStyleClass("sendLink");
 		send.setToFormSubmit(form);
@@ -168,25 +168,25 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 		TableCell2 cell = row.createHeaderCell();
 		cell.setStyleClass("firstColumn");
 		cell.setStyleClass("name");
-		cell.add(new Text(iwrb.getLocalizedString("name","Name")));
+		cell.add(new Text(this.iwrb.getLocalizedString("name","Name")));
 
 		cell = row.createHeaderCell();
 		cell.setStyleClass("personalID");
-		cell.add(new Text(iwrb.getLocalizedString("personal_id","Personal ID")));
+		cell.add(new Text(this.iwrb.getLocalizedString("personal_id","Personal ID")));
 
 		cell = row.createHeaderCell();
 		cell.setStyleClass("address");
-		cell.add(new Text(iwrb.getLocalizedString("address","Address")));
+		cell.add(new Text(this.iwrb.getLocalizedString("address","Address")));
 		
 		cell = row.createHeaderCell();
 		cell.setStyleClass("lastColumn");
 		cell.setStyleClass("postalCode");
-		cell.add(new Text(iwrb.getLocalizedString("postal_code","Postal code")));
+		cell.add(new Text(this.iwrb.getLocalizedString("postal_code","Postal code")));
 		
 		group = table.createBodyRowGroup();
 		int iRow = 1;
 		
-		Iterator iter = users.iterator();
+		Iterator iter = this.users.iterator();
 		while (iter.hasNext()) {
 			User user = (User) iter.next();
 			
@@ -218,8 +218,8 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 			else {
 				nameLink.addParameter(PARAMETER_USER_PK, user.getPrimaryKey().toString());
 			}
-			if (iPage != null) {
-				nameLink.setPage(iPage);
+			if (this.iPage != null) {
+				nameLink.setPage(this.iPage);
 			}
 			cell.add(nameLink);
 			
@@ -272,8 +272,8 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 			pid = pid.replaceAll("-", "");
 			
 			try {
-				users = getUsers(iwc, first, middle, last, pid);
-				users = filterResults(iwc, users);
+				this.users = getUsers(iwc, first, middle, last, pid);
+				this.users = filterResults(iwc, this.users);
 			}
 			catch (RemoteException re) {
 				throw new IBORuntimeException(re);
@@ -324,6 +324,6 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 	}
 	
 	public void setResponsePage(ICPage page) {
-		iPage = page;
+		this.iPage = page;
 	}
 }
