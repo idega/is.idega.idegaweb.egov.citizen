@@ -30,53 +30,37 @@ import se.idega.idegaweb.commune.account.data.AccountApplication;
 import com.idega.core.accesscontrol.business.LoginCreateException;
 import com.idega.core.accesscontrol.data.LoginTable;
 import com.idega.core.accesscontrol.data.PasswordNotKnown;
+import com.idega.core.idgenerator.business.IdGenerator;
+import com.idega.core.idgenerator.business.IdGeneratorFactory;
 import com.idega.data.IDOCreateException;
 import com.idega.user.data.User;
 import com.idega.util.FileUtil;
 import com.idega.util.IWTimestamp;
-import com.idega.xml.XMLDocType;
-import com.idega.xml.XMLDocument;
-import com.idega.xml.XMLElement;
-import com.idega.xml.XMLOutput;
 
 public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 		implements WSCitizenAccountBusiness, CitizenAccountBusiness, CallbackHandler {
 
-	protected static final String SEND_REGISTRATION_TO_BANK = "SEND_REGISTRATION_TO_BANK";
+	protected static final String BANK_SEND_REGISTRATION = "BANK_SEND_REGISTRATION";
 	
-	protected static final String SERVICE_URL = "https://ws-test.isb.is/adgerdirv1/birtingakerfi.asmx";
+	protected static final String BANK_SENDER_PIN = "BANK_SENDER_PIN";
 	
-	private static final String TEST_USER_ID = "idegatest";
-	
-	private static final String TEST_USER_PW = "iwccJi432s";
-	
-	private static final String XML_ROOT = "XML-S";
-	
-	private static final String XML_STATEMENT = "Statement";
-	
-	private static final String XML_STATEMENT_ACCT = "Acct";
-	
-	private static final String XML_STATEMENT_DATE = "Date";
-	
-	private static final String XML_STATEMENT_XKEY = "XKey";
-	
-	private static final String XML_SECTION = "Section";
+	protected static final String BANK_SENDER_USER_ID = "BANK_SENDER_USER_ID";
 
-	private static final String XML_SECTION_NAME = "Name";
-
-	private static final String XML_SECTION_OCC = "Occ";
+	protected static final String BANK_SENDER_USER_PASSWORD = "BANK_SENDER_USER_PW";
 	
-	private static final String XML_FIELD = "Field";
+	protected static final String BANK_SENDER_PAGELINK = "BANK_SENDER_PAGELINK";
 
-	private static final String XML_FIELD_NAME = "NAME";
+	protected static final String BANK_SENDER_LOGOLINK = "BANK_SENDER_LOGOLINK";
+
+	protected static final String BANK_SENDER_TYPE = "BANK_SENDER_TYPE";
+
+	protected static final String SERVICE_URL = "https://ws.isb.is/adgerdirv1/birtingakerfi.asmx";
 	
-	private static final String XML_FIELD_NAME_USERNAME = "UserName";
-
-	private static final String XML_FIELD_NAME_PASSWORD = "Password";
-
-	private static final String XML_FIELD_NAME_PAGELINK = "PageLink";
-
-	private static final String XML_FIELD_NAME_LOGO = "Logo";
+//	private static final String SENDER_USER_ID = "sunnan3";
+	
+//	private static final String SENDER_USER_PW = "j1hQ5U2b";
+	
+//	private static final String SENDER_USER_PIN = "6505982029";
 
 	/**
 	 * Creates a Login for a user with application theCase and send a message to
@@ -115,11 +99,22 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 
 			String sendMessageToBank = getIWApplicationContext()
 					.getApplicationSettings().getProperty(
-							SEND_REGISTRATION_TO_BANK, "false");
+							BANK_SEND_REGISTRATION, "false");
 			
 			if (!"false".equals(sendMessageToBank)) {
-				String xml = getXML(login, password, "pagelink", "logolink");
-				encodeAndSendXML(xml, "filename", citizen.getPersonalID());
+				String pageLink = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_PAGELINK);
+				String logoLink = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_LOGOLINK);
+				String ssn = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_PIN);
+				String user3 = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_TYPE);
+				String xml = getXML(login, password, pageLink, logoLink, citizen.getPrimaryKey().toString(), citizen.getPersonalID(), user3);
+				
+				StringBuffer filename = new StringBuffer(user3.toLowerCase());
+				filename.append("sunnan3");
+				IdGenerator uidGenerator = IdGeneratorFactory.getUUIDGenerator();
+				filename.append(uidGenerator.generateId());
+				filename.append(".xml");
+				
+				encodeAndSendXML(xml, filename.toString(), ssn);
 			}
 			else if (createUserMessage) {
 				this.getMessageBusiness().createUserMessage(citizen,
@@ -134,79 +129,60 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 		}
 	}
 
-	private String getXML(String login, String password, String pageLink, String logo) {
-		/*
-		<?xml version="1.0" encoding="iso-8859-1"?>
-		<!DOCTYPE XML-S SYSTEM "XML-S.dtd"[]>
-		<XML-S>
-			<Statement Acct="56789012341234567890" Date="2006/03/30" XKey="267">
-				<?bgls.BlueGill.com DefinitionName=idega.is?>
-				<?bgls.BlueGill.com User1=1234567890?>
-				<?bgls.BlueGill.com User3=ABCD-001?>
-				<?bgls.BlueGill.com User4=56789012341234567890267?>
-				<Section Name="IDEGA" Occ="1">
-					<Field Name="UserName">1234567890</Field>
-					<Field Name="Password">1234abcd</Field>
-					<Field Name="PageLink">http://www.sunnan3.is/</Field>
-					<Field Name="Logo">http://www.sunnan3.is/logo.jpg</Field>
-		        </Section>
-	         </Statement>
-	     </XML-S>
-		 */
+	private String getXML(String login, String password, String pageLink, String logo, String xkey, String user1, String user3) {
 		
-		XMLDocType type = new XMLDocType("XML-S", "XML-S.dtd");
-		XMLDocument doc = new XMLDocument(new XMLElement(XML_ROOT), type);
-
-		XMLElement root = doc.getRootElement();
-		XMLElement statement = new XMLElement(XML_STATEMENT);
-		statement.setAttribute(XML_STATEMENT_ACCT, "1233453");
-		statement.setAttribute(XML_STATEMENT_DATE, IWTimestamp.RightNow().getDateString("yyyy/MM/dd"));
-		statement.setAttribute(XML_STATEMENT_XKEY, "123");
-		root.addContent(statement);
+		String pin = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_PIN);
 		
-		//XMLElement bgls1 = new XMLElement(XML_BGLS);
+		String definitionName = "idega.is";
+		String acct = pin + user1;
+		user3 = user3 + "-001";
+		String user4 = acct + xkey;
 		
-		XMLElement section = new XMLElement(XML_SECTION);
-		section.setAttribute(XML_SECTION_NAME, "IDEGA");
-		section.setAttribute(XML_SECTION_OCC, "1");
-		statement.addContent(section);
-		
-		XMLElement field1 = new XMLElement(XML_FIELD);
-		field1.setAttribute(XML_FIELD_NAME, XML_FIELD_NAME_USERNAME);
-		field1.addContent(login);
+		StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
+		xml.append("<!DOCTYPE XML-S SYSTEM \"XML-S.dtd\"[]>\n");
+		xml.append("<XML-S>\n");
+		xml.append("\t<Statement Acct=\"");
+		xml.append(acct);
+		xml.append("\" Date=\"");
+		xml.append(IWTimestamp.RightNow().getDateString("yyyy/MM/dd"));
+		xml.append("\" XKey=\"");
+		xml.append(xkey);
+		xml.append("\">\n");
+		xml.append("\t\t<?bgls.BlueGill.com DefinitionName=");
+		xml.append(definitionName);
+		xml.append("?>\n");
+		xml.append("\t\t<?bgls.BlueGill.com User1=");
+		xml.append(user1);
+		xml.append("?>\n");
+		xml.append("\t\t<?bgls.BlueGill.com User3=");
+		xml.append(user3);
+		xml.append("?>\n");
+		xml.append("\t\t<?bgls.BlueGill.com User4=");
+		xml.append(user4);
+		xml.append("?>\n");
+		xml.append("\t\t<Section Name=\"IDEGA\" Occ=\"1\">\n");
+		xml.append("\t\t\t<Field Name=\"UserName\">");
+		xml.append(login);
+		xml.append("</Field>\n");
+		xml.append("\t\t\t<Field Name=\"Password\">");
+		xml.append(password);
+		xml.append("</Field>\n");
+		xml.append("\t\t\t<Field Name=\"PageLink\">");
+		xml.append(pageLink);
+		xml.append("</Field>\n");
+		xml.append("\t\t\t<Field Name=\"Logo\">");
+		xml.append(logo);
+		xml.append("</Field>\n");
+		xml.append("\t\t</Section>\n");
+		xml.append("\t</Statement>\n");
+		xml.append("</XML-S>");
 
-		XMLElement field2 = new XMLElement(XML_FIELD);
-		field2.setAttribute(XML_FIELD_NAME, XML_FIELD_NAME_PASSWORD);
-		field2.addContent(password);
-
-		XMLElement field3 = new XMLElement(XML_FIELD);
-		field3.setAttribute(XML_FIELD_NAME, XML_FIELD_NAME_PAGELINK);
-		field3.addContent(pageLink);
-
-		XMLElement field4 = new XMLElement(XML_FIELD);
-		field4.setAttribute(XML_FIELD_NAME, XML_FIELD_NAME_LOGO);
-		field4.addContent(logo);
-
-		section.addContent(field1);
-		section.addContent(field2);
-		section.addContent(field3);
-		section.addContent(field4);
-		
-		try {
-			XMLOutput output = new XMLOutput();
-			output.setLineSeparator(System.getProperty("line.separator"));
-			output.setTextNormalize(true);
-			output.setEncoding("ISO-8859-1");
-			output.setSkipEncoding(false);
-			return output.outputString(doc);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return null;
+		return xml.toString();
 	}
 
 	private void encodeAndSendXML(String xml, String filename, String personalID) {
+		String userId = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_USER_ID);
+		
 		try {
 			StringBuffer file = new StringBuffer(getBundle().getResourcesRealPath());
 			file.append(FileUtil.getFileSeparator());
@@ -222,7 +198,7 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 					WSHandlerConstants.USERNAME_TOKEN);
 			stub._setProperty(WSHandlerConstants.PASSWORD_TYPE,
 					WSConstants.PW_TEXT);
-			stub._setProperty(WSHandlerConstants.USER, TEST_USER_ID);
+			stub._setProperty(WSHandlerConstants.USER, userId);
 			stub._setProperty(WSHandlerConstants.PW_CALLBACK_CLASS, this.getClass().getName());
 
 			port.sendaSkra(filename, Base64.encode(xml.getBytes()), personalID);
@@ -239,20 +215,14 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 
 	public void handle(Callback[] callbacks)
 			throws UnsupportedCallbackException {
+		String userId = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_USER_ID);
+		String passwd = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_USER_PASSWORD);
 
 		for (int i = 0; i < callbacks.length; i++) {
-			System.out.println("callbacks.class = "
-					+ callbacks[i].getClass().getName());
 			if (callbacks[i] instanceof WSPasswordCallback) {
 				WSPasswordCallback pc = (WSPasswordCallback) callbacks[i];
-				/*
-				 * here call a function/method to lookup the password for the
-				 * given identifier (e.g. a user name or keystore alias) e.g.:
-				 * pc.setPassword(passStore.getPassword(pc.getIdentfifier)) for
-				 * testing we supply a fixed name/fixed key here.
-				 */
-				if (pc.getIdentifer().equals(TEST_USER_ID)) {
-					pc.setPassword(TEST_USER_PW);
+				if (pc.getIdentifer().equals(userId)) {
+					pc.setPassword(passwd);
 				}
 			} else {
 				throw new UnsupportedCallbackException(callbacks[i],
@@ -261,9 +231,15 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 		}
 	}
 
-	public static void main(String args[]) {
+/*	public static void main(String args[]) {
 		WSCitizenAccountBusinessBean bean = new WSCitizenAccountBusinessBean();
-		String xml = bean.getXML("1234567890","1234abcd", "http://www.sunnan3.is/", "http://www.sunnan3.is/logo.jpg");
-		System.out.println("xml = " + xml);
-	}
+		
+		String xml = bean.getXML("steina","stud", "http://www.sunnan3.is/", "https://www.sunnan3.is/content/files/public/sunnan3_logo.jpg", "54321", "1306635919", "SARP");
+		StringBuffer filename = new StringBuffer("sarpsunnan3");
+		IdGenerator uidGenerator = IdGeneratorFactory.getUUIDGenerator();
+		filename.append(uidGenerator.generateId());
+		filename.append(".xml");
+		
+		bean.encodeAndSendXML(xml, filename.toString(), SENDER_USER_PIN);
+	}*/
 }
