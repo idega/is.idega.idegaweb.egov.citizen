@@ -101,11 +101,20 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 					.getApplicationSettings().getProperty(
 							BANK_SEND_REGISTRATION, "false");
 			
+			System.out.println("sendMessageToBank = " + sendMessageToBank);
+			
 			if (!"false".equals(sendMessageToBank)) {
 				String pageLink = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_PAGELINK);
 				String logoLink = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_LOGOLINK);
 				String ssn = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_PIN);
 				String user3 = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_TYPE);
+
+				System.out.println("pageLink = " + pageLink);
+				System.out.println("logoLink = " + logoLink);
+				System.out.println("ssn = " + ssn);
+				System.out.println("user3 = " + user3);
+
+				
 				String xml = getXML(login, password, pageLink, logoLink, citizen.getPrimaryKey().toString(), citizen.getPersonalID(), user3);
 				
 				StringBuffer filename = new StringBuffer(user3.toLowerCase());
@@ -113,6 +122,8 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 				IdGenerator uidGenerator = IdGeneratorFactory.getUUIDGenerator();
 				filename.append(uidGenerator.generateId());
 				filename.append(".xml");
+
+				System.out.println("filename = " + filename.toString());
 				
 				encodeAndSendXML(xml, filename.toString(), ssn);
 			}
@@ -132,6 +143,8 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 	private String getXML(String login, String password, String pageLink, String logo, String xkey, String user1, String user3) {
 		
 		String pin = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_PIN);
+		System.out.println("pin = " + pin);
+
 		
 		String definitionName = "idega.is";
 		String acct = pin + user1;
@@ -182,6 +195,7 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 
 	private void encodeAndSendXML(String xml, String filename, String personalID) {
 		String userId = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_USER_ID);
+		System.out.println("userId = " + userId);
 		
 		try {
 			StringBuffer file = new StringBuffer(getBundle().getResourcesRealPath());
@@ -217,6 +231,8 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 			throws UnsupportedCallbackException {
 		String userId = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_USER_ID);
 		String passwd = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_USER_PASSWORD);
+		System.out.println("userId = " + userId);
+		System.out.println("passwd = " + passwd);
 
 		for (int i = 0; i < callbacks.length; i++) {
 			if (callbacks[i] instanceof WSPasswordCallback) {
