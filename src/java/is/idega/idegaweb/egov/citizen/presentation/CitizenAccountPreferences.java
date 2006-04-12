@@ -444,7 +444,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		boolean removeImage = iwc.isParameterSet(PARAMETER_REMOVE_IMAGE);
 
 		boolean updateEmail = false;
-		boolean updateCOAddress = false;
+		boolean updateCOAddress = true;
 
 		if (sEmail != null) {
 			updateEmail = EmailValidator.getInstance().validateEmail(sEmail);
@@ -463,20 +463,17 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		}
 		
 		// Validate c/o-address
-		if (useCOAddress) {
-			if (coStreetAddress.equals("")) {
-				errors.add(this.iwrb.getLocalizedString(KEY_CO_STREET_ADDRESS_MISSING, DEFAULT_CO_STREET_ADDRESS_MISSING));
-				hasErrors = true;
-			}
-			if (coPostalCode.equals("")) {
-				errors.add(this.iwrb.getLocalizedString(KEY_CO_POSTAL_CODE_MISSING, DEFAULT_CO_POSTAL_CODE_MISSING));
-				hasErrors = true;
-			}
-			if (coCity.equals("")) {
-				errors.add(this.iwrb.getLocalizedString(KEY_CO_CITY_MISSING, DEFAULT_CO_CITY_MISSING));
-				hasErrors = true;
-			}
-			updateCOAddress = true;
+		if (coStreetAddress.equals("")) {
+			errors.add(this.iwrb.getLocalizedString(KEY_CO_STREET_ADDRESS_MISSING, DEFAULT_CO_STREET_ADDRESS_MISSING));
+			hasErrors = true;
+		}
+		if (coPostalCode.equals("")) {
+			errors.add(this.iwrb.getLocalizedString(KEY_CO_POSTAL_CODE_MISSING, DEFAULT_CO_POSTAL_CODE_MISSING));
+			hasErrors = true;
+		}
+		if (coCity.equals("")) {
+			errors.add(this.iwrb.getLocalizedString(KEY_CO_CITY_MISSING, DEFAULT_CO_CITY_MISSING));
+			hasErrors = true;
 		}
 
 		if (!hasErrors) {
