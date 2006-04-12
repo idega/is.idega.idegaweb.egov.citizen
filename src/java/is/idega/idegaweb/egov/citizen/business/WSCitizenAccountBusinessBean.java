@@ -198,7 +198,7 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 		System.out.println("userId = " + userId);
 		
 		try {
-			StringBuffer file = new StringBuffer(getBundle().getResourcesRealPath());
+			StringBuffer file = new StringBuffer(this.getIWMainApplication().getBundle("is.idega.idegaweb.egov.citizen").getResourcesRealPath());
 			file.append(FileUtil.getFileSeparator());
 			file.append("client_deploy.wsdd");
 			
