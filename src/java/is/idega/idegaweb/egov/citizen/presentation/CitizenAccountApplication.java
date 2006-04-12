@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import se.idega.idegaweb.commune.account.citizen.business.CitizenAccountBusiness;
+//import se.idega.idegaweb.commune.account.citizen.business.CitizenAccountBusiness;
 
 import com.idega.business.IBOLookup;
 import com.idega.core.accesscontrol.business.UserHasLoginException;
@@ -282,7 +282,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		String emailRepeat = iwc.getParameter(EMAIL_KEY_REPEAT).toString();
 		String phoneHome = iwc.getParameter(PHONE_HOME_KEY).toString();
 		String phoneWork = iwc.getParameter(PHONE_CELL_KEY).toString();
-		CitizenAccountBusiness business = (CitizenAccountBusiness) IBOLookup.getServiceInstance(iwc, CitizenAccountBusiness.class);
+		WSCitizenAccountBusiness business = getBusiness(iwc);
 		User user = business.getUserIcelandic(ssn);
 		
 		boolean userHasLogin = false;
