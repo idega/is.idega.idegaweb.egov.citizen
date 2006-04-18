@@ -174,6 +174,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 				String commune = (String) iter.next();
 				communes.addMenuElement((String) this.iCommuneMap.get(commune), commune);
 			}
+			communes.addMenuElementFirst("", this.iwrb.getLocalizedString("select_commune", "Select commune"));
 
 			Layer formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
@@ -250,7 +251,12 @@ public class CitizenAccountApplication extends CitizenBlock {
 
 	private void submitSimpleForm(IWContext iwc) throws RemoteException {
 		if (iwc.isParameterSet(COMMUNE_KEY) && this.iForwardToURL) {
-			iwc.forwardToURL(getParentPage(), iwc.getParameter(COMMUNE_KEY), true);
+			String URL = iwc.getParameter(COMMUNE_KEY);
+			String query = iwc.getQueryString();
+			if (query.indexOf("?") == -1) {
+				query = "?" + query;
+			}
+			iwc.sendRedirect(URL + query);
 			return;
 		}
 		
