@@ -105,7 +105,7 @@ public class ForgottenPassword extends CitizenBlock {
 				
 				while (enumeration.hasMoreElements()) {
 					String element = (String) enumeration.nextElement();
-					query.append(element).append("=").append(iwc.getParameter(iwc.getParameter(element)));
+					query.append(element).append("=").append(iwc.getParameter(element));
 					if (enumeration.hasMoreElements()) {
 						query.append("&");
 					}
