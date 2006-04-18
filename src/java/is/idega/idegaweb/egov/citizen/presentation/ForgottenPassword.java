@@ -3,6 +3,7 @@ package is.idega.idegaweb.egov.citizen.presentation;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -97,11 +98,20 @@ public class ForgottenPassword extends CitizenBlock {
 	private void submitForm(IWContext iwc) {
 		if (iwc.isParameterSet(COMMUNE_KEY) && this.iForwardToURL) {
 			String URL = iwc.getParameter(COMMUNE_KEY);
-			String query = iwc.getQueryString();
-			if (query.indexOf("?") == -1) {
-				query = "?" + query;
+			StringBuffer query = new StringBuffer();
+			Enumeration enumeration = iwc.getParameterNames();
+			if (enumeration != null) {
+				query.append("?");
+				
+				while (enumeration.hasMoreElements()) {
+					String element = (String) enumeration.nextElement();
+					query.append(element).append("=").append(iwc.getParameter(iwc.getParameter(element)));
+					if (enumeration.hasMoreElements()) {
+						query.append("&");
+					}
+				}
 			}
-			iwc.sendRedirect(URL + query);
+			iwc.sendRedirect(URL + query.toString());
 			return;
 		}
 
