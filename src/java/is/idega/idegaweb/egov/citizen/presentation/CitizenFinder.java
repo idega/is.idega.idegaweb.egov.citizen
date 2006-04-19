@@ -189,6 +189,9 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 		Iterator iter = this.users.iterator();
 		while (iter.hasNext()) {
 			User user = (User) iter.next();
+			if (user.getPersonalID() == null || user.getPersonalID().length() == 0 || user.getPersonalID().indexOf("/") != -1) {
+				continue;
+			}
 			
 			Address address = null;
 			try {
