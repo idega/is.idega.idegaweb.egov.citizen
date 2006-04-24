@@ -1,25 +1,16 @@
-/**
- * 
- */
 package is.idega.idegaweb.egov.citizen.business;
 
 
-
-
+import javax.ejb.CreateException;
 import com.idega.business.IBOHomeImpl;
 
-/**
- * @author bluebottle
- *
- */
-public class WSCitizenAccountBusinessHomeImpl extends IBOHomeImpl implements
-		WSCitizenAccountBusinessHome {
-	protected Class getBeanInterfaceClass() {
+public class WSCitizenAccountBusinessHomeImpl extends IBOHomeImpl implements WSCitizenAccountBusinessHome {
+
+	public Class getBeanInterfaceClass() {
 		return WSCitizenAccountBusiness.class;
 	}
 
-	public WSCitizenAccountBusiness create() throws javax.ejb.CreateException {
+	public WSCitizenAccountBusiness create() throws CreateException {
 		return (WSCitizenAccountBusiness) super.createIBO();
 	}
-
 }

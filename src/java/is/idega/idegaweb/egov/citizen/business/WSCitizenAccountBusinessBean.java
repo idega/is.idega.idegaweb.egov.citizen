@@ -97,13 +97,10 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 
 			createUserMessage = sendEmail;
 
-			String sendMessageToBank = getIWApplicationContext()
-					.getApplicationSettings().getProperty(
-							BANK_SEND_REGISTRATION, "false");
-			
+			boolean sendMessageToBank = sendMessageToBank();
 			System.out.println("sendMessageToBank = " + sendMessageToBank);
 			
-			if (!"false".equals(sendMessageToBank)) {
+			if (sendMessageToBank) {
 				String pageLink = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_PAGELINK);
 				String logoLink = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_LOGOLINK);
 				String ssn = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_PIN);
@@ -246,6 +243,13 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 						"Unrecognized Callback");
 			}
 		}
+	}
+	
+	public boolean sendMessageToBank() {
+		return getIWApplicationContext()
+		.getApplicationSettings().getBoolean(
+				BANK_SEND_REGISTRATION, false);
+
 	}
 
 /*	public static void main(String args[]) {

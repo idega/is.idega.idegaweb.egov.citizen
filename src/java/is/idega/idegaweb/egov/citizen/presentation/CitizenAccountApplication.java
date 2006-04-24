@@ -86,6 +86,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 	protected 	final static String SSN_KEY = "personal_id";
 	private final static String TEXT_APPLICATION_SUBMITTED_DEFAULT = "Application is submitted.";
 	private final static String TEXT_APPLICATION_SUBMITTED_KEY = "application_submitted";
+	private final static String TEXT_APPLICATION_BANK_SUBMITTED_KEY = "application_bank_submitted";
 
 	private final static String USER_ALLREADY_HAS_A_LOGIN_DEFAULT = "You already have an account";
 	private final static String USER_ALLREADY_HAS_A_LOGIN_KEY = "user_already_has_an_account";
@@ -390,11 +391,12 @@ public class CitizenAccountApplication extends CitizenBlock {
 			layer.add(image);
 			
 			String serverName = iwc.getApplicationSettings().getProperty("server_name", "");
+			boolean sendMessageToBank = getBusiness(iwc).sendMessageToBank();
 
-			heading = new Heading1(this.iwrb.getLocalizedString(TEXT_APPLICATION_SUBMITTED_KEY + (serverName.length() > 0 ? ("_" + serverName) : ""), TEXT_APPLICATION_SUBMITTED_DEFAULT));
+			heading = new Heading1(this.iwrb.getLocalizedString((sendMessageToBank ? TEXT_APPLICATION_BANK_SUBMITTED_KEY : TEXT_APPLICATION_SUBMITTED_KEY) + (serverName.length() > 0 ? ("_" + serverName) : ""), TEXT_APPLICATION_SUBMITTED_DEFAULT));
 			layer.add(heading);
 			
-			layer.add(new Text(this.iwrb.getLocalizedString(TEXT_APPLICATION_SUBMITTED_KEY + "_text" + (serverName.length() > 0 ? ("_" + serverName) : ""), TEXT_APPLICATION_SUBMITTED_DEFAULT + " info")));
+			layer.add(new Text(this.iwrb.getLocalizedString((sendMessageToBank ? TEXT_APPLICATION_BANK_SUBMITTED_KEY + "_text" : TEXT_APPLICATION_SUBMITTED_KEY + "_text") + (serverName.length() > 0 ? ("_" + serverName) : ""), TEXT_APPLICATION_SUBMITTED_DEFAULT + " info")));
 			
 			add(layer);
 			
