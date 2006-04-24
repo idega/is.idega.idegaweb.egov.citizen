@@ -200,6 +200,7 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 		try {
 			StringBuffer file = new StringBuffer(this.getIWMainApplication().getBundle("is.idega.idegaweb.egov.citizen").getResourcesRealPath());
 			file.append(FileUtil.getFileSeparator());
+			//Do not change the name of this file because the stupid autodeployer will start it up otherwise.
 			file.append("deploy_client.wsdd");
 			
 			EngineConfiguration config = new FileProvider(new FileInputStream(file.toString()));
