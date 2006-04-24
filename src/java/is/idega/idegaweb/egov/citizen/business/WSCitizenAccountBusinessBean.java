@@ -200,7 +200,7 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 		try {
 			StringBuffer file = new StringBuffer(this.getIWMainApplication().getBundle("is.idega.idegaweb.egov.citizen").getResourcesRealPath());
 			file.append(FileUtil.getFileSeparator());
-			file.append("client_deploy.wsdd");
+			file.append("deploy_client.wsdd");
 			
 			EngineConfiguration config = new FileProvider(new FileInputStream(file.toString()));
 			BirtingakerfiWSLocator locator = new BirtingakerfiWSLocator(config);
