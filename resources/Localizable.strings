@@ -40,6 +40,7 @@ citizen_finder_helper_text=Please fill in personal ID and/or names and click 'Se
 citizen_preferences=Citizen preferences
 citizen_registraction_help=Please fill in your personal ID as well as your e-mail.  Your e-mail is required so that you can be contacted directly about changes to you ongoing cases.  If you don't have an e-mail account please contact the commune offices.
 citizen_registration=Citizen registration
+commmune=Commune
 commune=Commune
 email=Email
 email_can_not_be_empty=You must provide a valid e-mail address
