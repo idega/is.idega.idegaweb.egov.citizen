@@ -1,5 +1,7 @@
 account_application.example=(Example 0110012230)
 address=Address
+application_bank_submitted=Application is submitted.
+application_bank_submitted_text=Application is submitted. info
 application_errors_occured=There was a problem with the following items
 application_submitted=Application is submitted.
 application_submitted_rvk.is=Ums\u00F3kn um a\u00F0gang a\u00F0 Rafr\u00E6nni Reykjav\u00EDk er m\u00F3ttekin

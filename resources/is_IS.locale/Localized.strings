@@ -1,5 +1,7 @@
 account_application.example=(D\u00E6mi\: 0110012230)
 address=Heimilisfang
+application_bank_submitted=Ums\u00F3kn \u00FE\u00EDn um a\u00F0gang hefur veri\u00F0 afgreidd
+application_bank_submitted_text=Uppl\u00FDsingarnar hafa veri\u00F0 sendar sj\u00E1lfkrafa \u00ED heimabankann \u00FEinn. Vinsamlega skr\u00E1\u00F0u \u00FEig inn \u00ED heimabankann og \u00FEar undir Rafr\u00E6n skj\u00F6l e\u00F0a Vefskj\u00F6l finnur \u00FE\u00FA skjal me\u00F0 notandanafni og lykilor\u00F0i.<br> <br>\r\nAllir f\u00E1 einnig sent br\u00E9f \u00ED venjulegum p\u00F3sti \u00E1 skr\u00E1\u00F0 l\u00F6gheimili. Br\u00E9fi\u00F0 \u00E6tti a\u00F0 berast eftir 1-2 daga. <br> <br>\r\nEf \u00FEig vantar a\u00F0sto\u00F0 e\u00F0a hefur einhverjar spurningar vinsamlega hringdu \u00ED \u00FEj\u00F3nustuver \u00ED s\u00EDma\: 800 4000
 application_errors_occured=Eftirfarandi villa/villur komu upp
 application_submitted=Ums\u00F3kn um a\u00F0gang er m\u00F3ttekin.
 application_submitted_rvk.is=Ums\u00F3kn um a\u00F0gang a\u00F0 Rafr\u00E6nni Reykjav\u00EDk er m\u00F3ttekin
