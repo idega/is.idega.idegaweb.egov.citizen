@@ -39,7 +39,7 @@ public class ChangePassword extends CitizenBlock {
 	private final static int ACTION_VIEW_FORM = 1;
 	private final static int ACTION_FORM_SUBMIT = 2;
 
-	private final static String PARAMETER_FORM_SUBMIT = "cap_sbmt";
+	private final static String PARAMETER_FORM_SUBMIT = "cp_sbmt";
 
 	private final static String PARAMETER_CURRENT_PASSWORD = "cap_c_pw";
 	private final static String PARAMETER_NEW_PASSWORD = "cap_n_pw";
