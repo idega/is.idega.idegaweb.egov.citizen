@@ -376,9 +376,13 @@ public class CitizenAccountApplication extends CitizenBlock {
 			viewSimpleApplicationForm(iwc);
 		}
 		else {
+			Form form = new Form();
+			form.setID("accountApplicationForm");
+			form.setStyleClass("citizenForm");
+			
 			Layer header = new Layer(Layer.DIV);
 			header.setStyleClass("header");
-			add(header);
+			form.add(header);
 			
 			Heading1 heading = new Heading1(this.iwrb.getLocalizedString("citizen_registration", "Citizen registration"));
 			header.add(heading);
@@ -398,7 +402,8 @@ public class CitizenAccountApplication extends CitizenBlock {
 			
 			layer.add(new Text(this.iwrb.getLocalizedString((sendMessageToBank ? TEXT_APPLICATION_BANK_SUBMITTED_KEY + "_text" : TEXT_APPLICATION_SUBMITTED_KEY + "_text") + (serverName.length() > 0 ? ("_" + serverName) : ""), TEXT_APPLICATION_SUBMITTED_DEFAULT + " info")));
 			
-			add(layer);
+			form.add(layer);
+			add(form);
 			
 			if (this.iPage != null) {
 				iwc.forwardToIBPage(getParentPage(), this.iPage, this.iRedirectDelay, false);

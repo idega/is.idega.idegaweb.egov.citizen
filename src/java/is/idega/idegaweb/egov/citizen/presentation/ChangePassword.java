@@ -218,10 +218,13 @@ public class ChangePassword extends CitizenBlock {
 		}
 			// Ok to update password
 		if (!hasErrors) {
+			Form form = new Form();
+			form.setID("changePasswordForm");
+			form.setStyleClass("citizenForm");
 
 			Layer header = new Layer(Layer.DIV);
 			header.setStyleClass("header");
-			add(header);
+			form.add(header);
 			
 			Heading1 heading = new Heading1(this.iwrb.getLocalizedString("change_password", "Change password"));
 			header.add(heading);
@@ -262,7 +265,8 @@ public class ChangePassword extends CitizenBlock {
 				paragraph.add(link);
 			}
 			
-			add(layer);
+			form.add(layer);
+			add(form);
 		}
 		else {
 			showErrors(iwc, errors);
