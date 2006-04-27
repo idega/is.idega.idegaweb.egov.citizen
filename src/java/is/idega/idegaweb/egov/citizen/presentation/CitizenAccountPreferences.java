@@ -489,7 +489,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 				coAddress.setStreetName(coStreetAddress);
 
 				AddressBusiness addressBusiness = (AddressBusiness) IBOLookup.getServiceInstance(iwc, AddressBusiness.class);
-				Country country = addressBusiness.getCountry(coCountry);
+				Country country = addressBusiness.getCountryHome().findByPrimaryKey(new Integer(coCountry));
 				PostalCode pc = addressBusiness.getPostalCodeAndCreateIfDoesNotExist(coPostalCode, coCity, country);
 
 				coAddress.setPostalCode(pc);
