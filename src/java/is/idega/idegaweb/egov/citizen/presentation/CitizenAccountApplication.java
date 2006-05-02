@@ -252,29 +252,35 @@ public class CitizenAccountApplication extends CitizenBlock {
 	}
 
 	private void submitSimpleForm(IWContext iwc) throws RemoteException {
-		if (iwc.isParameterSet(COMMUNE_KEY) && this.iForwardToURL) {
-			String URL = iwc.getParameter(COMMUNE_KEY);
-			StringBuffer query = new StringBuffer();
-			Enumeration enumeration = iwc.getParameterNames();
-			if (enumeration != null) {
-				query.append("?");
-				
-				while (enumeration.hasMoreElements()) {
-					String element = (String) enumeration.nextElement();
-					query.append(element).append("=").append(iwc.getParameter(element));
-					if (enumeration.hasMoreElements()) {
-						query.append("&");
+		boolean hasErrors = false;
+		Collection errors = new ArrayList();
+		
+		if (this.iForwardToURL) {
+			if (iwc.isParameterSet(COMMUNE_KEY)) {
+				String URL = iwc.getParameter(COMMUNE_KEY);
+				StringBuffer query = new StringBuffer();
+				Enumeration enumeration = iwc.getParameterNames();
+				if (enumeration != null) {
+					query.append("?");
+					
+					while (enumeration.hasMoreElements()) {
+						String element = (String) enumeration.nextElement();
+						query.append(element).append("=").append(iwc.getParameter(element));
+						if (enumeration.hasMoreElements()) {
+							query.append("&");
+						}
 					}
 				}
+				iwc.sendRedirect(URL + query.toString());
+				return;
 			}
-			iwc.sendRedirect(URL + query.toString());
-			return;
+			else {
+				errors.add(this.iwrb.getLocalizedString("must_select_commune", "You have to select a commune."));
+				hasErrors = true;
+			}
 		}
 		
 		String ssn = iwc.getParameter(SSN_KEY);
-		
-		boolean hasErrors = false;
-		Collection errors = new ArrayList();
 		
 		if (ssn == null ||ssn.length() == 0) {
 			errors.add(this.iwrb.getLocalizedString("must_provide_personal_id", "You have to enter a personal ID."));
