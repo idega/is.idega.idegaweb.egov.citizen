@@ -126,7 +126,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		}
 	}
 
-	private void viewSimpleApplicationForm(IWContext iwc) {
+	private void viewSimpleApplicationForm(IWContext iwc) throws RemoteException {
 		Form form = new Form();
 		form.addParameter(SIMPLE_FORM_SUBMIT_KEY, Boolean.TRUE.toString());
 		form.setID("accountApplicationForm");
@@ -143,9 +143,11 @@ public class CitizenAccountApplication extends CitizenBlock {
 		section.setStyleClass("formSection");
 		form.add(section);
 		
+		boolean sendMessageToBank = getBusiness(iwc).sendMessageToBank();
+		
 		Layer helpLayer = new Layer(Layer.DIV);
 		helpLayer.setStyleClass("helperText");
-		helpLayer.add(new Text(this.iwrb.getLocalizedString("citizen_registraction_help", "Please fill in your personal ID as well as your e-mail.  Your e-mail is required so that you can be contacted directly about changes to you ongoing cases.  If you don't have an e-mail account please contact the commune offices.")));
+		helpLayer.add(new Text(this.iwrb.getLocalizedString(sendMessageToBank ? "citizen_registraction_bank_help" : "citizen_registraction_help", "Please fill in your personal ID as well as your e-mail.  Your e-mail is required so that you can be contacted directly about changes to you ongoing cases.  If you don't have an e-mail account please contact the commune offices.")));
 		section.add(helpLayer);
 		
 		TextInput personalID = new TextInput(SSN_KEY);
