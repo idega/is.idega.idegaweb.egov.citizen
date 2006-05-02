@@ -40,6 +40,7 @@ citizen_account.statistics=Citizen account statistics
 citizen_finder=Citizen finder
 citizen_finder_helper_text=Please fill in personal ID and/or names and click 'Search'.
 citizen_preferences=Citizen preferences
+citizen_registraction_bank_help=Please fill in your personal ID as well as your e-mail.  Your e-mail is required so that you can be contacted directly about changes to you ongoing cases.  If you don't have an e-mail account please contact the commune offices.
 citizen_registraction_help=Please fill in your personal ID as well as your e-mail.  Your e-mail is required so that you can be contacted directly about changes to you ongoing cases.  If you don't have an e-mail account please contact the commune offices.
 citizen_registration=Citizen registration
 commmune=Commune
