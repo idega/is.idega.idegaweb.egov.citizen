@@ -178,9 +178,13 @@ public class ForgottenPassword extends CitizenBlock {
 		if (!hasErrors) {
 			iwc.setSessionAttribute(hasAppliedForPsw, Boolean.TRUE.toString());
 			
+			Form form = new Form();
+			form.setID("accountApplicationForm");
+			form.setStyleClass("citizenForm");
+
 			Layer header = new Layer(Layer.DIV);
 			header.setStyleClass("header");
-			add(header);
+			form.add(header);
 			
 			Heading1 heading = new Heading1(this.iwrb.getLocalizedString("forgotten_password", "Forgotten password"));
 			header.add(heading);
@@ -197,7 +201,8 @@ public class ForgottenPassword extends CitizenBlock {
 			
 			layer.add(new Text(this.iwrb.getLocalizedString(PASSWORD_CREATED_KEY + "_text", PASSWORD_CREATED_DEFAULT + " info")));
 			
-			add(layer);
+			form.add(layer);
+			add(form);
 			
 			if (this.iPage != null) {
 				iwc.forwardToIBPage(getParentPage(), this.iPage, this.iRedirectDelay, false);
