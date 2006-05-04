@@ -114,9 +114,13 @@ public class ChangeEmail extends CitizenBlock {
 		}
 		
 		if (!hasErrors) {
+			Form form = new Form();
+			form.setID("changeEmailForm");
+			form.setStyleClass("citizenForm");
+
 			Layer header = new Layer(Layer.DIV);
 			header.setStyleClass("header");
-			add(header);
+			form.add(header);
 			
 			Heading1 heading = new Heading1(this.iwrb.getLocalizedString("change_email", "Change e-mail"));
 			header.add(heading);
@@ -157,7 +161,8 @@ public class ChangeEmail extends CitizenBlock {
 				paragraph.add(link);
 			}
 						
-			add(layer);
+			form.add(layer);
+			add(form);
 		}
 		else {
 			showErrors(iwc, errors);
@@ -181,6 +186,13 @@ public class ChangeEmail extends CitizenBlock {
 		if (user != null) {
 			LoginTable loginTable = LoginDBHandler.getUserLogin(user);
 			if (loginTable == null) {
+				Layer header = new Layer(Layer.DIV);
+				header.setStyleClass("header");
+				form.add(header);
+				
+				Heading1 heading = new Heading1(this.iwrb.getLocalizedString("change_email", "Change e-mail"));
+				header.add(heading);
+				
 				Layer layer = new Layer(Layer.DIV);
 				layer.setStyleClass("stop");
 				
@@ -188,7 +200,7 @@ public class ChangeEmail extends CitizenBlock {
 				image.setStyleClass("stopImage");
 				layer.add(image);
 				
-				Heading1 heading = new Heading1(this.iwrb.getLocalizedString("user_has_no_account", "User has no account"));
+				heading = new Heading1(this.iwrb.getLocalizedString("user_has_no_account", "User has no account"));
 				layer.add(heading);
 				
 				Paragraph paragraph = new Paragraph();
