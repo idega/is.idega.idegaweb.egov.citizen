@@ -10,6 +10,7 @@
     <project>com.idega.user</project>
     <project>org.apache.axis</project>
     <project>se.idega.idegaweb.commune</project>
+    <project>com.idega.block.web2.0</project>
   </projects>
   <buildSpec>
     <buildCommand>
