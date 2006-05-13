@@ -234,32 +234,44 @@ public class CitizenAccountPreferences extends CitizenBlock {
 			tiPhoneWork.setContent(workPhone.getNumber());
 		}
 		
-		TextInput tiCOStreetAddress = new TextInput(PARAMETER_CO_STREET_ADDRESS);
-		if (coAddress != null && coAddress.getStreetAddress() != null) {
-			tiCOStreetAddress.setContent(coAddress.getStreetAddress());
-		}
-		
-		TextInput tiCOPostalCode = new TextInput(PARAMETER_CO_POSTAL_CODE);
-		if (postal != null && postal.getPostalCode() != null) {
-			tiCOPostalCode.setValue(postal.getPostalCode());
-		}
-		
-		TextInput tiCOCity = new TextInput(PARAMETER_CO_CITY);
-		if (coAddress != null && coAddress.getCity() != null) {
-			tiCOCity.setValue(coAddress.getCity());
-		}
-		
-		CountryDropdownMenu tiCOCountry = new CountryDropdownMenu(PARAMETER_CO_COUNTRY);
-		if (postal != null && postal.getCountryID() > -1) {
-			tiCOCountry.setSelectedCountry(postal.getCountry());
-		}
-		
 		CitizenAccountSession cas = getCitizenAccountSession(iwc);
 		CheckBox useCOAddress = new CheckBox(PARAMETER_CO_ADDRESS_SELECT, "true");
 		useCOAddress.setStyleClass("checkbox");
 		useCOAddress.setChecked(cas.getIfUserUsesCOAddress());
 		useCOAddress.keepStatusOnAction(true);
 
+		TextInput tiCOStreetAddress = new TextInput(PARAMETER_CO_STREET_ADDRESS);
+		if (coAddress != null && coAddress.getStreetAddress() != null) {
+			tiCOStreetAddress.setContent(coAddress.getStreetAddress());
+		}
+		tiCOStreetAddress.setDisabled(!cas.getIfUserUsesCOAddress());
+		useCOAddress.setToDisableWhenUnchecked(tiCOStreetAddress);
+		useCOAddress.setToEnableWhenChecked(tiCOStreetAddress);
+		
+		TextInput tiCOPostalCode = new TextInput(PARAMETER_CO_POSTAL_CODE);
+		if (postal != null && postal.getPostalCode() != null) {
+			tiCOPostalCode.setValue(postal.getPostalCode());
+		}
+		tiCOPostalCode.setDisabled(!cas.getIfUserUsesCOAddress());
+		useCOAddress.setToDisableWhenUnchecked(tiCOPostalCode);
+		useCOAddress.setToEnableWhenChecked(tiCOPostalCode);
+		
+		TextInput tiCOCity = new TextInput(PARAMETER_CO_CITY);
+		if (coAddress != null && coAddress.getCity() != null) {
+			tiCOCity.setValue(coAddress.getCity());
+		}
+		tiCOCity.setDisabled(!cas.getIfUserUsesCOAddress());
+		useCOAddress.setToDisableWhenUnchecked(tiCOCity);
+		useCOAddress.setToEnableWhenChecked(tiCOCity);
+		
+		CountryDropdownMenu tiCOCountry = new CountryDropdownMenu(PARAMETER_CO_COUNTRY);
+		if (postal != null && postal.getCountryID() > -1) {
+			tiCOCountry.setSelectedCountry(postal.getCountry());
+		}
+		tiCOCountry.setDisabled(!cas.getIfUserUsesCOAddress());
+		useCOAddress.setToDisableWhenUnchecked(tiCOCountry);
+		useCOAddress.setToEnableWhenChecked(tiCOCountry);
+		
 		MessageSession messageSession = getMessageSession(iwc);
 		CheckBox messagesViaEmail = new CheckBox(PARAMETER_MESSAGES_VIA_EMAIL, "true");
 		messagesViaEmail.setStyleClass("checkbox");
@@ -444,7 +456,6 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		boolean removeImage = iwc.isParameterSet(PARAMETER_REMOVE_IMAGE);
 
 		boolean updateEmail = false;
-		boolean updateCOAddress = true;
 
 		if (sEmail != null) {
 			updateEmail = EmailValidator.getInstance().validateEmail(sEmail);
@@ -463,19 +474,21 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		}
 		
 		// Validate c/o-address
-		if (coStreetAddress.equals("")) {
-			errors.add(this.iwrb.getLocalizedString(KEY_CO_STREET_ADDRESS_MISSING, DEFAULT_CO_STREET_ADDRESS_MISSING));
-			hasErrors = true;
+		if (useCOAddress) {
+			if (coStreetAddress.equals("")) {
+				errors.add(this.iwrb.getLocalizedString(KEY_CO_STREET_ADDRESS_MISSING, DEFAULT_CO_STREET_ADDRESS_MISSING));
+				hasErrors = true;
+			}
+			if (coPostalCode.equals("")) {
+				errors.add(this.iwrb.getLocalizedString(KEY_CO_POSTAL_CODE_MISSING, DEFAULT_CO_POSTAL_CODE_MISSING));
+				hasErrors = true;
+			}
+			if (coCity.equals("")) {
+				errors.add(this.iwrb.getLocalizedString(KEY_CO_CITY_MISSING, DEFAULT_CO_CITY_MISSING));
+				hasErrors = true;
+			}
 		}
-		if (coPostalCode.equals("")) {
-			errors.add(this.iwrb.getLocalizedString(KEY_CO_POSTAL_CODE_MISSING, DEFAULT_CO_POSTAL_CODE_MISSING));
-			hasErrors = true;
-		}
-		if (coCity.equals("")) {
-			errors.add(this.iwrb.getLocalizedString(KEY_CO_CITY_MISSING, DEFAULT_CO_CITY_MISSING));
-			hasErrors = true;
-		}
-
+		
 		if (!hasErrors) {
 			UserBusiness ub = (UserBusiness) IBOLookup.getServiceInstance(iwc, UserBusiness.class);
 			if (updateEmail) {
@@ -484,7 +497,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 			ub.updateUserHomePhone(this.user, phoneHome);
 			ub.updateUserWorkPhone(this.user, phoneWork);
 			ub.updateUserMobilePhone(this.user, phoneMobile);
-			if (updateCOAddress) {
+			if (useCOAddress) {
 				Address coAddress = getCOAddress(iwc);
 				coAddress.setStreetName(coStreetAddress);
 
