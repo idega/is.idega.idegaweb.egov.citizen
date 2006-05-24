@@ -105,4 +105,5 @@ unknown_citizen=Enginn notandi finnst me\u00F0 \u00FEessa kennit\u00F6lu
 user_already_has_an_account=Notandi me\u00F0 \u00FEessa kennit\u00F6lu hefur n\u00FA \u00FEegar a\u00F0gang
 user_has_no_account=User has no account
 user_has_no_login=The user you are trying to change e-mail for doesn't have an account.
+user_has_not_logged_in=User with the personal ID you entered has never logged in.
 user_in_wrong_commune=You do not belong to the commune you are applying for according to our records and the application cannot be finished. Please contact your commune if you think this is an error.

@@ -153,12 +153,14 @@ public class ForgottenPassword extends CitizenBlock {
 		}
 		
 		if (user != null) {
+			boolean restrictLoginAccess = iwc.getApplicationSettings().getBoolean("egov.account.restrict.password.creation", true);
+			
 			LoginTable loginTable = LoginDBHandler.getUserLogin(user);
 			if (loginTable == null) {
 				errors.add(this.iwrb.getLocalizedString("no_login_found_for_user", "No login was found for the user with the personal ID you entered."));
 				hasErrors = true;
 			}
-			else {
+			else if (LoginDBHandler.hasLoggedIn(loginTable) && restrictLoginAccess) {
 				String newPassword = createNewPassword();
 				CitizenAccountBusiness business = getBusiness(iwc);
 				try {
@@ -172,6 +174,10 @@ public class ForgottenPassword extends CitizenBlock {
 					errors.add(this.iwrb.getLocalizedString("password_creation_failed", "Password creation failed."));
 					hasErrors = true;
 				}
+			}
+			else {
+				errors.add(this.iwrb.getLocalizedString("user_has_not_logged_in", "User with the personal ID you entered has never logged in."));
+				hasErrors = true;
 			}
 		}
 		
