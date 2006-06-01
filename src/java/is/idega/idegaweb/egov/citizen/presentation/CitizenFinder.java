@@ -104,17 +104,17 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 		TextInput lastName = new TextInput(PARAMETER_LAST_NAME);
 		lastName.keepStatusOnAction(true);
 		
+		Layer helpLayer = new Layer(Layer.DIV);
+		helpLayer.setStyleClass("helperText");
+		helpLayer.add(new Text(this.iwrb.getLocalizedString("citizen_finder_helper_text", "Please fill in personal ID and/or names and click 'Search'.")));
+		section.add(helpLayer);
+		
 		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		Label label = new Label(this.iwrb.getLocalizedString("personalID", "Personal ID"), personalID);
 		formItem.add(label);
 		formItem.add(personalID);
 		section.add(formItem);
-		
-		Layer helpLayer = new Layer(Layer.DIV);
-		helpLayer.setStyleClass("helperText");
-		helpLayer.add(new Text(this.iwrb.getLocalizedString("citizen_finder_helper_text", "Please fill in personal ID and/or names and click 'Search'.")));
-		section.add(helpLayer);
 		
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
