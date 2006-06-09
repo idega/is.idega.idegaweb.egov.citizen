@@ -12,8 +12,11 @@ package is.idega.idegaweb.egov.citizen.presentation;
 import java.rmi.RemoteException;
 import java.util.Collection;
 import java.util.Iterator;
+
 import javax.ejb.FinderException;
+
 import se.idega.idegaweb.commune.business.CommuneUserBusiness;
+
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.business.IBORuntimeException;
@@ -38,6 +41,7 @@ import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.TextInput;
 import com.idega.user.business.UserSession;
 import com.idega.user.data.User;
+import com.idega.util.Age;
 import com.idega.util.PersonalIDFormatter;
 import com.idega.util.text.Name;
 import com.idega.util.text.TextSoap;
@@ -53,6 +57,7 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 
 	private static final String PARAMETER_USER_PK = "cf_user_pk";
 	private static final String PARAMETER_USER_UNIQUE_ID = "cf_user_unique_id";
+	private static final String PROPERTY_MINIMUM_AGE_CITIZEN_FINDER = "citizen.finder.minimum.age";
 	
 	private ICPage iPage;
 	private Collection users;
@@ -214,15 +219,21 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 			cell.setStyleClass("name");
 			
 			Link nameLink = new Link(name.getName(iwc.getCurrentLocale()));
-			nameLink.setEventListener(this.getClass());
-			if (user.getUniqueId() != null) {
-				nameLink.addParameter(PARAMETER_USER_UNIQUE_ID, user.getUniqueId());
+			if (isOfAge(iwc, user)) {
+				nameLink.setEventListener(this.getClass());
+				if (user.getUniqueId() != null) {
+					nameLink.addParameter(PARAMETER_USER_UNIQUE_ID, user.getUniqueId());
+				}
+				else {
+					nameLink.addParameter(PARAMETER_USER_PK, user.getPrimaryKey().toString());
+				}
+				if (this.iPage != null) {
+					nameLink.setPage(this.iPage);
+				}
 			}
 			else {
-				nameLink.addParameter(PARAMETER_USER_PK, user.getPrimaryKey().toString());
-			}
-			if (this.iPage != null) {
-				nameLink.setPage(this.iPage);
+				nameLink.setURL("#");
+				nameLink.setOnClick("alert('" + this.iwrb.getLocalizedString("citizen_finder.not_of_age", "The citizen is not old enough.") + "');");
 			}
 			cell.add(nameLink);
 			
@@ -286,6 +297,19 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 	
 	protected Collection filterResults(IWContext iwc, Collection users) {
 		return users;
+	}
+	
+	protected boolean isOfAge(IWContext iwc, User user) {
+		boolean isOfAge = true;
+		if (user.getDateOfBirth() != null) {
+			Age age = new Age(user.getDateOfBirth());
+			int minimumAge = Integer.parseInt(iwc.getApplicationSettings().getProperty(PROPERTY_MINIMUM_AGE_CITIZEN_FINDER, "18"));
+			if (minimumAge > 0 && age.getYears() < minimumAge) {
+				isOfAge = false;
+			}
+		}
+		
+		return isOfAge;
 	}
 	
 	public boolean actionPerformed(IWContext iwc) {

@@ -26,6 +26,7 @@ citizen.co_street_address=A\u00F0setur\: Heimilisfang
 citizen.co_street_address_missing=\u00DEa\u00F0 ver\u00F0ur a\u00F0 skr\u00E1 heimilisfang
 citizen.current_password=N\u00FAverandi lykilor\u00F0
 citizen.email=Netfang
+citizen_finder.not_of_age=Valinn notandi er ekki n\u00F3gu gamall.  Til a\u00F0 senda inn ums\u00F3kn fyrir \u00EDb\u00FAa sem er yngri en 18 \u00E1ra \u00FEarftu a\u00F0 leita a\u00F0 foreldra/forr\u00E1\u00F0amanni vi\u00F0komandi og gera ums\u00F3knina \u00ED nafni hans.
 citizen.invalid_password=\u00D3gilt lykilor\u00F0
 citizen.messages_via_email=\u00C9g vil f\u00E1 skilabo\u00F0 me\u00F0 t\u00F6lvup\u00F3sti
 citizen.new_password=N\u00FDtt lykilor\u00F0
