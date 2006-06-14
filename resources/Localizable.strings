@@ -26,6 +26,7 @@ citizen.co_street_address=Street address c/o
 citizen.co_street_address_missing=Street address c/o must be entered.
 citizen.current_password=Current password
 citizen.email=E-mail
+citizen.email_invalid=Email address invalid.
 citizen_finder.not_of_age=The citizen is not old enough.
 citizen.invalid_password=Invalid password.
 citizen.messages_via_email=I want to get my messages via e-mail
