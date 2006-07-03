@@ -38,9 +38,9 @@ import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.ExceptionWrapper;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
+import com.idega.presentation.Span;
 import com.idega.presentation.text.Heading1;
 import com.idega.presentation.text.Link;
-import com.idega.presentation.text.Paragraph;
 import com.idega.presentation.text.Text;
 import com.idega.presentation.ui.DropdownMenu;
 import com.idega.presentation.ui.Form;
@@ -165,10 +165,6 @@ public class CitizenAccountApplication extends CitizenBlock {
 		TextInput homePhone = new TextInput(PHONE_HOME_KEY);
 		homePhone.keepStatusOnAction(true);
 		
-		Layer required = new Layer(Layer.SPAN);
-		required.setStyleClass("required");
-		required.add(new Text("*"));
-		
 		if (this.iCommuneMap != null) {
 			DropdownMenu communes = new DropdownMenu(COMMUNE_KEY);
 			Iterator iter = this.iCommuneMap.keySet().iterator();
@@ -180,8 +176,9 @@ public class CitizenAccountApplication extends CitizenBlock {
 
 			Layer formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
+			formItem.setStyleClass("required");
 			Label label = new Label(communes);
-			label.add(new Text(this.iwrb.getLocalizedString(COMMUNE_KEY, COMMUNE_DEFAULT)));
+			label.add(new Span(new Text(this.iwrb.getLocalizedString(COMMUNE_KEY, COMMUNE_DEFAULT))));
 			formItem.add(label);
 			formItem.add(communes);
 			section.add(formItem);
@@ -189,27 +186,27 @@ public class CitizenAccountApplication extends CitizenBlock {
 
 		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
+		formItem.setStyleClass("required");
 		Label label = new Label(personalID);
-		label.add(new Text(this.iwrb.getLocalizedString(SSN_KEY, SSN_DEFAULT)));
-		label.add(required);
+		label.add(new Span(new Text(this.iwrb.getLocalizedString(SSN_KEY, SSN_DEFAULT))));
 		formItem.add(label);
 		formItem.add(personalID);
 		section.add(formItem);
 		
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
+		formItem.setStyleClass("required");
 		label = new Label(email);
-		label.add(new Text(this.iwrb.getLocalizedString(EMAIL_KEY, EMAIL_DEFAULT)));
-		label.add(required);
+		label.add(new Span(new Text(this.iwrb.getLocalizedString(EMAIL_KEY, EMAIL_DEFAULT))));
 		formItem.add(label);
 		formItem.add(email);
 		section.add(formItem);
 		
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
+		formItem.setStyleClass("required");
 		label = new Label(emailRepeat);
-		label.add(new Text(this.iwrb.getLocalizedString(EMAIL_KEY_REPEAT, EMAIL_REPEAT_DEFAULT)));
-		label.add(required);
+		label.add(new Span(new Text(this.iwrb.getLocalizedString(EMAIL_KEY_REPEAT, EMAIL_REPEAT_DEFAULT))));
 		formItem.add(label);
 		formItem.add(emailRepeat);
 		section.add(formItem);
@@ -232,12 +229,6 @@ public class CitizenAccountApplication extends CitizenBlock {
 		clearLayer.setStyleClass("Clear");
 		section.add(clearLayer);
 		
-		Paragraph paragraph = new Paragraph();
-		paragraph.setStyleClass("requiredInfo");
-		paragraph.add(required);
-		paragraph.add(new Text(this.iwrb.getLocalizedString("required_information", "Required information")));
-		form.add(paragraph);
-
 		Layer buttonLayer = new Layer(Layer.DIV);
 		buttonLayer.setStyleClass("buttonLayer");
 		form.add(buttonLayer);
