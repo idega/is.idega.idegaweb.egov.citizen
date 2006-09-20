@@ -13,12 +13,15 @@ import java.rmi.RemoteException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+
 import javax.ejb.FinderException;
+
 import com.idega.business.IBOLookup;
 import com.idega.business.IBORuntimeException;
 import com.idega.core.accesscontrol.business.LoginDBHandler;
 import com.idega.core.accesscontrol.data.LoginTable;
 import com.idega.core.builder.data.ICPage;
+import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
@@ -210,6 +213,7 @@ public class ChangePassword extends CitizenBlock {
 		if (!hasErrors) {
 			try {
 				LoginDBHandler.updateLogin(((Integer)this.user.getPrimaryKey()).intValue(), login, newPassword1);
+				getUserBusiness(iwc).callAllUserGroupPluginAfterUserCreateOrUpdateMethod(this.user);
 			}
 			catch (Exception e) {
 				hasErrors = true;
@@ -274,6 +278,10 @@ public class ChangePassword extends CitizenBlock {
 		}
 	}
 	
+	protected UserBusiness getUserBusiness(IWApplicationContext iwac) throws RemoteException {
+		return (UserBusiness) IBOLookup.getServiceInstance(iwac, UserBusiness.class);
+	}
+
 	public void setMinimumPasswordLength(int length) {
 		this.MIN_PASSWORD_LENGTH = length;
 	}

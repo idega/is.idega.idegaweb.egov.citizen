@@ -5,6 +5,12 @@
   </properties>
   <body>
   
+  	<release version="1.0.4" date="2006-09-20">
+      <action dev="laddi" type="fix">
+      	Fixed so that when changing passwords all user plugins are called.
+      </action>
+    </release>
+    
   	<release version="1.0.3" date="2006-09-15">
       <action dev="laddi" type="update">
       	Translation updates.
