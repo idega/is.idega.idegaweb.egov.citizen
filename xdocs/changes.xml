@@ -5,6 +5,12 @@
   </properties>
   <body>
   
+  	<release version="1.0.6" date="2006-10-06">
+      <action dev="laddi" type="fix">
+      	Fixed error when entering a valid personal ID but no user is found.
+      </action>
+    </release>
+    
   	<release version="1.0.5" date="2006-09-27">
       <action dev="laddi" type="update">
       	Translation updates.

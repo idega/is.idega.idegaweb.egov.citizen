@@ -301,7 +301,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		
 		boolean userHasLogin = false;
 		Collection userLoginError = new ArrayList();
-		if (user == null && (ssn != null && SocialSecurityNumber.isValidIcelandicSocialSecurityNumber(ssn))) {
+		if (user == null) {
 			errors.add(this.iwrb.getLocalizedString(UNKNOWN_CITIZEN_KEY, UNKNOWN_CITIZEN_DEFAULT));
 			hasErrors = true;
 		}
