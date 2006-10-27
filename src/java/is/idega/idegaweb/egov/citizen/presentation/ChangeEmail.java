@@ -223,9 +223,13 @@ public class ChangeEmail extends CitizenBlock {
 				Heading1 heading = new Heading1(this.iwrb.getLocalizedString("change_email", "Change e-mail"));
 				header.add(heading);
 				
+				Layer contents = new Layer(Layer.DIV);
+				contents.setStyleClass("formContents");
+				form.add(contents);
+				
 				Layer section = new Layer(Layer.DIV);
 				section.setStyleClass("formSection");
-				form.add(section);
+				contents.add(section);
 				
 				Paragraph paragraph = new Paragraph();
 				paragraph.add(new Text(this.iwrb.getLocalizedString("change_email_helper_text", "Please enter the new e-mail and click 'Save'.")));
@@ -257,7 +261,7 @@ public class ChangeEmail extends CitizenBlock {
 
 				Layer buttonLayer = new Layer(Layer.DIV);
 				buttonLayer.setStyleClass("buttonLayer");
-				form.add(buttonLayer);
+				contents.add(buttonLayer);
 				
 				Layer span = new Layer(Layer.SPAN);
 				span.add(new Text(this.iwrb.getLocalizedString("save", "Save")));

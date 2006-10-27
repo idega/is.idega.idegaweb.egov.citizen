@@ -168,9 +168,13 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		Heading1 heading = new Heading1(this.iwrb.getLocalizedString("citizen_preferences", "Citizen preferences"));
 		header.add(heading);
 		
+		Layer contents = new Layer(Layer.DIV);
+		contents.setStyleClass("formContents");
+		form.add(contents);
+		
 		Layer section = new Layer(Layer.DIV);
 		section.setStyleClass("formSection");
-		form.add(section);
+		contents.add(section);
 		
 		UserBusiness ub = (UserBusiness) IBOLookup.getServiceInstance(iwc, UserBusiness.class);
 
@@ -400,7 +404,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 
 		Layer buttonLayer = new Layer(Layer.DIV);
 		buttonLayer.setStyleClass("buttonLayer");
-		form.add(buttonLayer);
+		contents.add(buttonLayer);
 		
 		Layer span = new Layer(Layer.SPAN);
 		span.add(new Text(this.iwrb.getLocalizedString(KEY_UPDATE, DEFAULT_UPDATE)));
