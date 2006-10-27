@@ -118,9 +118,13 @@ public class ChangePassword extends CitizenBlock {
 		Heading1 heading = new Heading1(this.iwrb.getLocalizedString("change_password", "Change password"));
 		header.add(heading);
 		
+		Layer contents = new Layer(Layer.DIV);
+		contents.setStyleClass("formContents");
+		form.add(contents);
+		
 		Layer section = new Layer(Layer.DIV);
 		section.setStyleClass("formSection");
-		form.add(section);
+		contents.add(section);
 		
 		Paragraph paragraph = new Paragraph();
 		paragraph.add(new Text(this.iwrb.getLocalizedString("change_password_helper_text", "Please fill in your current password and enter the new desired one.")));
@@ -162,7 +166,7 @@ public class ChangePassword extends CitizenBlock {
 
 		Layer buttonLayer = new Layer(Layer.DIV);
 		buttonLayer.setStyleClass("buttonLayer");
-		form.add(buttonLayer);
+		contents.add(buttonLayer);
 		
 		Layer span = new Layer(Layer.SPAN);
 		span.add(new Text(this.iwrb.getLocalizedString(KEY_UPDATE, DEFAULT_UPDATE)));
