@@ -239,9 +239,13 @@ public class ForgottenPassword extends CitizenBlock {
 		Heading1 heading = new Heading1(this.iwrb.getLocalizedString("forgotten_password", "Forgotten password"));
 		header.add(heading);
 		
+		Layer contents = new Layer(Layer.DIV);
+		contents.setStyleClass("formContents");
+		form.add(contents);
+		
 		Layer section = new Layer(Layer.DIV);
 		section.setStyleClass("formSection");
-		form.add(section);
+		contents.add(section);
 		
 		Paragraph paragraph = new Paragraph();
 		paragraph.add(new Text(this.iwrb.getLocalizedString("forgot_password_helper_text", "Please enter your personal ID and click 'Send'.  A new password will be created and sent to your e-mail address.")));
@@ -281,7 +285,7 @@ public class ForgottenPassword extends CitizenBlock {
 
 		Layer buttonLayer = new Layer(Layer.DIV);
 		buttonLayer.setStyleClass("buttonLayer");
-		form.add(buttonLayer);
+		contents.add(buttonLayer);
 		
 		Layer span = new Layer(Layer.SPAN);
 		span.add(new Text(this.iwrb.getLocalizedString(FORM_SUBMIT_KEY + "_button", FORM_SUBMIT_DEFAULT)));

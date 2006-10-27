@@ -139,9 +139,13 @@ public class CitizenAccountApplication extends CitizenBlock {
 		Heading1 heading = new Heading1(this.iwrb.getLocalizedString("citizen_registration", "Citizen registration"));
 		header.add(heading);
 		
+		Layer contents = new Layer(Layer.DIV);
+		contents.setStyleClass("formContents");
+		form.add(contents);
+		
 		Layer section = new Layer(Layer.DIV);
 		section.setStyleClass("formSection");
-		form.add(section);
+		contents.add(section);
 		
 		boolean sendMessageToBank = getBusiness(iwc).sendMessageToBank();
 		
@@ -187,6 +191,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		Layer formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		formItem.setStyleClass("required");
+		formItem.setID("personalID");
 		Label label = new Label(personalID);
 		label.add(new Span(new Text(this.iwrb.getLocalizedString(SSN_KEY, SSN_DEFAULT))));
 		formItem.add(label);
@@ -196,6 +201,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		formItem.setStyleClass("required");
+		formItem.setID("email");
 		label = new Label(email);
 		label.add(new Span(new Text(this.iwrb.getLocalizedString(EMAIL_KEY, EMAIL_DEFAULT))));
 		formItem.add(label);
@@ -205,6 +211,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		formItem.setStyleClass("required");
+		formItem.setID("emailRepeat");
 		label = new Label(emailRepeat);
 		label.add(new Span(new Text(this.iwrb.getLocalizedString(EMAIL_KEY_REPEAT, EMAIL_REPEAT_DEFAULT))));
 		formItem.add(label);
@@ -213,6 +220,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
+		formItem.setID("mobilePhone");
 		label = new Label(this.iwrb.getLocalizedString(PHONE_CELL_KEY, PHONE_CELL_DEFAULT), mobile);
 		formItem.add(label);
 		formItem.add(mobile);
@@ -220,6 +228,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
+		formItem.setID("homePhone");
 		label = new Label(this.iwrb.getLocalizedString(PHONE_HOME_KEY, PHONE_HOME_DEFAULT), homePhone);
 		formItem.add(label);
 		formItem.add(homePhone);
@@ -231,7 +240,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		
 		Layer buttonLayer = new Layer(Layer.DIV);
 		buttonLayer.setStyleClass("buttonLayer");
-		form.add(buttonLayer);
+		contents.add(buttonLayer);
 		
 		Layer span = new Layer(Layer.SPAN);
 		span.add(new Text(this.iwrb.getLocalizedString(SIMPLE_FORM_SUBMIT_KEY + "_button", SIMPLE_FORM_SUBMIT_DEFAULT)));
