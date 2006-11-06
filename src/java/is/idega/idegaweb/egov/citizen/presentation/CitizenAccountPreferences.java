@@ -289,6 +289,15 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		Layer formItem;
 		Label label;
 		
+		Layer layer = new Layer(Layer.DIV);
+		layer.setID("citizenImage");
+		section.add(layer);
+		
+		Layer helpLayer = new Layer(Layer.DIV);
+		helpLayer.setStyleClass("helperText");
+		helpLayer.add(new Text(this.iwrb.getLocalizedString("citizen_preferences_image_help", "Image help...")));
+		layer.add(helpLayer);
+		
 		if (image != null) {
 			formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
@@ -296,7 +305,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 			label.add(new Text(this.iwrb.getLocalizedString("image", "Image")));
 			formItem.add(label);
 			formItem.add(image);
-			section.add(formItem);
+			layer.add(formItem);
 			
 			formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
@@ -305,12 +314,12 @@ public class CitizenAccountPreferences extends CitizenBlock {
 			label = new Label(this.iwrb.getLocalizedString("remove_image", "Remove image"), removeImage);
 			formItem.add(removeImage);
 			formItem.add(label);
-			section.add(formItem);
+			layer.add(formItem);
 		}
 		
 		Layer clearLayer = new Layer(Layer.DIV);
 		clearLayer.setStyleClass("Clear");
-		section.add(clearLayer);
+		layer.add(clearLayer);
 
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
@@ -318,16 +327,25 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		label = new Label(this.iwrb.getLocalizedString("image_upload", "Image upload"), file);
 		formItem.add(label);
 		formItem.add(file);
-		section.add(formItem);
+		layer.add(formItem);
 		
 		section.add(clearLayer);
 
+		layer = new Layer(Layer.DIV);
+		layer.setID("citizenEmail");
+		section.add(layer);
+		
+		helpLayer = new Layer(Layer.DIV);
+		helpLayer.setStyleClass("helperText");
+		helpLayer.add(new Text(this.iwrb.getLocalizedString("citizen_preferences_email_help", "Email help...")));
+		layer.add(helpLayer);
+		
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		label = new Label(this.iwrb.getLocalizedString(KEY_EMAIL, DEFAULT_EMAIL), tiEmail);
 		formItem.add(label);
 		formItem.add(tiEmail);
-		section.add(formItem);
+		layer.add(formItem);
 		
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
@@ -336,23 +354,32 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		label = new Label(this.iwrb.getLocalizedString(KEY_MESSAGES_VIA_EMAIL, DEFAULT_MESSAGES_VIA_EMAIL), messagesViaEmail);
 		formItem.add(messagesViaEmail);
 		formItem.add(label);
-		section.add(formItem);
+		layer.add(formItem);
 		
 		section.add(clearLayer);
 
+		layer = new Layer(Layer.DIV);
+		layer.setID("citizenPhones");
+		section.add(layer);
+		
+		helpLayer = new Layer(Layer.DIV);
+		helpLayer.setStyleClass("helperText");
+		helpLayer.add(new Text(this.iwrb.getLocalizedString("citizen_preferences_phones_help", "Phones help...")));
+		layer.add(helpLayer);
+		
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		label = new Label(this.iwrb.getLocalizedString(KEY_PHONE_HOME, DEFAULT_PHONE_HOME), tiPhoneHome);
 		formItem.add(label);
 		formItem.add(tiPhoneHome);
-		section.add(formItem);
+		layer.add(formItem);
 		
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		label = new Label(this.iwrb.getLocalizedString(KEY_PHONE_WORK, DEFAULT_PHONE_WORK), tiPhoneWork);
 		formItem.add(label);
 		formItem.add(tiPhoneWork);
-		section.add(formItem);
+		layer.add(formItem);
 		
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
@@ -360,37 +387,46 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		label = new Label(this.iwrb.getLocalizedString(KEY_PHONE_MOBILE, DEFAULT_PHONE_MOBILE), tiPhoneMobile);
 		formItem.add(label);
 		formItem.add(tiPhoneMobile);
-		section.add(formItem);
+		layer.add(formItem);
 		
 		section.add(clearLayer);
 
+		layer = new Layer(Layer.DIV);
+		layer.setID("citizenResidence");
+		section.add(layer);
+		
+		helpLayer = new Layer(Layer.DIV);
+		helpLayer.setStyleClass("helperText");
+		helpLayer.add(new Text(this.iwrb.getLocalizedString("citizen_preferences_residence_help", "Residence help...")));
+		layer.add(helpLayer);
+		
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		label = new Label(this.iwrb.getLocalizedString(KEY_CO_STREET_ADDRESS, DEFAULT_CO_STREET_ADDRESS), tiCOStreetAddress);
 		formItem.add(label);
 		formItem.add(tiCOStreetAddress);
-		section.add(formItem);
+		layer.add(formItem);
 		
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		label = new Label(this.iwrb.getLocalizedString(KEY_CO_POSTAL_CODE, DEFAULT_CO_POSTAL_CODE), tiCOPostalCode);
 		formItem.add(label);
 		formItem.add(tiCOPostalCode);
-		section.add(formItem);
+		layer.add(formItem);
 		
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		label = new Label(this.iwrb.getLocalizedString(KEY_CO_CITY, DEFAULT_CO_CITY), tiCOCity);
 		formItem.add(label);
 		formItem.add(tiCOCity);
-		section.add(formItem);
+		layer.add(formItem);
 		
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		label = new Label(this.iwrb.getLocalizedString(KEY_CO_COUNTRY, DEFAULT_CO_COUNTRY), tiCOCountry);
 		formItem.add(label);
 		formItem.add(tiCOCountry);
-		section.add(formItem);
+		layer.add(formItem);
 		
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
@@ -398,7 +434,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		label = new Label(this.iwrb.getLocalizedString(KEY_CO_ADDRESS_SELECT, DEFAULT_CO_ADDRESS_SELECT), useCOAddress);
 		formItem.add(useCOAddress);
 		formItem.add(label);
-		section.add(formItem);
+		layer.add(formItem);
 		
 		section.add(clearLayer);
 
