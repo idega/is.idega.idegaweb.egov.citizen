@@ -72,7 +72,7 @@ public class ChangePassword extends CitizenBlock {
 	private final static String DEFAULT_PASSWORD_REPEATED_EMPTY = "Repeated password cannot be empty.";		
 	private final static String DEFAULT_PASSWORDS_NOT_SAME = "New passwords not the same.";		
 	private final static String DEFAULT_PASSWORD_INVALID = "Invalid password.";		
-	private final static String DEFAULT_PASSWORD_TOO_SHORT = "Password too short. Must be at least {0}Êletters/digits.";		
+	private final static String DEFAULT_PASSWORD_TOO_SHORT = "Password too short. Must be at least {0} letters/digits.";		
 	private final static String DEFAULT_PASSWORD_SAVED = "Your password has been saved.";	
 
 	private User user = null;
