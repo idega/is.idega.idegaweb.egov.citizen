@@ -44,6 +44,11 @@
       <name>1.0.7</name>
       <tag>CITIZEN_1_0_7</tag>
     </version>
+    <version>
+      <id>1.0.8</id>
+      <name>1.0.8</name>
+      <tag>CITIZEN_1_0_8</tag>
+    </version>
   </versions>
   <branches/>
   <developers>
