@@ -16,6 +16,7 @@ import com.idega.core.builder.data.ICPage;
 import com.idega.core.contact.data.Email;
 import com.idega.core.contact.data.Phone;
 import com.idega.core.file.data.ICFile;
+import com.idega.core.localisation.presentation.LocalePresentationUtil;
 import com.idega.core.location.business.AddressBusiness;
 import com.idega.core.location.data.Address;
 import com.idega.core.location.data.AddressHome;
@@ -35,6 +36,7 @@ import com.idega.presentation.text.Paragraph;
 import com.idega.presentation.text.Text;
 import com.idega.presentation.ui.CheckBox;
 import com.idega.presentation.ui.CountryDropdownMenu;
+import com.idega.presentation.ui.DropdownMenu;
 import com.idega.presentation.ui.FileInput;
 import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.Label;
@@ -77,6 +79,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	private final static String PARAMETER_CO_COUNTRY = "cap_co_country";
 	private final static String PARAMETER_MESSAGES_VIA_EMAIL = "cap_m_v_e";
 	private final static String PARAMETER_REMOVE_IMAGE = "cap_remove_image";
+	private final static String PARAMETER_PREFERRED_LOCALE = "cap_pref_locale";
 	
 	private final static String KEY_PREFIX = "citizen.";
 	private final static String KEY_EMAIL = KEY_PREFIX + "email";
@@ -96,6 +99,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	private final static String KEY_CO_CITY_MISSING = KEY_PREFIX + "co_city_missing";
 	private final static String KEY_PREFERENCES_SAVED = KEY_PREFIX + "preferenced_saved";
 	private final static String KEY_NO_EMAIL_FOR_LETTERS = KEY_PREFIX + "no_email_to_send_letter_to";
+	private final static String PREFERRED_LANGUAGE = "preferred_language";
 	
 	private final static String DEFAULT_EMAIL = "E-mail";
 	private final static String DEFAULT_UPDATE = "Update";
@@ -120,6 +124,8 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	private User user = null;
 
 	private IWResourceBundle iwrb;
+	
+	private boolean showPreferredLocaleChooser = false;
 
 	public CitizenAccountPreferences() {
 	}
@@ -295,7 +301,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		
 		Layer helpLayer = new Layer(Layer.DIV);
 		helpLayer.setStyleClass("helperText");
-		helpLayer.add(new Text(this.iwrb.getLocalizedString("citizen_preferences_image_help", "Image help...")));
+		helpLayer.add(new Text(this.iwrb.getLocalizedString("citizen_preferences_image_help", "To remove the displayed image check the checkbox and save.")));
 		layer.add(helpLayer);
 		
 		if (image != null) {
@@ -337,7 +343,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		
 		helpLayer = new Layer(Layer.DIV);
 		helpLayer.setStyleClass("helperText");
-		helpLayer.add(new Text(this.iwrb.getLocalizedString("citizen_preferences_email_help", "Email help...")));
+		helpLayer.add(new Text(this.iwrb.getLocalizedString("citizen_preferences_email_help", "Here you can change your current email address or choose not to be notified by email. You will still receive messages under your account even if you do.")));
 		layer.add(helpLayer);
 		
 		formItem = new Layer(Layer.DIV);
@@ -364,7 +370,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		
 		helpLayer = new Layer(Layer.DIV);
 		helpLayer.setStyleClass("helperText");
-		helpLayer.add(new Text(this.iwrb.getLocalizedString("citizen_preferences_phones_help", "Phones help...")));
+		helpLayer.add(new Text(this.iwrb.getLocalizedString("citizen_preferences_phones_help", "Here you can modify your phone information or delete the numbers by leaving the fields empty.")));
 		layer.add(helpLayer);
 		
 		formItem = new Layer(Layer.DIV);
@@ -397,7 +403,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		
 		helpLayer = new Layer(Layer.DIV);
 		helpLayer.setStyleClass("helperText");
-		helpLayer.add(new Text(this.iwrb.getLocalizedString("citizen_preferences_residence_help", "Residence help...")));
+		helpLayer.add(new Text(this.iwrb.getLocalizedString("citizen_preferences_residence_help", "If you would like to receive letters via your C/O address, rather than your registered one, you can check the checkbox below and fill in your C/O address.")));
 		layer.add(helpLayer);
 		
 		formItem = new Layer(Layer.DIV);
@@ -435,6 +441,27 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		formItem.add(useCOAddress);
 		formItem.add(label);
 		layer.add(formItem);
+		
+		
+		DropdownMenu localesDrop = LocalePresentationUtil.getAvailableLocalesDropdown(iwc.getIWMainApplication(), PARAMETER_PREFERRED_LOCALE);
+		if(localesDrop.getChildCount()>1 && isSetToShowPreferredLocaleChooser()){
+			section.add(clearLayer);
+			formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			formItem.setID("preferredLang");
+			
+			if(user.getPreferredLocale()!=null){
+				localesDrop.setSelectedElement(user.getPreferredLocale());
+			}
+			else{
+				localesDrop.setSelectedElement(iwc.getCurrentLocale().toString());
+			}
+			
+			label = new Label(this.iwrb.getLocalizedString(PREFERRED_LANGUAGE, "Preferred language"), localesDrop);
+			formItem.add(label);
+			formItem.add(localesDrop);
+			layer.add(formItem);
+		}
 		
 		section.add(clearLayer);
 
@@ -491,6 +518,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		String coPostalCode = iwc.getParameter(PARAMETER_CO_POSTAL_CODE);
 		String coCity = iwc.getParameter(PARAMETER_CO_CITY);
 		String coCountry = iwc.getParameter(PARAMETER_CO_COUNTRY);
+		String preferredLocale = iwc.getParameter(PARAMETER_PREFERRED_LOCALE);
 		boolean useCOAddress = iwc.isParameterSet(PARAMETER_CO_ADDRESS_SELECT);
 		boolean messagesViaEmail = iwc.isParameterSet(PARAMETER_MESSAGES_VIA_EMAIL);
 		boolean removeImage = iwc.isParameterSet(PARAMETER_REMOVE_IMAGE);
@@ -537,6 +565,10 @@ public class CitizenAccountPreferences extends CitizenBlock {
 			ub.updateUserHomePhone(this.user, phoneHome);
 			ub.updateUserWorkPhone(this.user, phoneWork);
 			ub.updateUserMobilePhone(this.user, phoneMobile);
+			
+			if(preferredLocale!=null){
+				ub.setUsersPreferredLocale(user, preferredLocale, true);
+			}
 			if (useCOAddress) {
 				Address coAddress = getCOAddress(iwc);
 				coAddress.setStreetName(coStreetAddress);
@@ -638,5 +670,19 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	}
 
 	public void setToRemoveEmailWhenEmpty(boolean flag) {
+	}
+
+	/**
+	 * @return Returns the showPreferredLocaleChooser.
+	 */
+	public boolean isSetToShowPreferredLocaleChooser() {
+		return showPreferredLocaleChooser;
+	}
+
+	/**
+	 * @param showPreferredLocaleChooser The showPreferredLocaleChooser to set.
+	 */
+	public void setToShowPreferredLocaleChooser(boolean showPreferredLocaleChooser) {
+		this.showPreferredLocaleChooser = showPreferredLocaleChooser;
 	}
 }

@@ -30,6 +30,7 @@ import com.idega.core.accesscontrol.business.UserHasLoginException;
 import com.idega.core.accesscontrol.data.LoginTable;
 import com.idega.core.accesscontrol.data.LoginTableHome;
 import com.idega.core.builder.data.ICPage;
+import com.idega.core.localisation.presentation.LocalePresentationUtil;
 import com.idega.core.location.data.Address;
 import com.idega.core.location.data.Commune;
 import com.idega.data.IDOLookup;
@@ -46,6 +47,7 @@ import com.idega.presentation.ui.DropdownMenu;
 import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.TextInput;
+import com.idega.user.business.UserBusiness;
 import com.idega.user.data.User;
 import com.idega.util.Age;
 import com.idega.util.IWTimestamp;
@@ -72,6 +74,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 	private final static String PHONE_HOME_KEY = "home_phone";
 	private final static String PHONE_HOME_DEFAULT = "Phone";
 	private final static String PHONE_CELL_KEY = "mobile_phone";
+	private final static String PREFERRED_LANGUAGE = "preferred_language";
 	private final static String PHONE_CELL_DEFAULT = "Cell phone";
 	private final static String UNKNOWN_CITIZEN_KEY = "unknown_citizen";
 	private final static String UNKNOWN_CITIZEN_DEFAULT = "Something is wrong with your personal id. Please try again or contact the responsible";
@@ -79,6 +82,8 @@ public class CitizenAccountApplication extends CitizenBlock {
 	private final static String NOT_VALID_ACCOUNT_AGE_DEFAULT = "You have to be {0} to apply for a citizen account";
 	private final static String COMMUNE_DEFAULT = "Commune";
 	private final static String COMMUNE_KEY = "commmune";
+	
+	private final static String PARAMETER_PREFERRED_LOCALE = "pref_locale";
 
 	private String communeUniqueIdsCSV;
 
@@ -106,6 +111,9 @@ public class CitizenAccountApplication extends CitizenBlock {
 	
 	private boolean iForwardToURL = false;
 	private Map iCommuneMap;
+	
+	
+	private boolean showPreferredLocaleChooser = false;
 	
 	public void present(IWContext iwc) {
 		this.iwrb = getResourceBundle(iwc);
@@ -234,6 +242,18 @@ public class CitizenAccountApplication extends CitizenBlock {
 		formItem.add(homePhone);
 		section.add(formItem);
 		
+		DropdownMenu localesDrop = LocalePresentationUtil.getAvailableLocalesDropdown(iwc.getIWMainApplication(), PARAMETER_PREFERRED_LOCALE);
+		if(localesDrop.getChildCount()>1 && isSetToShowPreferredLocaleChooser()){
+			formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			formItem.setID("preferredLang");
+			localesDrop.setSelectedElement(iwc.getCurrentLocale().toString());		
+			label = new Label(this.iwrb.getLocalizedString(PREFERRED_LANGUAGE, "Preferred language"), localesDrop);
+			formItem.add(label);
+			formItem.add(localesDrop);
+			section.add(formItem);
+		}
+				
 		Layer clearLayer = new Layer(Layer.DIV);
 		clearLayer.setStyleClass("Clear");
 		section.add(clearLayer);
@@ -296,15 +316,17 @@ public class CitizenAccountApplication extends CitizenBlock {
 			hasErrors = true;
 		}
 		
-		String email = iwc.getParameter(EMAIL_KEY).toString();
+		String email = iwc.getParameter(EMAIL_KEY);
 		if (email == null || email.length() == 0) {
 			errors.add(this.iwrb.getLocalizedString("email_can_not_be_empty", "You must provide a valid e-mail address"));
 			hasErrors = true;
 		}
 		
-		String emailRepeat = iwc.getParameter(EMAIL_KEY_REPEAT).toString();
-		String phoneHome = iwc.getParameter(PHONE_HOME_KEY).toString();
-		String phoneWork = iwc.getParameter(PHONE_CELL_KEY).toString();
+		String emailRepeat = iwc.getParameter(EMAIL_KEY_REPEAT);
+		String phoneHome = iwc.getParameter(PHONE_HOME_KEY);
+		String phoneWork = iwc.getParameter(PHONE_CELL_KEY);
+		String preferredLocale = iwc.getParameter(PARAMETER_PREFERRED_LOCALE);
+		
 		WSCitizenAccountBusiness business = getBusiness(iwc);
 		User user = business.getUserIcelandic(ssn);
 		
@@ -377,6 +399,10 @@ public class CitizenAccountApplication extends CitizenBlock {
 				errors.add(this.iwrb.getLocalizedString(USER_ALLREADY_HAS_A_LOGIN_KEY, USER_ALLREADY_HAS_A_LOGIN_DEFAULT));
 				hasErrors = true;
 			}
+		}
+		
+		if(!hasErrors && preferredLocale!=null){
+			getUserBusiness(iwc).setUsersPreferredLocale(user, preferredLocale, true);
 		}
 		
 		if (hasErrors) {
@@ -465,6 +491,10 @@ public class CitizenAccountApplication extends CitizenBlock {
 	protected WSCitizenAccountBusiness getBusiness(IWApplicationContext iwac) throws RemoteException {
 		return (WSCitizenAccountBusiness) IBOLookup.getServiceInstance(iwac, WSCitizenAccountBusiness.class);
 	}
+	
+	protected UserBusiness getUserBusiness(IWApplicationContext iwac) throws RemoteException {
+		return (UserBusiness) IBOLookup.getServiceInstance(iwac, UserBusiness.class);
+	}
 
 	private LoginTableHome getLoginTableHome() {
 		try {
@@ -490,5 +520,20 @@ public class CitizenAccountApplication extends CitizenBlock {
 		}
 		this.iCommuneMap.put(name, URL);
 		this.iForwardToURL = true;
+	}
+	
+
+	/**
+	 * @return Returns the showPreferredLocaleChooser.
+	 */
+	public boolean isSetToShowPreferredLocaleChooser() {
+		return showPreferredLocaleChooser;
+	}
+
+	/**
+	 * @param showPreferredLocaleChooser The showPreferredLocaleChooser to set.
+	 */
+	public void setToShowPreferredLocaleChooser(boolean showPreferredLocaleChooser) {
+		this.showPreferredLocaleChooser = showPreferredLocaleChooser;
 	}
 }

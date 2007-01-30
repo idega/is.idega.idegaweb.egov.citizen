@@ -4,6 +4,14 @@
     <author email="laddi@idega.com">Thorhallur "Laddi" Helgason</author>
   </properties>
   <body>
+  
+   
+   	<release version="1.0.9" date="2007-01-30">
+      <action dev="eiki" type="update">
+      	Added a preferred locale dropdown menu for CitizenAccountApplication and CitizenAccountPreferences.
+      	So the system will know in which language to send messages to citizens.
+      </action>
+    </release>
  
    	<release version="1.0.8" date="2007-01-10">
       <action dev="eiki" type="update">

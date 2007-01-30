@@ -86,9 +86,10 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 		login = lt.getUserLogin();
 		try {
 			String password = lt.getUnencryptedUserPassword();
+
 			String messageBody = this.getAcceptMessageBody(theCase, login,
 					password);
-			String messageSubject = this.getAcceptMessageSubject();
+			String messageSubject = this.getAcceptMessageSubject(theCase);
 
 			if (createPasswordMessage) {
 				this.getMessageBusiness().createPasswordMessage(citizen, login,
