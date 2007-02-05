@@ -54,6 +54,11 @@
       <name>1.0.9</name>
       <tag>CITIZEN_1_0_9</tag>
     </version>
+    <version>
+      <id>1.0.10</id>
+      <name>1.0.10</name>
+      <tag>CITIZEN_1_0_10</tag>
+    </version>
   </versions>
   <branches/>
   <developers>
