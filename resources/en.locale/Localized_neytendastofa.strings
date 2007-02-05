@@ -1,5 +1,7 @@
 application_submitted_neytendastofa.is=Your registration has been received.
 application_submitted_text_neytendastofa.is=Your have been registered and should receive an email shortly with your username and password. You will also get a printed letter with the same information. Your account will activate as soon as you log in.
 ccitizen_registraction_help=Please fill in your personal ID as well as your e-mail.  Your e-mail is required so that you can be contacted directly about changes to you ongoing cases.  If you don't have an e-mail account please contact the Consumer Agency via telephone +354-510-1100.
+citizen_registraction_bank_help=Please fill in your personal ID as well as your e-mail. Your e-mail is required so that you can be contacted directly about changes to you ongoing cases. If you don't have an e-mail account please contact the Consumer Agency via telephone +354-510-1100.
+citizen_registraction_help=Please fill in your personal ID as well as your e-mail. Your e-mail is required so that you can be contacted directly about changes to you ongoing cases. If you don't have an e-mail account please contact the Consumer Agency via telephone +354-510-1100.
 forgot_password_helper_text=Please enter your personal ID and click 'Send' (10 digits no '-'). A new password will be created and sent to your e-mail address. If you do not receive an email lease please contact the Consumer Agency via telephone +354-510-1100.
 my_page=My submissions
