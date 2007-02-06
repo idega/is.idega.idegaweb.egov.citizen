@@ -132,7 +132,8 @@ public class ForgottenPassword extends CitizenBlock {
 			invalidPersonalID = true;
 		}
 
-		if (iwc.getSessionAttribute(hasAppliedForPsw) != null) {
+		boolean hasAppliedForPassword = iwc.getSessionAttribute(hasAppliedForPsw) != null;
+		if (hasAppliedForPassword) {
 			errors.add(this.iwrb.getLocalizedString("already_applied_for_password", "You have already requested a new password."));
 			hasErrors = true;
 		}
@@ -152,7 +153,7 @@ public class ForgottenPassword extends CitizenBlock {
 			}
 		}
 		
-		if (user != null) {
+		if (user != null && !hasAppliedForPassword) {
 			boolean restrictLoginAccess = iwc.getApplicationSettings().getBoolean("egov.account.restrict.password.creation", true);
 			
 			LoginTable loginTable = LoginDBHandler.getUserLogin(user);
