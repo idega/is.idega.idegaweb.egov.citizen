@@ -5,6 +5,15 @@
   </properties>
   <body>
   
+  	<release version="1.0.12" date="2007-03-01">
+      <action dev="laddi" type="update">
+      	Added displaying of current email when changing user email.
+      </action>
+      <action dev="laddi" type="update">
+      	Added displaying of current email in citizen finder result table.
+      </action>
+    </release>
+   
   	<release version="1.0.11" date="2007-02-07">
       <action dev="laddi" type="fix">
       	Fixed so that when a user has applied for a new password he can't do it multiple times in the same session.

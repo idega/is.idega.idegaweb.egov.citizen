@@ -59,6 +59,7 @@ citizen_registraction_help=Vinsamlegast skr\u00E1i\u00F0 inn kennit\u00F6lu og n
 citizen_registration=N\u00FDskr\u00E1ning
 commmune=Sveitarf\u00E9lag
 commune=Sveitarf\u00E9lag
+current_email=N\u00FAverandi netfang
 email=Netfang
 email_can_not_be_empty=Vinsamlegast gef\u00F0u upp netfang
 email_repeat=Endurtaka netfang

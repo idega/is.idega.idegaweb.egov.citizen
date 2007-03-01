@@ -59,6 +59,7 @@ citizen_registraction_help=Please fill in your personal ID as well as your e-mai
 citizen_registration=Citizen registration
 commmune=Commune
 commune=Commune
+current_email=Current email
 email=Email
 email_can_not_be_empty=You must provide a valid e-mail address
 email_repeat=Email again
