@@ -16,6 +16,7 @@ package is.idega.idegaweb.egov.citizen.presentation;
 
 import is.idega.idegaweb.egov.citizen.business.WSCitizenAccountBusiness;
 
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import com.idega.business.IBOLookup;
+import com.idega.core.accesscontrol.business.LoginBusinessBean;
 import com.idega.core.accesscontrol.business.UserHasLoginException;
 import com.idega.core.accesscontrol.data.LoginTable;
 import com.idega.core.accesscontrol.data.LoginTableHome;
@@ -45,6 +47,7 @@ import com.idega.presentation.text.Link;
 import com.idega.presentation.text.Text;
 import com.idega.presentation.ui.DropdownMenu;
 import com.idega.presentation.ui.Form;
+import com.idega.presentation.ui.HiddenInput;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.TextInput;
 import com.idega.user.business.UserBusiness;
@@ -83,12 +86,15 @@ public class CitizenAccountApplication extends CitizenBlock {
 	private final static String COMMUNE_DEFAULT = "Commune";
 	private final static String COMMUNE_KEY = "commmune";
 	
-	private final static String PARAMETER_PREFERRED_LOCALE = "pref_locale";
-
+	public final static String PARAMETER_PREFERRED_LOCALE = "pref_locale";
+	public final static String PARAMETER_HIDE_PERSONALID_INPUT = "hidePersonalIdInput";
+	public final static String PARAMETER_CREATE_LOGIN_AND_LETTER = "createLoginAndLetter";
+	public final static String PARAMETER_REDIRECT_URI = "redirectUriOnSubmit";
+	
 	private String communeUniqueIdsCSV;
 
 	private final static String SSN_DEFAULT = "Personal ID";
-	protected 	final static String SSN_KEY = "personal_id";
+	public 	final static String SSN_KEY = "personal_id";
 	private final static String TEXT_APPLICATION_SUBMITTED_DEFAULT = "Application is submitted.";
 	private final static String TEXT_APPLICATION_SUBMITTED_KEY = "application_submitted";
 	private final static String TEXT_APPLICATION_BANK_SUBMITTED_KEY = "application_bank_submitted";
@@ -111,13 +117,15 @@ public class CitizenAccountApplication extends CitizenBlock {
 	
 	private boolean iForwardToURL = false;
 	private Map iCommuneMap;
-	
+	private boolean hidePersonalIdInput=false;
+	private boolean createLoginAndLetter=true;
+	private String redirectUrlOnSubmit;
 	
 	private boolean showPreferredLocaleChooser = false;
 	
 	public void present(IWContext iwc) {
 		this.iwrb = getResourceBundle(iwc);
-
+		parseParameters(iwc);
 		try {
 			int action = parseAction(iwc);
 			switch (action) {
@@ -134,7 +142,70 @@ public class CitizenAccountApplication extends CitizenBlock {
 		}
 	}
 
-	private void viewSimpleApplicationForm(IWContext iwc) throws RemoteException {
+	/**
+	 * <p>
+	 * Parse the request parameters and initialize this component with teir values if they are set
+	 * </p>
+	 * @param iwc
+	 */
+	protected void parseParameters(IWContext iwc) {
+		
+		if(iwc.isParameterSet(PARAMETER_HIDE_PERSONALID_INPUT)){
+			String value = iwc.getParameter(PARAMETER_HIDE_PERSONALID_INPUT);
+			if(Boolean.valueOf(value).booleanValue()==true){
+				setHidePersonalIdInput(true);
+			}
+		}
+		if(iwc.isParameterSet(PARAMETER_CREATE_LOGIN_AND_LETTER)){
+			String value = iwc.getParameter(PARAMETER_CREATE_LOGIN_AND_LETTER);
+			if(Boolean.valueOf(value).booleanValue()==false){
+				setCreateLoginAndLetter(false);
+			}
+		}
+		if(iwc.isParameterSet(PARAMETER_REDIRECT_URI)){
+			String value = iwc.getParameter(PARAMETER_REDIRECT_URI);
+			if(value!=null){
+				setRedirectUrlOnSubmit(value);
+			}
+		}
+	}
+	
+	/**
+	 * <p>
+	 * Maintain the needed parameters between submits.
+	 * </p>
+	 * @param iwc
+	 * @param form
+	 */
+	protected void maintainHiddenParameters(IWContext iwc, Form form) {
+		if(iwc.isParameterSet(PARAMETER_HIDE_PERSONALID_INPUT)){
+			String value = iwc.getParameter(PARAMETER_HIDE_PERSONALID_INPUT);
+			if(value!=null){
+				HiddenInput input = new HiddenInput(PARAMETER_HIDE_PERSONALID_INPUT);
+				input.keepStatusOnAction();
+				form.add(input);
+			}
+		}
+		if(iwc.isParameterSet(PARAMETER_CREATE_LOGIN_AND_LETTER)){
+			String value = iwc.getParameter(PARAMETER_CREATE_LOGIN_AND_LETTER);
+			if(value!=null){
+				HiddenInput input = new HiddenInput(PARAMETER_CREATE_LOGIN_AND_LETTER);
+				input.keepStatusOnAction();
+				form.add(input);
+			}
+		}
+		if(iwc.isParameterSet(PARAMETER_REDIRECT_URI)){
+			String value = iwc.getParameter(PARAMETER_REDIRECT_URI);
+			if(value!=null){
+				HiddenInput input = new HiddenInput(PARAMETER_REDIRECT_URI);
+				input.keepStatusOnAction();
+				form.add(input);
+			}
+		}
+	}
+
+
+	protected void viewSimpleApplicationForm(IWContext iwc) throws RemoteException {
 		Form form = new Form();
 		form.addParameter(SIMPLE_FORM_SUBMIT_KEY, Boolean.TRUE.toString());
 		form.setID("accountApplicationForm");
@@ -162,8 +233,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		helpLayer.add(new Text(this.iwrb.getLocalizedString(sendMessageToBank ? "citizen_registraction_bank_help" : "citizen_registraction_help", "Please fill in your personal ID as well as your e-mail.  Your e-mail is required so that you can be contacted directly about changes to you ongoing cases.  If you don't have an e-mail account please contact the commune offices.")));
 		section.add(helpLayer);
 		
-		TextInput personalID = new TextInput(SSN_KEY);
-		personalID.keepStatusOnAction(true);
+		maintainHiddenParameters(iwc,form);
 
 		TextInput email = new TextInput(EMAIL_KEY);
 		email.keepStatusOnAction(true);
@@ -196,15 +266,26 @@ public class CitizenAccountApplication extends CitizenBlock {
 			section.add(formItem);
 		}
 
-		Layer formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("required");
-		formItem.setID("personalID");
-		Label label = new Label(personalID);
-		label.add(new Span(new Text(this.iwrb.getLocalizedString(SSN_KEY, SSN_DEFAULT))));
-		formItem.add(label);
-		formItem.add(personalID);
-		section.add(formItem);
+		Layer formItem;
+		Label label;
+		if(isHidePersonalIdInput()){
+			HiddenInput personalID = new HiddenInput(SSN_KEY);
+			personalID.keepStatusOnAction(true);
+			section.add(personalID);
+		}
+		else{
+			TextInput personalID = new TextInput(SSN_KEY);
+			personalID.keepStatusOnAction(true);
+			formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			formItem.setStyleClass("required");
+			formItem.setID("personalID");
+			label = new Label(personalID);
+			label.add(new Span(new Text(this.iwrb.getLocalizedString(SSN_KEY, SSN_DEFAULT))));
+			formItem.add(label);
+			formItem.add(personalID);
+			section.add(formItem);
+		}
 		
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
@@ -271,7 +352,8 @@ public class CitizenAccountApplication extends CitizenBlock {
 		add(form);
 	}
 
-	private void submitSimpleForm(IWContext iwc) throws RemoteException {
+
+	protected void submitSimpleForm(IWContext iwc) throws RemoteException {
 		boolean hasErrors = false;
 		Collection errors = new ArrayList();
 		
@@ -389,7 +471,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 			
 			try {
 				if (!hasErrors) {
-					if (null == business.insertApplication(iwc, user, ssn, email, phoneHome, phoneWork, true)) {
+					if (null == business.insertApplication(iwc, user, ssn, email, phoneHome, phoneWork, true,isCreateLoginAndLetter())) {
 						errors.add(this.iwrb.getLocalizedString(ERROR_NO_INSERT_KEY, ERROR_NO_INSERT_KEY));
 						hasErrors = true;
 					}
@@ -442,6 +524,17 @@ public class CitizenAccountApplication extends CitizenBlock {
 			if (this.iPage != null) {
 				iwc.forwardToIBPage(getParentPage(), this.iPage, this.iRedirectDelay, false);
 			}
+			else if(getRedirectUrlOnSubmit()!=null){
+				
+				try{
+					iwc.getResponse().sendRedirect(getRedirectUrlOnSubmit());
+				}
+				catch(IOException io){
+					//the response is most likely been committed, i.e. written output to already
+					iwc.forwardToURL(getParentPage(), getRedirectUrlOnSubmit(), this.iRedirectDelay, false);
+				}
+				
+			}
 		}
 	}
 
@@ -461,7 +554,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		this.communeUniqueIdsCSV = communeUniqueIdsCSV;
 	}
 	
-	private boolean isValidAge(IWContext iwc, String ssn) {
+	protected boolean isValidAge(IWContext iwc, String ssn) {
 		int validAge = Integer.parseInt(iwc.getApplicationSettings().getProperty(ATTRIBUTE_VALID_ACCOUNT_AGE, String.valueOf(18)));
 		boolean validAgeYear = iwc.getApplicationSettings().getBoolean(ATTRIBUTE_VALID_ACCOUNT_AGE_YEAR);
 		
@@ -478,7 +571,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		return true;
 	}
 
-	private int parseAction(final IWContext iwc) {
+	protected int parseAction(final IWContext iwc) {
 		int action = ACTION_VIEW_FORM;
 
 		if (iwc.isParameterSet(SIMPLE_FORM_SUBMIT_KEY)) {
@@ -496,7 +589,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		return (UserBusiness) IBOLookup.getServiceInstance(iwac, UserBusiness.class);
 	}
 
-	private LoginTableHome getLoginTableHome() {
+	protected LoginTableHome getLoginTableHome() {
 		try {
 			return (LoginTableHome) IDOLookup.getHome(LoginTable.class);
 		}
@@ -535,5 +628,35 @@ public class CitizenAccountApplication extends CitizenBlock {
 	 */
 	public void setToShowPreferredLocaleChooser(boolean showPreferredLocaleChooser) {
 		this.showPreferredLocaleChooser = showPreferredLocaleChooser;
+	}
+
+	
+	public boolean isCreateLoginAndLetter() {
+		return createLoginAndLetter;
+	}
+
+	
+	public void setCreateLoginAndLetter(boolean createLoginAndLetter) {
+		this.createLoginAndLetter = createLoginAndLetter;
+	}
+
+	
+	public boolean isHidePersonalIdInput() {
+		return hidePersonalIdInput;
+	}
+
+	
+	public void setHidePersonalIdInput(boolean hidePersonalIdInput) {
+		this.hidePersonalIdInput = hidePersonalIdInput;
+	}
+
+	
+	public String getRedirectUrlOnSubmit() {
+		return redirectUrlOnSubmit;
+	}
+
+	
+	public void setRedirectUrlOnSubmit(String redirectUrlOnSubmit) {
+		this.redirectUrlOnSubmit = redirectUrlOnSubmit;
 	}
 }

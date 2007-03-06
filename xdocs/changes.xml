@@ -5,6 +5,13 @@
   </properties>
   <body>
   
+  	<release version="1.0.13" date="2007-03-06">
+      <action dev="tryggvil" type="update">
+      	Update to handle Icelandic PKI Authentication and registration (first time) which is done with CitizenAccountApplication and
+      	module is.idega.block.pki.
+      </action>
+    </release>
+  
   	<release version="1.0.12" date="2007-03-01">
       <action dev="laddi" type="update">
       	Added displaying of current email when changing user email.
