@@ -1,92 +1,106 @@
 <document>
-  <properties>
-    <title>Citizen changes</title>
-    <author email="laddi@idega.com">Thorhallur "Laddi" Helgason</author>
-  </properties>
-  <body>
-  
-  	<release version="1.0.13" date="2007-03-06">
-      <action dev="tryggvil" type="update">
-      	Update to handle Icelandic PKI Authentication and registration (first time) which is done with CitizenAccountApplication and
-      	module is.idega.block.pki.
-      </action>
-    </release>
-  
-  	<release version="1.0.12" date="2007-03-01">
-      <action dev="laddi" type="update">
-      	Added displaying of current email when changing user email.
-      </action>
-      <action dev="laddi" type="update">
-      	Added displaying of current email in citizen finder result table.
-      </action>
-    </release>
-   
-  	<release version="1.0.11" date="2007-02-07">
-      <action dev="laddi" type="fix">
-      	Fixed so that when a user has applied for a new password he can't do it multiple times in the same session.
-      </action>
-    </release>
-   
-  	<release version="1.0.10" date="2007-02-05">
-      <action dev="eiki" type="update">
-      	Localization for Neytendastofa
-      </action>
-    </release>
-   
-   	<release version="1.0.9" date="2007-01-30">
-      <action dev="eiki" type="update">
-      	Added a preferred locale dropdown menu for CitizenAccountApplication and CitizenAccountPreferences.
-      	So the system will know in which language to send messages to citizens.
-      </action>
-    </release>
- 
-   	<release version="1.0.8" date="2007-01-10">
-      <action dev="eiki" type="update">
-      	Localizing.
-      </action>
-    </release>
-    
-  	<release version="1.0.7" date="2006-11-06">
-      <action dev="laddi" type="update">
-      	Added help texts to citizen preferences.
-      </action>
-    </release>
-    
-  	<release version="1.0.6" date="2006-10-06">
-      <action dev="laddi" type="fix">
-      	Fixed error when entering a valid personal ID but no user is found.
-      </action>
-    </release>
-    
-  	<release version="1.0.5" date="2006-09-27">
-      <action dev="laddi" type="update">
-      	Translation updates.
-      </action>
-    </release>
-    
-  	<release version="1.0.4" date="2006-09-20">
-      <action dev="laddi" type="fix">
-      	Fixed so that when changing passwords all user plugins are called.
-      </action>
-    </release>
-    
-  	<release version="1.0.3" date="2006-09-15">
-      <action dev="laddi" type="update">
-      	Translation updates.
-      </action>
-    </release>
-    
-  	<release version="1.0.2" date="2006-09-07">
-      <action dev="laddi" type="update">
-      	Translation updates.
-      </action>
-    </release>
-    
-   <release version="1.0.1" date="2006-07-11">
-      <action dev="laddi" type="update">
-        Declaring new version of block.
-      </action>
-    </release>
+	<properties>
+		<title>Citizen changes</title>
+		<author email="laddi@idega.com">
+			Thorhallur "Laddi" Helgason
+		</author>
+	</properties>
+	<body>
+		<release version="1.0.14" date="2007-03-09">
+			<action dev="palli" type="update">
+				Updating and fixing dependencies to create a new sunnan3
+				application.
+			</action>
+		</release>
 
-  </body>
+		<release version="1.0.13" date="2007-03-06">
+			<action dev="tryggvil" type="update">
+				Update to handle Icelandic PKI Authentication and
+				registration (first time) which is done with
+				CitizenAccountApplication and module is.idega.block.pki.
+			</action>
+		</release>
+
+		<release version="1.0.12" date="2007-03-01">
+			<action dev="laddi" type="update">
+				Added displaying of current email when changing user
+				email.
+			</action>
+			<action dev="laddi" type="update">
+				Added displaying of current email in citizen finder
+				result table.
+			</action>
+		</release>
+
+		<release version="1.0.11" date="2007-02-07">
+			<action dev="laddi" type="fix">
+				Fixed so that when a user has applied for a new password
+				he can't do it multiple times in the same session.
+			</action>
+		</release>
+
+		<release version="1.0.10" date="2007-02-05">
+			<action dev="eiki" type="update">
+				Localization for Neytendastofa
+			</action>
+		</release>
+
+		<release version="1.0.9" date="2007-01-30">
+			<action dev="eiki" type="update">
+				Added a preferred locale dropdown menu for
+				CitizenAccountApplication and CitizenAccountPreferences.
+				So the system will know in which language to send
+				messages to citizens.
+			</action>
+		</release>
+
+		<release version="1.0.8" date="2007-01-10">
+			<action dev="eiki" type="update">Localizing.</action>
+		</release>
+
+		<release version="1.0.7" date="2006-11-06">
+			<action dev="laddi" type="update">
+				Added help texts to citizen preferences.
+			</action>
+		</release>
+
+		<release version="1.0.6" date="2006-10-06">
+			<action dev="laddi" type="fix">
+				Fixed error when entering a valid personal ID but no
+				user is found.
+			</action>
+		</release>
+
+		<release version="1.0.5" date="2006-09-27">
+			<action dev="laddi" type="update">
+				Translation updates.
+			</action>
+		</release>
+
+		<release version="1.0.4" date="2006-09-20">
+			<action dev="laddi" type="fix">
+				Fixed so that when changing passwords all user plugins
+				are called.
+			</action>
+		</release>
+
+		<release version="1.0.3" date="2006-09-15">
+			<action dev="laddi" type="update">
+				Translation updates.
+			</action>
+		</release>
+
+		<release version="1.0.2" date="2006-09-07">
+			<action dev="laddi" type="update">
+				Translation updates.
+			</action>
+		</release>
+
+		<release version="1.0.1" date="2006-07-11">
+			<action dev="laddi" type="update">
+				Declaring new version of block.
+			</action>
+		</release>
+
+	</body>
 </document>

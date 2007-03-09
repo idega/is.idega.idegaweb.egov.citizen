@@ -5,7 +5,7 @@
   <pomVersion>3</pomVersion>
   <name>eGov General Cases</name>
   <artifactId>is.idega.idegaweb.egov.citizen</artifactId>
-  <currentVersion>1.0.13</currentVersion>
+  <currentVersion>1.0.14</currentVersion>
   <inceptionYear>2005</inceptionYear>
   <shortDescription>eGov Citizen</shortDescription>
   <versions>
@@ -89,32 +89,23 @@
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.core</artifactId>
-      <version>3.1.31</version>
+      <version>3.1.39</version>
       <type>jar</type>
       <url>http://www.idega.com/</url>
-      <properties>
-        <eclipse.dependency>true</eclipse.dependency>
-      </properties>
     </dependency>
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.block.process</artifactId>
-      <version>3.1.9</version>
+      <version>3.1.11</version>
       <type>jar</type>
       <url>http://www.idega.com/</url>
-      <properties>
-        <eclipse.dependency>true</eclipse.dependency>
-      </properties>
     </dependency>
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.user</artifactId>
-      <version>3.1.2</version>
+      <version>3.1.4</version>
       <type>jar</type>
       <url>http://www.idega.com/</url>
-      <properties>
-        <eclipse.dependency>true</eclipse.dependency>
-      </properties>
     </dependency>
     <dependency>
       <groupId>bundles</groupId>
@@ -176,7 +167,7 @@
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>se.idega.idegaweb.commune</artifactId>
-      <version>1.0.8</version>
+      <version>1.0.9</version>
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
