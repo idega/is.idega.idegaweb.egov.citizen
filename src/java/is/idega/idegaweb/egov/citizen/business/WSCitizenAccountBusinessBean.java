@@ -1,5 +1,6 @@
 package is.idega.idegaweb.egov.citizen.business;
 
+import is.idega.idegaweb.egov.citizen.data.AccountApplication;
 import is.idega.idegaweb.egov.citizen.wsclient.BirtingakerfiWSLocator;
 import is.idega.idegaweb.egov.citizen.wsclient.BirtingakerfiWSSoap_PortType;
 
@@ -23,10 +24,6 @@ import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSPasswordCallback;
 import org.apache.ws.security.handler.WSHandlerConstants;
 
-import se.idega.idegaweb.commune.account.citizen.business.CitizenAccountBusiness;
-import se.idega.idegaweb.commune.account.citizen.business.CitizenAccountBusinessBean;
-import se.idega.idegaweb.commune.account.data.AccountApplication;
-
 import com.idega.core.accesscontrol.business.LoginCreateException;
 import com.idega.core.accesscontrol.data.LoginTable;
 import com.idega.core.accesscontrol.data.PasswordNotKnown;
@@ -37,17 +34,16 @@ import com.idega.user.data.User;
 import com.idega.util.FileUtil;
 import com.idega.util.IWTimestamp;
 
-public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
-		implements WSCitizenAccountBusiness, CitizenAccountBusiness, CallbackHandler {
+public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean implements WSCitizenAccountBusiness, CitizenAccountBusiness, CallbackHandler {
 
 	protected static final String BANK_SEND_REGISTRATION = "BANK_SEND_REGISTRATION";
-	
+
 	protected static final String BANK_SENDER_PIN = "BANK_SENDER_PIN";
-	
+
 	protected static final String BANK_SENDER_USER_ID = "BANK_SENDER_USER_ID";
 
 	protected static final String BANK_SENDER_USER_PASSWORD = "BANK_SENDER_USER_PW";
-	
+
 	protected static final String BANK_SENDER_PAGELINK = "BANK_SENDER_PAGELINK";
 
 	protected static final String BANK_SENDER_LOGOLINK = "BANK_SENDER_LOGOLINK";
@@ -55,28 +51,18 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 	protected static final String BANK_SENDER_TYPE = "BANK_SENDER_TYPE";
 
 	protected static final String SERVICE_URL = "https://ws.isb.is/adgerdirv1/birtingakerfi.asmx";
-	
-//	private static final String SENDER_USER_ID = "sunnan3";
-	
-//	private static final String SENDER_USER_PW = "j1hQ5U2b";
-	
-//	private static final String SENDER_USER_PIN = "6505982029";
 
 	/**
-	 * Creates a Login for a user with application theCase and send a message to
-	 * the user that applies if it is successful.
+	 * Creates a Login for a user with application theCase and send a message to the user that applies if it is successful.
 	 * 
 	 * @param theCase
-	 *            The Account Application
+	 *          The Account Application
 	 * @throws CreateException
-	 *             Error creating data objects.
+	 *           Error creating data objects.
 	 * @throws LoginCreateException
-	 *             If an error occurs creating login for the user.
+	 *           If an error occurs creating login for the user.
 	 */
-	protected void createLoginAndSendMessage(AccountApplication theCase,
-			boolean createUserMessage, boolean createPasswordMessage,
-			boolean sendEmail) throws RemoteException, CreateException,
-			LoginCreateException {
+	protected void createLoginAndSendMessage(AccountApplication theCase, boolean createUserMessage, boolean createPasswordMessage, boolean sendEmail) throws RemoteException, CreateException, LoginCreateException {
 		boolean sendLetter = false;
 		LoginTable lt;
 		String login;
@@ -87,20 +73,18 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 		try {
 			String password = lt.getUnencryptedUserPassword();
 
-			String messageBody = this.getAcceptMessageBody(theCase, login,
-					password);
+			String messageBody = this.getAcceptMessageBody(theCase, login, password);
 			String messageSubject = this.getAcceptMessageSubject(theCase);
 
 			if (createPasswordMessage) {
-				this.getMessageBusiness().createPasswordMessage(citizen, login,
-						password);
+				this.getMessageBusiness().createPasswordMessage(citizen, login, password);
 			}
 
 			createUserMessage = sendEmail;
 
 			boolean sendMessageToBank = sendMessageToBank();
 			System.out.println("sendMessageToBank = " + sendMessageToBank);
-			
+
 			if (sendMessageToBank) {
 				String pageLink = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_PAGELINK);
 				String logoLink = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_LOGOLINK);
@@ -112,9 +96,8 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 				System.out.println("ssn = " + ssn);
 				System.out.println("user3 = " + user3);
 
-				
 				String xml = getXML(login, password, pageLink, logoLink, citizen.getPrimaryKey().toString(), citizen.getPersonalID(), user3);
-				
+
 				StringBuffer filename = new StringBuffer(user3.toLowerCase());
 				filename.append("sunnan3");
 				IdGenerator uidGenerator = IdGeneratorFactory.getUUIDGenerator();
@@ -122,33 +105,33 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 				filename.append(".xml");
 
 				System.out.println("filename = " + filename.toString());
-				
+
 				encodeAndSendXML(xml, filename.toString(), ssn);
 			}
 			else if (createUserMessage) {
-				this.getMessageBusiness().createUserMessage(citizen,
-						messageSubject, messageBody, sendLetter);
+				this.getMessageBusiness().createUserMessage(citizen, messageSubject, messageBody, sendLetter);
 			}
-			
-		} catch (PasswordNotKnown e) {
+
+		}
+		catch (PasswordNotKnown e) {
 			// e.printStackTrace();
 			throw new IDOCreateException(e);
-		} catch (RemoteException e) {
+		}
+		catch (RemoteException e) {
 			e.printStackTrace();
 		}
 	}
 
 	private String getXML(String login, String password, String pageLink, String logo, String xkey, String user1, String user3) {
-		
+
 		String pin = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_PIN);
 		System.out.println("pin = " + pin);
 
-		
 		String definitionName = "idega.is";
 		String acct = pin + user1;
 		user3 = user3 + "-001";
 		String user4 = acct + xkey;
-		
+
 		StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
 		xml.append("<!DOCTYPE XML-S SYSTEM \"XML-S.dtd\"[]>\n");
 		xml.append("<XML-S>\n");
@@ -194,40 +177,40 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 	private void encodeAndSendXML(String xml, String filename, String personalID) {
 		String userId = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_USER_ID);
 		System.out.println("userId = " + userId);
-		
+
 		try {
 			StringBuffer file = new StringBuffer(this.getIWMainApplication().getBundle("is.idega.idegaweb.egov.citizen").getResourcesRealPath());
 			file.append(FileUtil.getFileSeparator());
-			//Do not change the name of this file because the stupid autodeployer will start it up otherwise.
+			// Do not change the name of this file because the stupid autodeployer will start it up otherwise.
 			file.append("deploy_client.wsdd");
-			
+
 			EngineConfiguration config = new FileProvider(new FileInputStream(file.toString()));
 			BirtingakerfiWSLocator locator = new BirtingakerfiWSLocator(config);
-			BirtingakerfiWSSoap_PortType port = locator
-					.getBirtingakerfiWSSoap(new URL(SERVICE_URL));
+			BirtingakerfiWSSoap_PortType port = locator.getBirtingakerfiWSSoap(new URL(SERVICE_URL));
 
 			Stub stub = (Stub) port;
-			stub._setProperty(WSHandlerConstants.ACTION,
-					WSHandlerConstants.USERNAME_TOKEN);
-			stub._setProperty(WSHandlerConstants.PASSWORD_TYPE,
-					WSConstants.PW_TEXT);
+			stub._setProperty(WSHandlerConstants.ACTION, WSHandlerConstants.USERNAME_TOKEN);
+			stub._setProperty(WSHandlerConstants.PASSWORD_TYPE, WSConstants.PW_TEXT);
 			stub._setProperty(WSHandlerConstants.USER, userId);
 			stub._setProperty(WSHandlerConstants.PW_CALLBACK_CLASS, this.getClass().getName());
 
 			port.sendaSkra(filename, Base64.encode(xml.getBytes()), personalID);
-		} catch (ServiceException e) {
+		}
+		catch (ServiceException e) {
 			e.printStackTrace();
-		} catch (RemoteException e) {
+		}
+		catch (RemoteException e) {
 			e.printStackTrace();
-		} catch (FileNotFoundException e) {
+		}
+		catch (FileNotFoundException e) {
 			e.printStackTrace();
-		} catch (MalformedURLException e) {
+		}
+		catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public void handle(Callback[] callbacks)
-			throws UnsupportedCallbackException {
+	public void handle(Callback[] callbacks) throws UnsupportedCallbackException {
 		String userId = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_USER_ID);
 		String passwd = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_USER_PASSWORD);
 		System.out.println("userId = " + userId);
@@ -239,29 +222,15 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 				if (pc.getIdentifer().equals(userId)) {
 					pc.setPassword(passwd);
 				}
-			} else {
-				throw new UnsupportedCallbackException(callbacks[i],
-						"Unrecognized Callback");
+			}
+			else {
+				throw new UnsupportedCallbackException(callbacks[i], "Unrecognized Callback");
 			}
 		}
 	}
-	
+
 	public boolean sendMessageToBank() {
-		return getIWApplicationContext()
-		.getApplicationSettings().getBoolean(
-				BANK_SEND_REGISTRATION, false);
+		return getIWApplicationContext().getApplicationSettings().getBoolean(BANK_SEND_REGISTRATION, false);
 
 	}
-
-/*	public static void main(String args[]) {
-		WSCitizenAccountBusinessBean bean = new WSCitizenAccountBusinessBean();
-		
-		String xml = bean.getXML("steina","stud", "http://www.sunnan3.is/", "https://www.sunnan3.is/content/files/public/sunnan3_logo.jpg", "54321", "1306635919", "SARP");
-		StringBuffer filename = new StringBuffer("sarpsunnan3");
-		IdGenerator uidGenerator = IdGeneratorFactory.getUUIDGenerator();
-		filename.append(uidGenerator.generateId());
-		filename.append(".xml");
-		
-		bean.encodeAndSendXML(xml, filename.toString(), SENDER_USER_PIN);
-	}*/
 }

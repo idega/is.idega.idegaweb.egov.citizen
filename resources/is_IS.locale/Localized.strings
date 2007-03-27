@@ -1,4 +1,12 @@
 PREFERRED\ LOCALE=Tungum\u00E1l skilabo\u00F0a
+acc.app.acc.body1=G\u00F3\u00F0an dag, 
+acc.app.acc.body2=Ums\u00F3kn \u00FE\u00EDn um "\u00FE\u00EDna \u00FEj\u00F3nustug\u00E1tt" hefur veri\u00F0 sam\u00FEykkt.
+acc.app.acc.body3=A\u00F0gangur \u00FEinn a\u00F0 Rafr\u00E6nni Reykjav\u00EDk er n\u00FA\: \n\r\nNotandanafn\:
+acc.app.acc.body4=\nLykilor\u00F0\:
+acc.app.acc.body5=Sl\u00F3\u00F0\:
+acc.app.acc.fp.subj=N\u00FDtt lykilor\u00F0 fyrir Rafr\u00E6na Reykjav\u00EDk
+acc.app.appr.body=G\u00F3\u00F0an dag {0},\r\n\r\n\u00DE\u00FA hefur fengi\u00F0 a\u00F0gang a\u00F0 Rafr\u00E6nni Reykjav\u00EDk \u00E1 vef Reykjav\u00EDkurborgar.\r\n\r\nNotendanafn\: {1}\r\nLykilor\u00F0\: {2}\r\n\r\n{3}
+acc.app.appr.subj=\u00DEj\u00F3nustug\u00E1tt \u00FE\u00EDn er virk
 account_application.example=(D\u00E6mi\: 0110012230)
 address=Heimilisfang
 already_applied_for_password=\u00DE\u00FA ert b\u00FAinn a\u00F0 s\u00E6kja um n\u00FDtt lykilor\u00F0

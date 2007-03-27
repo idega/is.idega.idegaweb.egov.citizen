@@ -1,13 +1,10 @@
 package is.idega.idegaweb.egov.citizen.business;
 
-
 import java.rmi.RemoteException;
 
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.UnsupportedCallbackException;
-
-import se.idega.idegaweb.commune.account.citizen.business.CitizenAccountBusiness;
 
 import com.idega.business.IBOService;
 

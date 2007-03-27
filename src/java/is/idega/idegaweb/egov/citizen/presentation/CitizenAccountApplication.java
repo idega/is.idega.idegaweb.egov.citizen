@@ -468,7 +468,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 			
 			try {
 				if (!hasErrors) {
-					if (null == business.insertApplication(iwc, user, ssn, email, phoneHome, phoneWork, true,isCreateLoginAndLetter())) {
+					if (null == business.insertApplication(iwc, user, ssn, email, phoneHome, phoneWork, true, isCreateLoginAndLetter())) {
 						errors.add(this.iwrb.getLocalizedString(ERROR_NO_INSERT_KEY, ERROR_NO_INSERT_KEY));
 						hasErrors = true;
 					}

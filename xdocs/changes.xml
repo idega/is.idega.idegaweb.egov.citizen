@@ -6,6 +6,12 @@
 		</author>
 	</properties>
 	<body>
+		<release version="1.0.15" date="2007-03-27">
+			<action dev="laddi" type="update">
+				Refactoring/Elimination of se bundles.
+			</action>
+		</release>
+
 		<release version="1.0.14" date="2007-03-09">
 			<action dev="palli" type="update">
 				Updating and fixing dependencies to create a new sunnan3

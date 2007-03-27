@@ -1,5 +1,7 @@
 package is.idega.idegaweb.egov.citizen.presentation;
 
+import is.idega.idegaweb.egov.citizen.business.CitizenAccountBusiness;
+
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,7 +12,7 @@ import java.util.Map;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
-import se.idega.idegaweb.commune.account.citizen.business.CitizenAccountBusiness;
+
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.business.IBORuntimeException;
@@ -35,21 +37,14 @@ import com.idega.util.text.SocialSecurityNumber;
 /**
  * *
  * 
- * Title: idegaWeb Description: This class handles the case, when a user has
- * forgotten his password. The presentation provides a single input field for
- * the personal id. After submitting the input is checked. If the inputfield is
- * empty a warning dialog pops up. If the input represents an impossible social
- * security number (SSN) an error message is returned (with the inputfield
- * again). If the input is a possible valid ssn the value is checked if this ssn
- * can be found in the table of already known citizen in the database. If the
- * ssn is unknown a link to the citizen application form is returned. If the ssn
- * is known it is checked if the citizen has already activated his account. If
- * the citizen has not an activated account yet again a link to to the citizen
- * application form is returned. There are two different cases if the citizen
- * has already an activated account: If the user has never logged in you can not
- * trust his registered email address. Therefore a new password is generated and
- * send by regular post to the person. If the the user has logged at some time a
- * new password is generated and send by email.
+ * Title: idegaWeb Description: This class handles the case, when a user has forgotten his password. The presentation provides a single input field
+ * for the personal id. After submitting the input is checked. If the inputfield is empty a warning dialog pops up. If the input represents an
+ * impossible social security number (SSN) an error message is returned (with the inputfield again). If the input is a possible valid ssn the value is
+ * checked if this ssn can be found in the table of already known citizen in the database. If the ssn is unknown a link to the citizen application
+ * form is returned. If the ssn is known it is checked if the citizen has already activated his account. If the citizen has not an activated account
+ * yet again a link to to the citizen application form is returned. There are two different cases if the citizen has already an activated account: If
+ * the user has never logged in you can not trust his registered email address. Therefore a new password is generated and send by regular post to the
+ * person. If the the user has logged at some time a new password is generated and send by email.
  * 
  * Copyright: Copyright (c) 2002 Company: idega software
  * 
@@ -69,7 +64,7 @@ public class ForgottenPassword extends CitizenBlock {
 	private final static String ACTION_VIEW_FORM = "action_view_form";
 	private final static String ACTION_FORM_SUBMIT = "action_form_submit";
 	private static final String hasAppliedForPsw = "has_applied_before";
-	
+
 	private IWResourceBundle iwrb;
 	private ICPage iPage;
 	private int iRedirectDelay = 15;
@@ -90,8 +85,7 @@ public class ForgottenPassword extends CitizenBlock {
 	}
 
 	/**
-	 * Handles the input. Checks if the input is a possible valid ssn and if the
-	 * user is known or unknown.
+	 * Handles the input. Checks if the input is a possible valid ssn and if the user is known or unknown.
 	 * 
 	 * @param iwc
 	 */
@@ -102,7 +96,7 @@ public class ForgottenPassword extends CitizenBlock {
 			Enumeration enumeration = iwc.getParameterNames();
 			if (enumeration != null) {
 				query.append("?");
-				
+
 				while (enumeration.hasMoreElements()) {
 					String element = (String) enumeration.nextElement();
 					query.append(element).append("=").append(iwc.getParameter(element));
@@ -120,8 +114,8 @@ public class ForgottenPassword extends CitizenBlock {
 		boolean hasErrors = false;
 		boolean invalidPersonalID = false;
 		Collection errors = new ArrayList();
-		
-		if (ssn == null ||ssn.length() == 0) {
+
+		if (ssn == null || ssn.length() == 0) {
 			errors.add(this.iwrb.getLocalizedString("must_provide_personal_id", "You have to enter a personal ID."));
 			hasErrors = true;
 			invalidPersonalID = true;
@@ -152,10 +146,10 @@ public class ForgottenPassword extends CitizenBlock {
 				hasErrors = true;
 			}
 		}
-		
+
 		if (user != null && !hasAppliedForPassword) {
 			boolean restrictLoginAccess = iwc.getApplicationSettings().getBoolean("egov.account.restrict.password.creation", true);
-			
+
 			LoginTable loginTable = LoginDBHandler.getUserLogin(user);
 			if (loginTable == null) {
 				errors.add(this.iwrb.getLocalizedString("no_login_found_for_user", "No login was found for the user with the personal ID you entered."));
@@ -181,10 +175,10 @@ public class ForgottenPassword extends CitizenBlock {
 				hasErrors = true;
 			}
 		}
-		
+
 		if (!hasErrors) {
 			iwc.setSessionAttribute(hasAppliedForPsw, Boolean.TRUE.toString());
-			
+
 			Form form = new Form();
 			form.setID("accountApplicationForm");
 			form.setStyleClass("citizenForm");
@@ -192,25 +186,25 @@ public class ForgottenPassword extends CitizenBlock {
 			Layer header = new Layer(Layer.DIV);
 			header.setStyleClass("header");
 			form.add(header);
-			
+
 			Heading1 heading = new Heading1(this.iwrb.getLocalizedString("forgotten_password", "Forgotten password"));
 			header.add(heading);
-			
+
 			Layer layer = new Layer(Layer.DIV);
 			layer.setStyleClass("receipt");
-			
+
 			Layer image = new Layer(Layer.DIV);
 			image.setStyleClass("receiptImage");
 			layer.add(image);
-			
+
 			heading = new Heading1(this.iwrb.getLocalizedString(PASSWORD_CREATED_KEY, PASSWORD_CREATED_DEFAULT));
 			layer.add(heading);
-			
+
 			layer.add(new Text(this.iwrb.getLocalizedString(PASSWORD_CREATED_KEY + "_text", PASSWORD_CREATED_DEFAULT + " info")));
-			
+
 			form.add(layer);
 			add(form);
-			
+
 			if (this.iPage != null) {
 				iwc.forwardToIBPage(getParentPage(), this.iPage, this.iRedirectDelay, false);
 			}
@@ -222,8 +216,7 @@ public class ForgottenPassword extends CitizenBlock {
 	}
 
 	/**
-	 * Builds a presentation containing the form with input field and submit
-	 * button.
+	 * Builds a presentation containing the form with input field and submit button.
 	 * 
 	 * @param iwc
 	 */
@@ -232,26 +225,26 @@ public class ForgottenPassword extends CitizenBlock {
 		form.addParameter(FORM_SUBMIT_KEY, Boolean.TRUE.toString());
 		form.setID("forgotPasswordForm");
 		form.setStyleClass("citizenForm");
-		
+
 		Layer header = new Layer(Layer.DIV);
 		header.setStyleClass("header");
 		form.add(header);
-		
+
 		Heading1 heading = new Heading1(this.iwrb.getLocalizedString("forgotten_password", "Forgotten password"));
 		header.add(heading);
-		
+
 		Layer contents = new Layer(Layer.DIV);
 		contents.setStyleClass("formContents");
 		form.add(contents);
-		
+
 		Layer section = new Layer(Layer.DIV);
 		section.setStyleClass("formSection");
 		contents.add(section);
-		
+
 		Paragraph paragraph = new Paragraph();
 		paragraph.add(new Text(this.iwrb.getLocalizedString("forgot_password_helper_text", "Please enter your personal ID and click 'Send'.  A new password will be created and sent to your e-mail address.")));
 		section.add(paragraph);
-		
+
 		TextInput input = new TextInput(SSN_KEY);
 		input.keepStatusOnAction(true);
 
@@ -279,7 +272,7 @@ public class ForgottenPassword extends CitizenBlock {
 		formItem.add(label);
 		formItem.add(input);
 		section.add(formItem);
-		
+
 		Layer clearLayer = new Layer(Layer.DIV);
 		clearLayer.setStyleClass("Clear");
 		section.add(clearLayer);
@@ -287,14 +280,14 @@ public class ForgottenPassword extends CitizenBlock {
 		Layer buttonLayer = new Layer(Layer.DIV);
 		buttonLayer.setStyleClass("buttonLayer");
 		contents.add(buttonLayer);
-		
+
 		Layer span = new Layer(Layer.SPAN);
 		span.add(new Text(this.iwrb.getLocalizedString(FORM_SUBMIT_KEY + "_button", FORM_SUBMIT_DEFAULT)));
 		Link send = new Link(span);
 		send.setStyleClass("sendLink");
 		send.setToFormSubmit(form);
 		buttonLayer.add(send);
-		
+
 		add(form);
 	}
 
@@ -302,8 +295,7 @@ public class ForgottenPassword extends CitizenBlock {
 	 * Parses the parameter string.
 	 * 
 	 * @param iwc
-	 * @return either string for action "view form" or string for action "form was
-	 *         submitted".
+	 * @return either string for action "view form" or string for action "form was submitted".
 	 */
 	private String parseAction(final IWContext iwc) {
 		String action = ACTION_VIEW_FORM;
@@ -336,11 +328,11 @@ public class ForgottenPassword extends CitizenBlock {
 	private String createNewPassword() {
 		return LoginDBHandler.getGeneratedPasswordForUser();
 	}
-	
+
 	public void setPage(ICPage page) {
 		this.iPage = page;
 	}
-	
+
 	public void setRedirectDelay(int redirectDelay) {
 		this.iRedirectDelay = redirectDelay;
 	}

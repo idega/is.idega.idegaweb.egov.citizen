@@ -5,7 +5,7 @@
   <pomVersion>3</pomVersion>
   <name>eGov General Cases</name>
   <artifactId>is.idega.idegaweb.egov.citizen</artifactId>
-  <currentVersion>1.0.14</currentVersion>
+  <currentVersion>1.0.15</currentVersion>
   <inceptionYear>2005</inceptionYear>
   <shortDescription>eGov Citizen</shortDescription>
   <versions>
@@ -79,6 +79,11 @@
       <name>1.0.14</name>
       <tag>CITIZEN_1_0_14</tag>
     </version>
+    <version>
+      <id>1.0.15</id>
+      <name>1.0.15</name>
+      <tag>CITIZEN_1_0_15</tag>
+    </version>
   </versions>
   <branches/>
   <developers>
@@ -111,6 +116,26 @@
       <version>3.1.4</version>
       <type>jar</type>
       <url>http://www.idega.com/</url>
+    </dependency>
+    <dependency>
+      <groupId>bundles</groupId>
+      <artifactId>is.idega.idegaweb.egov</artifactId>
+      <version>1.0.9</version>
+      <type>jar</type>
+      <url>http://www.idega.com/</url>
+      <properties>
+        <eclipse.dependency>true</eclipse.dependency>
+      </properties>
+    </dependency>
+    <dependency>
+      <groupId>bundles</groupId>
+      <artifactId>is.idega.idegaweb.egov.message</artifactId>
+      <version>1.0.1</version>
+      <type>jar</type>
+      <url>http://www.idega.com/</url>
+      <properties>
+        <eclipse.dependency>true</eclipse.dependency>
+      </properties>
     </dependency>
     <dependency>
       <groupId>bundles</groupId>
@@ -167,16 +192,6 @@
       <url>http://ws.apache.org/wss4j/</url>
       <properties>
         <idegaweb.bundle.include>true</idegaweb.bundle.include>
-      </properties>
-    </dependency>
-    <dependency>
-      <groupId>bundles</groupId>
-      <artifactId>se.idega.idegaweb.commune</artifactId>
-      <version>1.0.9</version>
-      <type>jar</type>
-      <url>http://www.idega.com/</url>
-      <properties>
-        <eclipse.dependency>true</eclipse.dependency>
       </properties>
     </dependency>
   </dependencies>

@@ -7,13 +7,13 @@
  */
 package is.idega.idegaweb.egov.citizen.presentation;
 
+import is.idega.idegaweb.egov.accounting.business.CitizenBusiness;
+
 import java.rmi.RemoteException;
 import java.util.Collection;
 import java.util.Iterator;
 
 import javax.ejb.FinderException;
-
-import se.idega.idegaweb.commune.business.CommuneUserBusiness;
 
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
@@ -355,9 +355,9 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 		return false;
 	}
 
-	protected CommuneUserBusiness getUserBusiness(IWApplicationContext iwc) {
+	protected CitizenBusiness getUserBusiness(IWApplicationContext iwc) {
 		try {
-			return (CommuneUserBusiness) IBOLookup.getServiceInstance(iwc, CommuneUserBusiness.class);
+			return (CitizenBusiness) IBOLookup.getServiceInstance(iwc, CitizenBusiness.class);
 		}
 		catch (IBOLookupException ile) {
 			throw new IBORuntimeException(ile);
