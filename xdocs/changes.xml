@@ -6,6 +6,12 @@
 		</author>
 	</properties>
 	<body>
+		<release version="1.0.16" date="2007-03-28">
+			<action dev="laddi" type="update">
+				Changed so that all personal ID inputs allow a maximum of 10 letters/numbers.
+			</action>
+		</release>
+
 		<release version="1.0.15" date="2007-03-27">
 			<action dev="laddi" type="update">
 				Refactoring/Elimination of se bundles.

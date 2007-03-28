@@ -246,6 +246,9 @@ public class ForgottenPassword extends CitizenBlock {
 		section.add(paragraph);
 
 		TextInput input = new TextInput(SSN_KEY);
+		input.setStyleClass("personalID");
+		input.setMaxlength(10);
+		input.setLength(10);
 		input.keepStatusOnAction(true);
 
 		if (this.iCommuneMap != null) {
