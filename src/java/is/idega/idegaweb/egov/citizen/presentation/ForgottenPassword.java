@@ -3,6 +3,7 @@ package is.idega.idegaweb.egov.citizen.presentation;
 import is.idega.idegaweb.egov.citizen.business.CitizenAccountBusiness;
 
 import java.rmi.RemoteException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -19,6 +20,7 @@ import com.idega.business.IBORuntimeException;
 import com.idega.core.accesscontrol.business.LoginDBHandler;
 import com.idega.core.accesscontrol.data.LoginTable;
 import com.idega.core.builder.data.ICPage;
+import com.idega.core.contact.data.Email;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
@@ -30,6 +32,7 @@ import com.idega.presentation.ui.DropdownMenu;
 import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.TextInput;
+import com.idega.user.business.NoEmailFoundException;
 import com.idega.user.business.UserBusiness;
 import com.idega.user.data.User;
 import com.idega.util.text.SocialSecurityNumber;
@@ -147,8 +150,20 @@ public class ForgottenPassword extends CitizenBlock {
 			}
 		}
 
+		Email email = null;
 		if (user != null && !hasAppliedForPassword) {
 			boolean restrictLoginAccess = iwc.getApplicationSettings().getBoolean("egov.account.restrict.password.creation", true);
+
+			try {
+				UserBusiness business = (UserBusiness) IBOLookup.getServiceInstance(iwc, UserBusiness.class);
+				email = business.getUsersMainEmail(user);
+			}
+			catch (RemoteException re) {
+				throw new IBORuntimeException(re);
+			}
+			catch (NoEmailFoundException ex) {
+				// No email found...
+			}
 
 			LoginTable loginTable = LoginDBHandler.getUserLogin(user);
 			if (loginTable == null) {
@@ -200,7 +215,8 @@ public class ForgottenPassword extends CitizenBlock {
 			heading = new Heading1(this.iwrb.getLocalizedString(PASSWORD_CREATED_KEY, PASSWORD_CREATED_DEFAULT));
 			layer.add(heading);
 
-			layer.add(new Text(this.iwrb.getLocalizedString(PASSWORD_CREATED_KEY + "_text", PASSWORD_CREATED_DEFAULT + " info")));
+			Object[] arguments = { email != null ? email.getEmailAddress() : "email@email.is" };
+			layer.add(new Text(MessageFormat.format(this.iwrb.getLocalizedString(PASSWORD_CREATED_KEY + "_text", PASSWORD_CREATED_DEFAULT + " info"), arguments)));
 
 			form.add(layer);
 			add(form);
