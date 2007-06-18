@@ -59,7 +59,7 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 	private static final String PROPERTY_MINIMUM_AGE_CITIZEN_FINDER = "citizen.finder.minimum.age";
 
 	private ICPage iPage;
-	private Collection users;
+	protected Collection users;
 	protected IWResourceBundle iwrb;
 
 	public void present(IWContext iwc) {
@@ -162,7 +162,7 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 		return form;
 	}
 
-	private Table2 getUserTable(IWContext iwc) {
+	protected Table2 getUserTable(IWContext iwc) {
 		Table2 table = new Table2();
 		table.setStyleClass("adminTable");
 		table.setStyleClass("ruler");
