@@ -28,6 +28,7 @@ import com.idega.idegaweb.IWResourceBundle;
 import com.idega.idegaweb.IWUserContext;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
+import com.idega.presentation.Script;
 import com.idega.presentation.Table2;
 import com.idega.presentation.TableCell2;
 import com.idega.presentation.TableRow;
@@ -66,10 +67,23 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 		this.iwrb = getResourceBundle(iwc);
 		parseAction(iwc);
 
-		add(getSearchForm(iwc));
-		if (this.users != null) {
-			add(getUserTable(iwc));
+		if (hasPermission(iwc)) {
+			add(getSearchForm(iwc));
+			if (this.users != null) {
+				add(getUserTable(iwc));
+			}
 		}
+		else {
+			showNoPermission(iwc);
+		}
+	}
+
+	protected boolean hasPermission(IWContext iwc) {
+		return true;
+	}
+
+	protected void showNoPermission(IWContext iwc) {
+		//Override in subclasses...
 	}
 
 	private Collection getUsers(IWContext iwc, String firstName, String middleName, String lastName, String pid) throws RemoteException {
@@ -84,6 +98,10 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 		Form form = new Form();
 		form.setID("citizenFinderForm");
 		form.setStyleClass("citizenForm");
+
+		Script script = new Script();
+		script.addFunction("enterSubmit", "function enterSubmit(myfield,e) { var keycode; if (window.event) keycode = window.event.keyCode; else if (e) keycode = e.which; else return true; if (keycode == 13) { myfield.form.submit(); return false; } else return true; }");
+		form.add(script);
 
 		Layer header = new Layer(Layer.DIV);
 		header.setStyleClass("header");
@@ -101,15 +119,19 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 		personalID.keepStatusOnAction(true);
 		personalID.setMaxlength(10);
 		personalID.setLength(10);
+		personalID.setOnKeyPress("return enterSubmit(this,event)");
 
 		TextInput firstName = new TextInput(PARAMETER_FIRST_NAME);
 		firstName.keepStatusOnAction(true);
+		firstName.setOnKeyPress("return enterSubmit(this,event)");
 
 		TextInput middleName = new TextInput(PARAMETER_MIDDLE_NAME);
 		middleName.keepStatusOnAction(true);
+		middleName.setOnKeyPress("return enterSubmit(this,event)");
 
 		TextInput lastName = new TextInput(PARAMETER_LAST_NAME);
 		lastName.keepStatusOnAction(true);
+		lastName.setOnKeyPress("return enterSubmit(this,event)");
 
 		Layer helpLayer = new Layer(Layer.DIV);
 		helpLayer.setStyleClass("helperText");
