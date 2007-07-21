@@ -266,8 +266,8 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 				else {
 					nameLink.addParameter(PARAMETER_USER_PK, user.getPrimaryKey().toString());
 				}
-				if (this.iPage != null) {
-					nameLink.setPage(this.iPage);
+				if (getResponsePage() != null) {
+					nameLink.setPage(getResponsePage());
 				}
 			}
 			else {
@@ -400,5 +400,9 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 
 	public void setResponsePage(ICPage page) {
 		this.iPage = page;
+	}
+
+	protected ICPage getResponsePage() {
+		return this.iPage;
 	}
 }
