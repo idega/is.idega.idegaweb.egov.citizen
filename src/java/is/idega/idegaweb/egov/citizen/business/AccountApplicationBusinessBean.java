@@ -48,7 +48,7 @@ public abstract class AccountApplicationBusinessBean extends CaseBusinessBean im
 	protected AccountApplication getApplication(int applicationID) throws FinderException {
 		return (AccountApplication) this.getCase(applicationID);
 	}
-
+	
 	/**
 	 * Accepts the application for an application with ID applicationID by User performer
 	 * 
@@ -63,8 +63,7 @@ public abstract class AccountApplicationBusinessBean extends CaseBusinessBean im
 	 * @throws FinderException
 	 *           If an application with applicationID is not found.
 	 */
-
-	public void acceptApplication(int applicationID, User performer, boolean createUserMessage, boolean createPasswordMessage, boolean sendEmail) throws CreateException {
+	public void acceptApplication(int applicationID, User performer, boolean createUserMessage, boolean createPasswordMessage, boolean sendEmail, boolean sendSnailMail) throws CreateException {
 		UserTransaction trans = null;
 		User user = null;
 		try {
@@ -76,7 +75,7 @@ public abstract class AccountApplicationBusinessBean extends CaseBusinessBean im
 
 			addUserToRootAcceptedCitizenGroup(user);
 
-			createLoginAndSendMessage(theCase, createUserMessage, createPasswordMessage, sendEmail);
+			createLoginAndSendMessage(theCase, createUserMessage, createPasswordMessage, sendEmail, sendSnailMail);
 
 			trans.commit();
 		}
@@ -141,7 +140,7 @@ public abstract class AccountApplicationBusinessBean extends CaseBusinessBean im
 	 *           If an application with applicationID is not found.
 	 */
 	public void acceptApplication(int applicationID, User performer, boolean createPasswordMessage) throws CreateException {
-		acceptApplication(applicationID, performer, shouldEmailBeSentWhenANewAccountIsInserted(), createPasswordMessage, false);
+		acceptApplication(applicationID, performer, shouldEmailBeSentWhenANewAccountIsInserted(), createPasswordMessage, false, false);
 	}
 
 	protected String getAcceptMessageBody(AccountApplication theCase, String login, String password) {
@@ -181,7 +180,7 @@ public abstract class AccountApplicationBusinessBean extends CaseBusinessBean im
 			getMessageBusiness().sendMessage(email, subject, body);
 		}
 	}
-
+	
 	/**
 	 * Creates a Login for a user with application theCase and send a message to the user that applies if it is successful.
 	 * 
@@ -192,7 +191,7 @@ public abstract class AccountApplicationBusinessBean extends CaseBusinessBean im
 	 * @throws LoginCreateException
 	 *           If an error occurs creating login for the user.
 	 */
-	protected void createLoginAndSendMessage(AccountApplication theCase, boolean createUserMessage, boolean createPasswordMessage, boolean sendEmail) throws RemoteException, CreateException, LoginCreateException {
+	protected void createLoginAndSendMessage(AccountApplication theCase, boolean createUserMessage, boolean createPasswordMessage, boolean sendEmail, boolean sendSnailMail) throws RemoteException, CreateException, LoginCreateException {
 		boolean sendLetter = false;
 		LoginTable lt;
 		String login;

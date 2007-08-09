@@ -47,7 +47,7 @@ public class CitizenAccountBusinessBean extends AccountApplicationBusinessBean i
 	protected CitizenAccountHome getCitizenAccountHome() throws RemoteException {
 		return (CitizenAccountHome) IDOLookup.getHome(CitizenAccount.class);
 	}
-
+	
 	/**
 	 * Creates an application for CitizenAccount for a user with a personalId that is in the system.
 	 * 
@@ -66,7 +66,7 @@ public class CitizenAccountBusinessBean extends AccountApplicationBusinessBean i
 	 *           If A User already has a login in the system.
 	 */
 
-	public Integer insertApplication(IWContext iwc, User user, String ssn, String email, String phoneHome, String phoneWork, boolean sendEmail, boolean createLoginAndSendLetter) throws UserHasLoginException {
+	public Integer insertApplication(IWContext iwc, User user, String ssn, String email, String phoneHome, String phoneWork, boolean sendEmail, boolean createLoginAndSendLetter, boolean sendSnailMail) throws UserHasLoginException {
 		CitizenAccount application = null;
 		UserTransaction transaction = null;
 		// NBSLoginBusinessBean loginBusiness = new NBSLoginBusinessBean();
@@ -122,7 +122,7 @@ public class CitizenAccountBusinessBean extends AccountApplicationBusinessBean i
 						acceptApplication(applicationID, user, false);
 					}
 					else {
-						acceptApplication(applicationID, user, shouldEmailBeSentWhenANewAccountIsInserted(), true, sendEmail);
+						acceptApplication(applicationID, user, shouldEmailBeSentWhenANewAccountIsInserted(), true, sendEmail, sendSnailMail);
 					}
 				}
 			}
@@ -185,8 +185,8 @@ public class CitizenAccountBusinessBean extends AccountApplicationBusinessBean i
 	protected Class getCaseEntityClass() {
 		return CitizenAccount.class;
 	}
-
-	public void acceptApplication(int applicationID, User performer, boolean createUserMessage, boolean createPasswordMessage, boolean sendEmail) throws CreateException {
+	
+	public void acceptApplication(int applicationID, User performer, boolean createUserMessage, boolean createPasswordMessage, boolean sendEmail, boolean sendSnailMail) throws CreateException {
 		UserTransaction transaction = null;
 		try {
 			transaction = getSessionContext().getUserTransaction();
@@ -200,7 +200,7 @@ public class CitizenAccountBusinessBean extends AccountApplicationBusinessBean i
 
 			applicant.setOwner(user);
 			applicant.store();
-			super.acceptApplication(applicationID, performer, createUserMessage, createPasswordMessage, sendEmail);
+			super.acceptApplication(applicationID, performer, createUserMessage, createPasswordMessage, sendEmail, sendSnailMail);
 			transaction.commit();
 		}
 		catch (Exception e) {

@@ -13,10 +13,7 @@ import com.idega.user.data.User;
 
 public interface CitizenAccountBusiness extends IBOService, AccountBusiness {
 
-	/**
-	 * @see is.idega.idegaweb.egov.citizen.business.CitizenAccountBusinessBean#insertApplication
-	 */
-	public Integer insertApplication(IWContext iwc, User user, String ssn, String email, String phoneHome, String phoneWork, boolean sendEmail, boolean createLoginAndSendLetter) throws UserHasLoginException, RemoteException;
+	public Integer insertApplication(IWContext iwc, User user, String ssn, String email, String phoneHome, String phoneWork, boolean sendEmail, boolean createLoginAndSendLetter, boolean sendSnailMail) throws UserHasLoginException, RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.citizen.business.CitizenAccountBusinessBean#getUserIcelandic
@@ -26,7 +23,7 @@ public interface CitizenAccountBusiness extends IBOService, AccountBusiness {
 	/**
 	 * @see is.idega.idegaweb.egov.citizen.business.CitizenAccountBusinessBean#acceptApplication
 	 */
-	public void acceptApplication(int applicationID, User performer, boolean createUserMessage, boolean createPasswordMessage, boolean sendEmail) throws CreateException, RemoteException;
+	public void acceptApplication(int applicationID, User performer, boolean createUserMessage, boolean createPasswordMessage, boolean sendEmail, boolean sendSnailMail) throws CreateException, RemoteException;
 
 	/**
 	 * @see is.idega.idegaweb.egov.citizen.business.CitizenAccountBusinessBean#changePasswordAndSendLetterOrEmail

@@ -7,7 +7,7 @@ public interface AccountBusiness extends com.idega.business.IBOService {
 
 	public void acceptApplication(int p0, com.idega.user.data.User p1, boolean p2) throws java.rmi.RemoteException, javax.ejb.CreateException;
 
-	public void acceptApplication(int p0, com.idega.user.data.User p1, boolean p2, boolean p3, boolean p4) throws java.rmi.RemoteException, javax.ejb.CreateException;
+	public void acceptApplication(int p0, com.idega.user.data.User p1, boolean p2, boolean p3, boolean p4, boolean p5) throws java.rmi.RemoteException, javax.ejb.CreateException;
 
 	public java.lang.String getAcceptMessageSubject(AccountApplication theCase) throws java.rmi.RemoteException;
 
