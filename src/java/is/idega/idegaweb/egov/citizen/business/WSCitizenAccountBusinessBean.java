@@ -1,5 +1,6 @@
 package is.idega.idegaweb.egov.citizen.business;
 
+import is.idega.idegaweb.egov.citizen.business.landsbankan.SendLoginDataBusiness;
 import is.idega.idegaweb.egov.citizen.data.AccountApplication;
 import is.idega.idegaweb.egov.citizen.wsclient.BirtingakerfiWSLocator;
 import is.idega.idegaweb.egov.citizen.wsclient.BirtingakerfiWSSoap_PortType;
@@ -24,19 +25,28 @@ import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSPasswordCallback;
 import org.apache.ws.security.handler.WSHandlerConstants;
 
+import com.idega.business.IBORuntimeException;
 import com.idega.core.accesscontrol.business.LoginCreateException;
+import com.idega.core.accesscontrol.data.LoginInfo;
+import com.idega.core.accesscontrol.data.LoginInfoHome;
 import com.idega.core.accesscontrol.data.LoginTable;
 import com.idega.core.accesscontrol.data.PasswordNotKnown;
 import com.idega.core.idgenerator.business.IdGenerator;
 import com.idega.core.idgenerator.business.IdGeneratorFactory;
 import com.idega.data.IDOCreateException;
+import com.idega.data.IDOLookup;
+import com.idega.data.IDOLookupException;
 import com.idega.user.data.User;
 import com.idega.util.FileUtil;
 import com.idega.util.IWTimestamp;
 
 public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean implements WSCitizenAccountBusiness, CitizenAccountBusiness, CallbackHandler {
 
+	private static final long serialVersionUID = -8824721140289363380L;
+
 	protected static final String BANK_SEND_REGISTRATION = "BANK_SEND_REGISTRATION";
+	
+	protected static final String USE_LANDSBANKAN = "USE_LANDSBANKAN";
 
 	protected static final String BANK_SENDER_PIN = "BANK_SENDER_PIN";
 
@@ -62,51 +72,58 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean imp
 	 * @throws LoginCreateException
 	 *           If an error occurs creating login for the user.
 	 */
-	protected void createLoginAndSendMessage(AccountApplication theCase, boolean createUserMessage, boolean createPasswordMessage, boolean sendEmail) throws RemoteException, CreateException, LoginCreateException {
+	protected void createLoginAndSendMessage(AccountApplication theCase, boolean createUserMessage, boolean createPasswordMessage, boolean sendEmail, boolean sendSnailMail) throws RemoteException, CreateException, LoginCreateException {
+
 		boolean sendLetter = false;
-		LoginTable lt;
-		String login;
-		User citizen;
-		citizen = theCase.getOwner();
-		lt = getUserBusiness().generateUserLogin(citizen);
-		login = lt.getUserLogin();
+		User citizen = theCase.getOwner();
+		LoginTable lt = getUserBusiness().generateUserLogin(citizen);
+		String login = lt.getUserLogin();
+		
 		try {
 			String password = lt.getUnencryptedUserPassword();
 
 			String messageBody = this.getAcceptMessageBody(theCase, login, password);
 			String messageSubject = this.getAcceptMessageSubject(theCase);
-
-			if (createPasswordMessage) {
+			
+			if (createPasswordMessage && sendSnailMail)
 				this.getMessageBusiness().createPasswordMessage(citizen, login, password);
-			}
 
 			createUserMessage = sendEmail;
 
 			boolean sendMessageToBank = sendMessageToBank();
-			System.out.println("sendMessageToBank = " + sendMessageToBank);
-
+			
 			if (sendMessageToBank) {
 				String pageLink = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_PAGELINK);
 				String logoLink = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_LOGOLINK);
 				String ssn = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_PIN);
 				String user3 = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_TYPE);
 
-				System.out.println("pageLink = " + pageLink);
-				System.out.println("logoLink = " + logoLink);
-				System.out.println("ssn = " + ssn);
-				System.out.println("user3 = " + user3);
-
 				String xml = getXML(login, password, pageLink, logoLink, citizen.getPrimaryKey().toString(), citizen.getPersonalID(), user3);
+				
+				if(sendUsingLandsbankan()) {
+					
+					SendLoginDataBusiness send_data = (SendLoginDataBusiness)getServiceInstance(SendLoginDataBusiness.class);
+					send_data.send(xml);
+					
+					try {
+						LoginInfo loginInfo = getLoginInfoHome().findByPrimaryKey(lt.getPrimaryKey());
+						loginInfo.setCreationType("RVKLB");
+						loginInfo.store();
+						
+					} catch (Exception e) {
+						throw new RuntimeException("Failed to flag secure user registration", e);
+					}
+					
+				} else {
+					
+					StringBuffer filename = new StringBuffer(user3.toLowerCase());
+					filename.append("sunnan3");
+					IdGenerator uidGenerator = IdGeneratorFactory.getUUIDGenerator();
+					filename.append(uidGenerator.generateId());
+					filename.append(".xml");
 
-				StringBuffer filename = new StringBuffer(user3.toLowerCase());
-				filename.append("sunnan3");
-				IdGenerator uidGenerator = IdGeneratorFactory.getUUIDGenerator();
-				filename.append(uidGenerator.generateId());
-				filename.append(".xml");
-
-				System.out.println("filename = " + filename.toString());
-
-				encodeAndSendXML(xml, filename.toString(), ssn);
+					encodeAndSendXML(xml, filename.toString(), ssn);
+				}
 			}
 			else if (createUserMessage) {
 				this.getMessageBusiness().createUserMessage(citizen, messageSubject, messageBody, sendLetter);
@@ -121,11 +138,14 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean imp
 			e.printStackTrace();
 		}
 	}
+	
+	private boolean sendUsingLandsbankan() {
+		return getIWApplicationContext().getApplicationSettings().getBoolean(USE_LANDSBANKAN, false);
+	}
 
 	private String getXML(String login, String password, String pageLink, String logo, String xkey, String user1, String user3) {
-
+		
 		String pin = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_PIN);
-		System.out.println("pin = " + pin);
 
 		String definitionName = "idega.is";
 		String acct = pin + user1;
@@ -162,10 +182,13 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean imp
 		xml.append(password);
 		xml.append("</Field>\n");
 		xml.append("\t\t\t<Field Name=\"PageLink\">");
-		xml.append(pageLink);
+		
+		if(pageLink != null)
+			xml.append(pageLink);
 		xml.append("</Field>\n");
 		xml.append("\t\t\t<Field Name=\"Logo\">");
-		xml.append(logo);
+		if(logo != null)
+			xml.append(logo);
 		xml.append("</Field>\n");
 		xml.append("\t\t</Section>\n");
 		xml.append("\t</Statement>\n");
@@ -173,10 +196,9 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean imp
 
 		return xml.toString();
 	}
-
+	
 	private void encodeAndSendXML(String xml, String filename, String personalID) {
 		String userId = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_USER_ID);
-		System.out.println("userId = " + userId);
 
 		try {
 			StringBuffer file = new StringBuffer(this.getIWMainApplication().getBundle("is.idega.idegaweb.egov.citizen").getResourcesRealPath());
@@ -213,8 +235,6 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean imp
 	public void handle(Callback[] callbacks) throws UnsupportedCallbackException {
 		String userId = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_USER_ID);
 		String passwd = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_USER_PASSWORD);
-		System.out.println("userId = " + userId);
-		System.out.println("passwd = " + passwd);
 
 		for (int i = 0; i < callbacks.length; i++) {
 			if (callbacks[i] instanceof WSPasswordCallback) {
@@ -231,6 +251,14 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean imp
 
 	public boolean sendMessageToBank() {
 		return getIWApplicationContext().getApplicationSettings().getBoolean(BANK_SEND_REGISTRATION, false);
-
+	}
+	
+	private LoginInfoHome getLoginInfoHome() {
+		try {
+			return (LoginInfoHome) IDOLookup.getHome(LoginInfo.class);
+		}
+		catch (IDOLookupException ile) {
+			throw new IBORuntimeException(ile);
+		}
 	}
 }
