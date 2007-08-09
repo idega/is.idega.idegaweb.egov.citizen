@@ -40,6 +40,7 @@ import com.idega.presentation.Span;
 import com.idega.presentation.text.Heading1;
 import com.idega.presentation.text.Link;
 import com.idega.presentation.text.Text;
+import com.idega.presentation.ui.CheckBox;
 import com.idega.presentation.ui.DropdownMenu;
 import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.HiddenInput;
@@ -67,6 +68,8 @@ public class CitizenAccountApplication extends CitizenBlock {
 
 	private final static String EMAIL_DEFAULT = "Email";
 	private final static String EMAIL_KEY = "email";
+	private final static String SNAIL_MAIL_KEY = "snail_mail";
+	private final static String SNAIL_MAIL_DEFAULT = "Send password using ordinary mail";
 	private final static String EMAIL_KEY_REPEAT = "email_repeat";
 	private final static String EMAIL_REPEAT_DEFAULT = "Email again";
 	private final static String PHONE_HOME_KEY = "home_phone";
@@ -117,8 +120,10 @@ public class CitizenAccountApplication extends CitizenBlock {
 	private String redirectUrlOnSubmit;
 
 	private boolean showPreferredLocaleChooser = false;
+	private boolean showSendSnailMailChooser = false;
 
 	public void present(IWContext iwc) {
+		
 		this.iwrb = getResourceBundle(iwc);
 		parseParameters(iwc);
 		try {
@@ -233,6 +238,9 @@ public class CitizenAccountApplication extends CitizenBlock {
 
 		TextInput email = new TextInput(EMAIL_KEY);
 		email.keepStatusOnAction(true);
+		
+		CheckBox snailMail = new CheckBox(SNAIL_MAIL_KEY);
+		snailMail.keepStatusOnAction(true);
 
 		TextInput emailRepeat = new TextInput(EMAIL_KEY_REPEAT);
 		emailRepeat.keepStatusOnAction(true);
@@ -296,7 +304,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		formItem.add(label);
 		formItem.add(email);
 		section.add(formItem);
-
+		
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		formItem.setStyleClass("required");
@@ -306,6 +314,20 @@ public class CitizenAccountApplication extends CitizenBlock {
 		formItem.add(label);
 		formItem.add(emailRepeat);
 		section.add(formItem);
+
+		
+		if(isSetToShowSendSnailMailChooser()) {
+			
+			formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			formItem.setID("snail_mail");
+			snailMail.setStyleClass("checkbox");
+			label = new Label(snailMail);
+			label.add(new Span(new Text(this.iwrb.getLocalizedString(SNAIL_MAIL_KEY, SNAIL_MAIL_DEFAULT))));
+			formItem.add(label);
+			formItem.add(snailMail);
+			section.add(formItem);
+		}
 
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
@@ -402,7 +424,9 @@ public class CitizenAccountApplication extends CitizenBlock {
 			errors.add(this.iwrb.getLocalizedString("email_can_not_be_empty", "You must provide a valid e-mail address"));
 			hasErrors = true;
 		}
-
+		
+		boolean sendSnailMail = !(iwc.getParameter(SNAIL_MAIL_KEY) == null || iwc.getParameter(SNAIL_MAIL_KEY).length() == 0);
+		
 		String emailRepeat = iwc.getParameter(EMAIL_KEY_REPEAT);
 		String phoneHome = iwc.getParameter(PHONE_HOME_KEY);
 		String phoneWork = iwc.getParameter(PHONE_CELL_KEY);
@@ -471,7 +495,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 
 			try {
 				if (!hasErrors) {
-					if (null == business.insertApplication(iwc, user, ssn, email, phoneHome, phoneWork, true, isCreateLoginAndLetter())) {
+					if (null == business.insertApplication(iwc, user, ssn, email, phoneHome, phoneWork, true, isCreateLoginAndLetter(), isSetToShowSendSnailMailChooser() ? sendSnailMail : true)) {
 						errors.add(this.iwrb.getLocalizedString(ERROR_NO_INSERT_KEY, ERROR_NO_INSERT_KEY));
 						hasErrors = true;
 					}
@@ -630,6 +654,14 @@ public class CitizenAccountApplication extends CitizenBlock {
 	 */
 	public void setToShowPreferredLocaleChooser(boolean showPreferredLocaleChooser) {
 		this.showPreferredLocaleChooser = showPreferredLocaleChooser;
+	}
+	
+	public void setToShowSendSnailMailChooser(boolean showSendSnailMailChooser) {
+		this.showSendSnailMailChooser = showSendSnailMailChooser;
+	}
+	
+	public boolean isSetToShowSendSnailMailChooser() {
+		return showSendSnailMailChooser;
 	}
 
 	public boolean isCreateLoginAndLetter() {
