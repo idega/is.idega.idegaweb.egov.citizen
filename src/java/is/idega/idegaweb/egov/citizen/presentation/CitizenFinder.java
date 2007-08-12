@@ -35,6 +35,7 @@ import com.idega.presentation.TableRow;
 import com.idega.presentation.TableRowGroup;
 import com.idega.presentation.text.Heading1;
 import com.idega.presentation.text.Link;
+import com.idega.presentation.text.Lists;
 import com.idega.presentation.text.Text;
 import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.Label;
@@ -72,6 +73,11 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 			if (this.users != null) {
 				add(getUserTable(iwc));
 			}
+
+			Lists legend = getLegend(iwc);
+			if (legend != null) {
+				add(legend);
+			}
 		}
 		else {
 			showNoPermission(iwc);
@@ -84,6 +90,10 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 
 	protected void showNoPermission(IWContext iwc) {
 		//Override in subclasses...
+	}
+
+	protected Lists getLegend(IWContext iwc) {
+		return null;
 	}
 
 	private Collection getUsers(IWContext iwc, String firstName, String middleName, String lastName, String pid) throws RemoteException {
