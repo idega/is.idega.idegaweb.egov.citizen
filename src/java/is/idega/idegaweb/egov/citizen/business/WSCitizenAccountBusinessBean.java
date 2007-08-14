@@ -1,6 +1,6 @@
 package is.idega.idegaweb.egov.citizen.business;
 
-import is.idega.idegaweb.egov.citizen.business.landsbankan.SendLoginDataBusiness;
+import is.idega.idegaweb.egov.citizen.business.landsbankinn.SendLoginDataBusiness;
 import is.idega.idegaweb.egov.citizen.data.AccountApplication;
 import is.idega.idegaweb.egov.citizen.wsclient.BirtingakerfiWSLocator;
 import is.idega.idegaweb.egov.citizen.wsclient.BirtingakerfiWSSoap_PortType;
@@ -46,7 +46,7 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean imp
 
 	protected static final String BANK_SEND_REGISTRATION = "BANK_SEND_REGISTRATION";
 	
-	protected static final String USE_LANDSBANKIN = "USE_LANDSBANKIN";
+	protected static final String USE_LANDSBANKINN = "USE_LANDSBANKINN";
 
 	protected static final String BANK_SENDER_PIN = "BANK_SENDER_PIN";
 
@@ -144,7 +144,7 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean imp
 	}
 	
 	private boolean sendUsingLandsbankan() {
-		return getIWApplicationContext().getApplicationSettings().getBoolean(USE_LANDSBANKIN, false);
+		return getIWApplicationContext().getApplicationSettings().getBoolean(USE_LANDSBANKINN, false);
 	}
 
 	private String getXML(String login, String password, String pageLink, String logo, String xkey, String user1, String user3) {
