@@ -1,5 +1,7 @@
 package is.idega.idegaweb.egov.citizen.business.landsbankan;
 
+import is.idega.idegaweb.egov.citizen.business.WSCitizenAccountBusinessBean;
+
 import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -11,6 +13,8 @@ import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.httpclient.methods.multipart.StringPart;
 
 import com.idega.business.IBOServiceBean;
+import com.idega.idegaweb.IWMainApplication;
+import com.idega.util.CypherText;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.core.BaseException;
 import com.thoughtworks.xstream.io.xml.XmlFriendlyReplacer;
@@ -34,8 +38,13 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 	private XStream send_data_response_err_xstream;
 	
 	private static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-	private static final String DEFAULT_SERVICE_URL = "https://b2b.fbl.is/test/lib2btest.dll?processXML";
+	private static final String DEFAULT_SERVICE_URL = "https://b2b.fbl.is/lib2b.dll?processXML";
 	private static final String LANDSBANKIN_SERVICE_URL = "LANDSBANKIN_SERVICE_URL";
+	
+	private static final String landsbankin_service_rvk_login_app_key = "landsbankin.rvk.ws.login";
+	private static final String landsbankin_service_rvk_pass_app_key = "landsbankin.rvk.ws.pass";
+	
+	private static final String ck = "8CTW4ktdt1oVAdve4I2GGTpyDkP4ROuztfxRcBzo2xTT8CGFqhMFxMrbtmCH1c3yUz8qYV9LRd8XTPzZj9YMLyP16eJyWOrZWKgQ";
 	
 	public void send(String xml_str) {
 		
@@ -79,10 +88,11 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 	}
 	
 	protected String login() {
-		
+
+		String[] loginAndPass = getLoginAndPassword();
 		LoginRequest req = new LoginRequest();
-		req.setLoginName("L621077B2B");
-		req.setLoginPassword("L6192965");
+		req.setLoginName(loginAndPass[0]);
+		req.setLoginPassword(loginAndPass[1]);
 		
 		PostMethod response = sendXMLData(req, getLoginRequestXStream());
 		
@@ -123,7 +133,12 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 	}
 	
 	public static void main(String[] args) {
-		new SendLoginDataBusinessBean().send("xmldata");
+		
+//		String xml = WSCitizenAccountBusinessBean.getXML("1011783159", "hi_tryggvi", "http://rafraen.reykjavik.is/pages/", "http://rafraen.reykjavik.is/idegaweb/bundles/is.idega.idegaweb.egov.message.bundle/resources/is_IS.locale/print/commune_logo.png", "1", "1011783159", "RVKP");
+//		System.out.println(xml);
+		
+//		new SendLoginDataBusinessBean().send(xml);
+//		System.out.println("... sent");
 	}
 	
 	protected void logout(String session_id) {
@@ -147,7 +162,7 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 	
 	protected PostMethod sendXMLData(Object req, XStream xstream) {
 		
-		PostMethod post = new PostMethod(DEFAULT_SERVICE_URL/*getIWMainApplication().getSettings().getProperty(LANDSBANKIN_SERVICE_URL, DEFAULT_SERVICE_URL)*/);
+		PostMethod post = new PostMethod(getIWMainApplication().getSettings().getProperty(LANDSBANKIN_SERVICE_URL, DEFAULT_SERVICE_URL));
 		
 		try {
 			StringPart userPart = new StringPart("processXML", XML_HEADER+xstream.toXML(req), "UTF-8");
@@ -292,5 +307,27 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 		}
 		
 		return send_data_xstream;
+	}
+	
+	protected String[] getLoginAndPassword() {
+		
+		IWMainApplication iwma = IWMainApplication.getDefaultIWMainApplication();
+		
+		if(iwma != null) {
+			
+			String login = (String)iwma.getSettings().getProperty(landsbankin_service_rvk_login_app_key);
+			String pass = (String)iwma.getSettings().getProperty(landsbankin_service_rvk_pass_app_key);
+			
+			if(login == null || pass == null)
+				return null;
+			
+			CypherText ct = new CypherText();
+			login = ct.doDeCypher(login, ck);
+			pass = ct.doDeCypher(pass, ck);
+
+			return new String[] {login, pass};
+		}
+		
+		return null;
 	}
 }

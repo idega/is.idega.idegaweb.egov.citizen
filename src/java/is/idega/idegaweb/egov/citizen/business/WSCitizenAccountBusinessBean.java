@@ -46,7 +46,7 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean imp
 
 	protected static final String BANK_SEND_REGISTRATION = "BANK_SEND_REGISTRATION";
 	
-	protected static final String USE_LANDSBANKAN = "USE_LANDSBANKAN";
+	protected static final String USE_LANDSBANKIN = "USE_LANDSBANKIN";
 
 	protected static final String BANK_SENDER_PIN = "BANK_SENDER_PIN";
 
@@ -59,6 +59,9 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean imp
 	protected static final String BANK_SENDER_LOGOLINK = "BANK_SENDER_LOGOLINK";
 
 	protected static final String BANK_SENDER_TYPE = "BANK_SENDER_TYPE";
+	
+	protected static final String USER_CREATION_TYPE = "RVKLB";
+	
 
 	protected static final String SERVICE_URL = "https://ws.isb.is/adgerdirv1/birtingakerfi.asmx";
 
@@ -98,16 +101,17 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean imp
 				String ssn = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_PIN);
 				String user3 = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_TYPE);
 
-				String xml = getXML(login, password, pageLink, logoLink, citizen.getPrimaryKey().toString(), citizen.getPersonalID(), user3);
+				String xml = getXML(login, password, pageLink, logoLink, sendUsingLandsbankan() ? "1" : citizen.getPrimaryKey().toString(), citizen.getPersonalID(), user3);
 				
 				if(sendUsingLandsbankan()) {
 					
 					SendLoginDataBusiness send_data = (SendLoginDataBusiness)getServiceInstance(SendLoginDataBusiness.class);
+					
 					send_data.send(xml);
 					
 					try {
 						LoginInfo loginInfo = getLoginInfoHome().findByPrimaryKey(lt.getPrimaryKey());
-						loginInfo.setCreationType("RVKLB");
+						loginInfo.setCreationType(USER_CREATION_TYPE);
 						loginInfo.store();
 						
 					} catch (Exception e) {
@@ -140,7 +144,7 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean imp
 	}
 	
 	private boolean sendUsingLandsbankan() {
-		return getIWApplicationContext().getApplicationSettings().getBoolean(USE_LANDSBANKAN, false);
+		return getIWApplicationContext().getApplicationSettings().getBoolean(USE_LANDSBANKIN, false);
 	}
 
 	private String getXML(String login, String password, String pageLink, String logo, String xkey, String user1, String user3) {
@@ -151,8 +155,12 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean imp
 		String acct = pin + user1;
 		user3 = user3 + "-001";
 		String user4 = acct + xkey;
+		
+		String encoding = sendUsingLandsbankan() ? "UTF-8" : "iso-8859-1";
 
-		StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
+		StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"");
+		xml.append(encoding);
+		xml.append("\"?>\n");
 		xml.append("<!DOCTYPE XML-S SYSTEM \"XML-S.dtd\"[]>\n");
 		xml.append("<XML-S>\n");
 		xml.append("\t<Statement Acct=\"");
