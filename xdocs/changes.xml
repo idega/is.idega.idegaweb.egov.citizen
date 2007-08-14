@@ -6,6 +6,11 @@
 		</author>
 	</properties>
 	<body>
+		<release version="1.0.19" date="2007-07-14">
+			<action dev="civilis" type="update">
+				Added using landsbankan to send login and pass to RB
+			</action>
+		</release>
 		<release version="1.0.18" date="2007-07-02">
 			<action dev="laddi" type="update">
 				Added possibility to press Enter to submit form.

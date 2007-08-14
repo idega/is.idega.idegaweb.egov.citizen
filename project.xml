@@ -5,7 +5,7 @@
   <pomVersion>3</pomVersion>
   <name>eGov Citizen</name>
   <artifactId>is.idega.idegaweb.egov.citizen</artifactId>
-  <currentVersion>1.0.18</currentVersion>
+  <currentVersion>1.0.19</currentVersion>
   <inceptionYear>2005</inceptionYear>
   <shortDescription>eGov Citizen</shortDescription>
   <versions>
@@ -99,6 +99,11 @@
       <name>1.0.18</name>
       <tag>CITIZEN_1_0_18</tag>
     </version>
+    <version>
+      <id>1.0.19</id>
+      <name>1.0.19</name>
+      <tag>CITIZEN_1_0_19</tag>
+    </version>
   </versions>
   <branches/>
   <developers>
@@ -114,7 +119,7 @@
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.core</artifactId>
-      <version>3.1.59</version>
+      <version>3.1.61</version>
       <type>jar</type>
       <url>http://www.idega.com/</url>
     </dependency>
