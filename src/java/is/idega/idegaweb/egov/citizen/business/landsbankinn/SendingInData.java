@@ -1,34 +1,42 @@
-package is.idega.idegaweb.egov.citizen.business.landsbankan;
+package is.idega.idegaweb.egov.citizen.business.landsbankinn;
 
 /**
  * @author <a href="mailto:civilis@idega.com">Vytautas Čivilis</a>
  * @version 1.0
  */
-public class LoginRequest {
+public class SendingInData {
 
-	public static final String login_name_field = "login_name";
-	public static final String login_password_field = "login_password";
+	public static final String session_id_field = "session_id";
+	public static final String data_type_field = "data_type";
+	public static final String data_field = "data";
 	public static final String xsd_field = "xsd";
 	public static final String xsi_field = "xsi";
 	public static final String version_field = "version";
 	
-	private String login_name;
-	private String login_password;
+	private String session_id;
+	private String data_type = "NOTANDI_LYKILORD";
+	private String data;
 	private String xsd = "http://www.w3.org/2001/XMLSchema";
 	private String xsi = "http://www.w3.org/2001/XMLSchema-instance";
 	private String version = "1.1";
 	
-	public String getLoginName() {
-		return login_name;
+	public String getData() {
+		return data;
 	}
-	public void setLoginName(String login_name) {
-		this.login_name = login_name;
+	public void setData(String data) {
+		this.data = data;
 	}
-	public String getLoginPassword() {
-		return login_password;
+	public String getDataType() {
+		return data_type;
 	}
-	public void setLoginPassword(String login_password) {
-		this.login_password = login_password;
+	public void setDataType(String data_type) {
+		this.data_type = data_type;
+	}
+	public String getSessionId() {
+		return session_id;
+	}
+	public void setSessionId(String session_id) {
+		this.session_id = session_id;
 	}
 	public String getVersion() {
 		return version;

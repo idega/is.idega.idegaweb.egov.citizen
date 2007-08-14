@@ -1,6 +1,4 @@
-package is.idega.idegaweb.egov.citizen.business.landsbankan;
-
-import is.idega.idegaweb.egov.citizen.business.WSCitizenAccountBusinessBean;
+package is.idega.idegaweb.egov.citizen.business.landsbankinn;
 
 import java.io.InputStream;
 import java.util.logging.Level;
@@ -39,10 +37,10 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 	
 	private static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 	private static final String DEFAULT_SERVICE_URL = "https://b2b.fbl.is/lib2b.dll?processXML";
-	private static final String LANDSBANKIN_SERVICE_URL = "LANDSBANKIN_SERVICE_URL";
+	private static final String LANDSBANKINN_SERVICE_URL = "LANDSBANKINN_SERVICE_URL";
 	
-	private static final String landsbankin_service_rvk_login_app_key = "landsbankin.rvk.ws.login";
-	private static final String landsbankin_service_rvk_pass_app_key = "landsbankin.rvk.ws.pass";
+	private static final String landsbankinn_service_rvk_login_app_key = "landsbankinn.rvk.ws.login";
+	private static final String landsbankinn_service_rvk_pass_app_key = "landsbankinn.rvk.ws.pass";
 	
 	private static final String ck = "8CTW4ktdt1oVAdve4I2GGTpyDkP4ROuztfxRcBzo2xTT8CGFqhMFxMrbtmCH1c3yUz8qYV9LRd8XTPzZj9YMLyP16eJyWOrZWKgQ";
 	
@@ -162,7 +160,7 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 	
 	protected PostMethod sendXMLData(Object req, XStream xstream) {
 		
-		PostMethod post = new PostMethod(getIWMainApplication().getSettings().getProperty(LANDSBANKIN_SERVICE_URL, DEFAULT_SERVICE_URL));
+		PostMethod post = new PostMethod(getIWMainApplication().getSettings().getProperty(LANDSBANKINN_SERVICE_URL, DEFAULT_SERVICE_URL));
 		
 		try {
 			StringPart userPart = new StringPart("processXML", XML_HEADER+xstream.toXML(req), "UTF-8");
@@ -315,8 +313,8 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 		
 		if(iwma != null) {
 			
-			String login = (String)iwma.getSettings().getProperty(landsbankin_service_rvk_login_app_key);
-			String pass = (String)iwma.getSettings().getProperty(landsbankin_service_rvk_pass_app_key);
+			String login = (String)iwma.getSettings().getProperty(landsbankinn_service_rvk_login_app_key);
+			String pass = (String)iwma.getSettings().getProperty(landsbankinn_service_rvk_pass_app_key);
 			
 			if(login == null || pass == null)
 				return null;

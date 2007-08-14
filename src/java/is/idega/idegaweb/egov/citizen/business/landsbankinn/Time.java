@@ -1,4 +1,4 @@
-package is.idega.idegaweb.egov.citizen.business.landsbankan;
+package is.idega.idegaweb.egov.citizen.business.landsbankinn;
 
 /**
  * @author <a href="mailto:civilis@idega.com">Vytautas Čivilis</a>
