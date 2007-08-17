@@ -6,6 +6,11 @@
 		</author>
 	</properties>
 	<body>
+		<release version="1.0.20" date="2007-07-17">
+			<action dev="civilis" type="update">
+				Added checkbox of use of terms agreement in the citizen account application together with a link to the agreement file.
+			</action>
+		</release>
 		<release version="1.0.19" date="2007-07-14">
 			<action dev="civilis" type="update">
 				Added using landsbankan to send login and pass to RB
