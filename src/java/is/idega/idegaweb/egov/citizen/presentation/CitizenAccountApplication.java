@@ -70,6 +70,16 @@ public class CitizenAccountApplication extends CitizenBlock {
 	private final static String EMAIL_KEY = "email";
 	private final static String SNAIL_MAIL_KEY = "snail_mail";
 	private final static String SNAIL_MAIL_DEFAULT = "Send password using ordinary mail";
+	
+	private final static String APP_AGREEMENT_PARAM = "applicationAgreement";
+	
+	private final static String APP_AGREEMENT_TEXT_KEY = "accountApplication.agreementText";
+	private final static String APP_AGREEMENT_NOTAGREED_KEY = "accountApplication.agreementNotAgreed";
+	private final static String APP_AGREEMENT_NOTAGREED_DEFAULT = "Þú þarft að samþykkja skilmálana fyrst";
+	private final static String APP_AGREEMENT_TEXT_DEFAULT = "Ég hef kynnt mér og samþykki skilmála Reykjavíkurborgar";
+	private final static String APP_AGREEMENT_TERMSOFUSE_KEY = "accountApplication.termsOfUse";
+	private final static String APP_AGREEMENT_TERMSOFUSE_DEFAULT = "<a href=\"{0}\">Notkunarskilmálar</a>";
+	
 	private final static String EMAIL_KEY_REPEAT = "email_repeat";
 	private final static String EMAIL_REPEAT_DEFAULT = "Email again";
 	private final static String PHONE_HOME_KEY = "home_phone";
@@ -118,6 +128,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 	private boolean hidePersonalIdInput = false;
 	private boolean createLoginAndLetter = true;
 	private String redirectUrlOnSubmit;
+	private String agreementFileUrl;
 
 	private boolean showPreferredLocaleChooser = false;
 	private boolean showSendSnailMailChooser = false;
@@ -250,6 +261,9 @@ public class CitizenAccountApplication extends CitizenBlock {
 
 		TextInput homePhone = new TextInput(PHONE_HOME_KEY);
 		homePhone.keepStatusOnAction(true);
+		
+		CheckBox applicationAgreement = new CheckBox(APP_AGREEMENT_PARAM);
+		applicationAgreement.keepStatusOnAction(true);
 
 		if (this.iCommuneMap != null) {
 			DropdownMenu communes = new DropdownMenu(COMMUNE_KEY);
@@ -356,6 +370,25 @@ public class CitizenAccountApplication extends CitizenBlock {
 			formItem.add(localesDrop);
 			section.add(formItem);
 		}
+		
+		formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		formItem.setStyleClass("required");
+		formItem.setID(APP_AGREEMENT_PARAM);
+		applicationAgreement.setStyleClass("checkbox");
+		
+//		TODO: localize the url to agreement file
+		Object[] linkToAgreement = new Object[] {getAgreementFileUrl()};
+		label = new Label(applicationAgreement);
+
+		label.add(new Span(new Text(this.iwrb.getLocalizedString(APP_AGREEMENT_TEXT_KEY, APP_AGREEMENT_TEXT_DEFAULT))));
+				
+		Layer checkboxAndApplicationAgreement = new Layer(Layer.DIV);
+		checkboxAndApplicationAgreement.add(applicationAgreement);
+		checkboxAndApplicationAgreement.add(new Text(this.iwrb.getLocalizedAndFormattedString(APP_AGREEMENT_TERMSOFUSE_KEY, APP_AGREEMENT_TERMSOFUSE_DEFAULT, linkToAgreement)));
+		formItem.add(label);
+		formItem.add(checkboxAndApplicationAgreement);
+		section.add(formItem);
 
 		Layer clearLayer = new Layer(Layer.DIV);
 		clearLayer.setStyleClass("Clear");
@@ -424,8 +457,15 @@ public class CitizenAccountApplication extends CitizenBlock {
 			errors.add(this.iwrb.getLocalizedString("email_can_not_be_empty", "You must provide a valid e-mail address"));
 			hasErrors = true;
 		}
+
+		boolean agreementAccepted = iwc.getParameter(APP_AGREEMENT_PARAM) != null && iwc.getParameter(APP_AGREEMENT_PARAM).length() > 0;
 		
-		boolean sendSnailMail = !(iwc.getParameter(SNAIL_MAIL_KEY) == null || iwc.getParameter(SNAIL_MAIL_KEY).length() == 0);
+		if(!agreementAccepted) {
+			errors.add(this.iwrb.getLocalizedString(APP_AGREEMENT_NOTAGREED_KEY, APP_AGREEMENT_NOTAGREED_DEFAULT));
+			hasErrors = true;
+		}
+		
+		boolean sendSnailMail = iwc.getParameter(SNAIL_MAIL_KEY) != null && iwc.getParameter(SNAIL_MAIL_KEY).length() > 0;
 		
 		String emailRepeat = iwc.getParameter(EMAIL_KEY_REPEAT);
 		String phoneHome = iwc.getParameter(PHONE_HOME_KEY);
@@ -686,5 +726,13 @@ public class CitizenAccountApplication extends CitizenBlock {
 
 	public void setRedirectUrlOnSubmit(String redirectUrlOnSubmit) {
 		this.redirectUrlOnSubmit = redirectUrlOnSubmit;
+	}
+	
+	public String getAgreementFileUrl() {
+		return agreementFileUrl == null || agreementFileUrl.equals("") ? "#" : agreementFileUrl;
+	}
+
+	public void setAgreementFileUrl(String agreementFileUrl) {
+		this.agreementFileUrl = agreementFileUrl;
 	}
 }
