@@ -8,6 +8,9 @@ acc.app.acc.fp.body2=N\u00FDtt lykilor\u00F0 var b\u00FAi\u00F0 til fyrir a\u00F
 acc.app.acc.fp.subj=N\u00FDtt lykilor\u00F0 fyrir Rafr\u00E6na Reykjav\u00EDk
 acc.app.appr.body=G\u00F3\u00F0an dag {0},\r\n\r\n\u00DE\u00FA hefur fengi\u00F0 a\u00F0gang a\u00F0 Rafr\u00E6nni Reykjav\u00EDk \u00E1 vef Reykjav\u00EDkurborgar.\r\n\r\nNotendanafn\: {1}\r\nLykilor\u00F0\: {2}\r\n\r\n{3}
 acc.app.appr.subj=\u00DEj\u00F3nustug\u00E1tt \u00FE\u00EDn er virk
+accountApplication.agreementNotAgreed=\u00DE\u00FA \u00FEarft a\u00F0 sam\u00FEykkja skilm\u00E1lana fyrst
+accountApplication.agreementText=\u00C9g hef kynnt m\u00E9r og sam\u00FEykki skilm\u00E1la Reykjav\u00EDkurborgar.
+accountApplication.termsOfUse=<a href\="{0}">Notkunarskilm\u00E1lar</a>
 account_application.example=(D\u00E6mi\: 0110012230)
 address=Heimilisfang
 already_applied_for_password=\u00DE\u00FA ert b\u00FAinn a\u00F0 s\u00E6kja um n\u00FDtt lykilor\u00F0

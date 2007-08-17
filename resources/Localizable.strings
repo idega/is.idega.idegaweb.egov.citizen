@@ -8,11 +8,17 @@ acc.app.acc.fp.body2=A new password was created for your account.
 acc.app.acc.fp.subj=New password for your account
 acc.app.appr.body=Dear mr./ms./mrs. {0}\n\nYour application has been accepted and you have been given acces to the system with the following login information\:\n\nUserName\: {1}\nPassword\: {2}\n\nYou can log on via\: {3}.
 acc.app.appr.subj=Your application has been approved
+accountApplication.agreementNotAgreed=\u00DE\u00FA \u00FEarft a\u00F0 sam\u00FEykkja skilm\u00E1lana fyrst
+accountApplication.agreementText=\u00C9g hef kynnt m\u00E9r og sam\u00FEykki skilm\u00E1la Reykjav\u00EDkurborgar.
+accountApplication.termsOfUse=<a href\="{0}">Notkunarskilm\u00E1lar</a>
+accountApplication.termsofuse=\u00C9g hef kynnt m\u00E9r og sam\u00FEykki skilm\u00E1la Reykjav\u00EDkurborgar\: <a href\="{0}">Notkunarskilm\u00E1lar</a>.
 account_application.example=(Example 0110012230)
 address=Address
 already_applied_for_password=You have already requested a new password.
 application_bank_submitted=Application is submitted.
+application_bank_submitted_rvk.is=Application is submitted.
 application_bank_submitted_text=Application is submitted. info
+application_bank_submitted_text_rvk.is=Application is submitted. info
 application_errors_occured=There was a problem with the following items
 application_submitted=Application is submitted.
 application_submitted_rvk.is=Ums\u00F3kn um a\u00F0gang a\u00F0 Rafr\u00E6nni Reykjav\u00EDk er m\u00F3ttekin
@@ -90,6 +96,7 @@ iw.component.is.idega.idegaweb.egov.citizen.presentation.CitizenAccountStatistic
 iw.component.is.idega.idegaweb.egov.citizen.presentation.CitizenFinder.name=CitizenFinder
 iw.component.is.idega.idegaweb.egov.citizen.presentation.CitizenImage.name=CitizenImage
 iw.component.is.idega.idegaweb.egov.citizen.presentation.ForgottenPassword.name=ForgottenPassword
+lala=Not agreed
 last_name=Last name
 middle_name=Middle name
 mobile_phone=Cell phone
@@ -120,6 +127,7 @@ save=Save
 scaa_simpleSubmit_button=Forward >>
 search=Search
 select_commune=Select commune
+snail_mail=Send password using ordinary mail
 unknown_citizen=Enginn notandi finnst me\u00F0 \u00FEessa kennit\u00F6lu
 user_already_has_an_account=Notandi me\u00F0 \u00FEessa kennit\u00F6lu hefur n\u00FA \u00FEegar a\u00F0gang
 user_has_no_account=User has no account
