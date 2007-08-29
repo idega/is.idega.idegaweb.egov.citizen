@@ -74,11 +74,9 @@ public class CitizenAccountApplication extends CitizenBlock {
 
 	private final static String APP_AGREEMENT_PARAM = "applicationAgreement";
 
-	private final static String APP_AGREEMENT_TEXT_KEY = "accountApplication.agreementText";
 	private final static String APP_AGREEMENT_NOTAGREED_KEY = "accountApplication.agreementNotAgreed";
 	private final static String APP_AGREEMENT_NOTAGREED_DEFAULT = "Þú þarft að samþykkja skilmálana fyrst";
-	private final static String APP_AGREEMENT_TEXT_DEFAULT = "Ég hef kynnt mér og samþykki skilmála Reykjavíkurborgar";
-	private final static String APP_AGREEMENT_TERMSOFUSE_KEY = "accountApplication.termsOfUse";
+	private final static String APP_AGREEMENT_TERMSOFUSE_KEY = "accountApplication.termsofuse";
 	private final static String APP_AGREEMENT_TERMSOFUSE_DEFAULT = "<a href=\"{0}\">Notkunarskilmálar</a>";
 
 	private final static String EMAIL_KEY_REPEAT = "email_repeat";
@@ -253,6 +251,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		email.keepStatusOnAction(true);
 
 		CheckBox snailMail = new CheckBox(SNAIL_MAIL_KEY);
+		snailMail.setStyleClass("checkbox");
 		snailMail.keepStatusOnAction(true);
 
 		TextInput emailRepeat = new TextInput(EMAIL_KEY_REPEAT);
@@ -265,6 +264,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		homePhone.keepStatusOnAction(true);
 
 		CheckBox applicationAgreement = new CheckBox(APP_AGREEMENT_PARAM);
+		applicationAgreement.setStyleClass("checkbox");
 		applicationAgreement.keepStatusOnAction(true);
 
 		if (this.iCommuneMap != null) {
@@ -372,23 +372,15 @@ public class CitizenAccountApplication extends CitizenBlock {
 			section.add(formItem);
 		}
 
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("required");
-		formItem.setID(APP_AGREEMENT_PARAM);
-		applicationAgreement.setStyleClass("checkbox");
-
 		//		TODO: localize the url to agreement file
 		Object[] linkToAgreement = new Object[] { getAgreementFileUrl() };
-		label = new Label(applicationAgreement);
-
-		label.add(new Span(new Text(this.iwrb.getLocalizedString(APP_AGREEMENT_TEXT_KEY, APP_AGREEMENT_TEXT_DEFAULT))));
-
-		Layer checkboxAndApplicationAgreement = new Layer(Layer.DIV);
-		checkboxAndApplicationAgreement.setStyleClass("radioButtonItem");
-		checkboxAndApplicationAgreement.add(applicationAgreement);
-		checkboxAndApplicationAgreement.add(new Text(this.iwrb.getLocalizedAndFormattedString(APP_AGREEMENT_TERMSOFUSE_KEY, APP_AGREEMENT_TERMSOFUSE_DEFAULT, linkToAgreement)));
-		formItem.add(checkboxAndApplicationAgreement);
+		formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
+		formItem.setStyleClass("radioButtonItem");
+		formItem.setStyleClass("required");
+		formItem.setID(APP_AGREEMENT_PARAM);
+		label = new Label(new Span(new Text(this.iwrb.getLocalizedAndFormattedString(APP_AGREEMENT_TERMSOFUSE_KEY, APP_AGREEMENT_TERMSOFUSE_DEFAULT, linkToAgreement))), applicationAgreement);
+		formItem.add(applicationAgreement);
 		formItem.add(label);
 		section.add(formItem);
 
