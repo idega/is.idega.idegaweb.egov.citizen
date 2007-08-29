@@ -7,7 +7,8 @@
 /**
  * @author Malin
  * 
- * To change the template for this generated type comment go to Window - Preferences - Java - Code Generation - Code and Comments
+ * To change the template for this generated type comment go to Window -
+ * Preferences - Java - Code Generation - Code and Comments
  */
 
 package is.idega.idegaweb.egov.citizen.presentation;
@@ -70,16 +71,16 @@ public class CitizenAccountApplication extends CitizenBlock {
 	private final static String EMAIL_KEY = "email";
 	private final static String SNAIL_MAIL_KEY = "snail_mail";
 	private final static String SNAIL_MAIL_DEFAULT = "Send password using ordinary mail";
-	
+
 	private final static String APP_AGREEMENT_PARAM = "applicationAgreement";
-	
+
 	private final static String APP_AGREEMENT_TEXT_KEY = "accountApplication.agreementText";
 	private final static String APP_AGREEMENT_NOTAGREED_KEY = "accountApplication.agreementNotAgreed";
 	private final static String APP_AGREEMENT_NOTAGREED_DEFAULT = "Þú þarft að samþykkja skilmálana fyrst";
 	private final static String APP_AGREEMENT_TEXT_DEFAULT = "Ég hef kynnt mér og samþykki skilmála Reykjavíkurborgar";
 	private final static String APP_AGREEMENT_TERMSOFUSE_KEY = "accountApplication.termsOfUse";
 	private final static String APP_AGREEMENT_TERMSOFUSE_DEFAULT = "<a href=\"{0}\">Notkunarskilmálar</a>";
-	
+
 	private final static String EMAIL_KEY_REPEAT = "email_repeat";
 	private final static String EMAIL_REPEAT_DEFAULT = "Email again";
 	private final static String PHONE_HOME_KEY = "home_phone";
@@ -134,7 +135,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 	private boolean showSendSnailMailChooser = false;
 
 	public void present(IWContext iwc) {
-		
+
 		this.iwrb = getResourceBundle(iwc);
 		parseParameters(iwc);
 		try {
@@ -155,7 +156,8 @@ public class CitizenAccountApplication extends CitizenBlock {
 
 	/**
 	 * <p>
-	 * Parse the request parameters and initialize this component with teir values if they are set
+	 * Parse the request parameters and initialize this component with teir values
+	 * if they are set
 	 * </p>
 	 * 
 	 * @param iwc
@@ -249,7 +251,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 
 		TextInput email = new TextInput(EMAIL_KEY);
 		email.keepStatusOnAction(true);
-		
+
 		CheckBox snailMail = new CheckBox(SNAIL_MAIL_KEY);
 		snailMail.keepStatusOnAction(true);
 
@@ -261,7 +263,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 
 		TextInput homePhone = new TextInput(PHONE_HOME_KEY);
 		homePhone.keepStatusOnAction(true);
-		
+
 		CheckBox applicationAgreement = new CheckBox(APP_AGREEMENT_PARAM);
 		applicationAgreement.keepStatusOnAction(true);
 
@@ -318,7 +320,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		formItem.add(label);
 		formItem.add(email);
 		section.add(formItem);
-		
+
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		formItem.setStyleClass("required");
@@ -329,17 +331,16 @@ public class CitizenAccountApplication extends CitizenBlock {
 		formItem.add(emailRepeat);
 		section.add(formItem);
 
-		
-		if(isSetToShowSendSnailMailChooser()) {
-			
+		if (isSetToShowSendSnailMailChooser()) {
 			formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
+			formItem.setStyleClass("radioButtonItem");
 			formItem.setID("snail_mail");
 			snailMail.setStyleClass("checkbox");
 			label = new Label(snailMail);
 			label.add(new Span(new Text(this.iwrb.getLocalizedString(SNAIL_MAIL_KEY, SNAIL_MAIL_DEFAULT))));
-			formItem.add(label);
 			formItem.add(snailMail);
+			formItem.add(label);
 			section.add(formItem);
 		}
 
@@ -370,24 +371,25 @@ public class CitizenAccountApplication extends CitizenBlock {
 			formItem.add(localesDrop);
 			section.add(formItem);
 		}
-		
+
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
 		formItem.setStyleClass("required");
 		formItem.setID(APP_AGREEMENT_PARAM);
 		applicationAgreement.setStyleClass("checkbox");
-		
-//		TODO: localize the url to agreement file
-		Object[] linkToAgreement = new Object[] {getAgreementFileUrl()};
+
+		//		TODO: localize the url to agreement file
+		Object[] linkToAgreement = new Object[] { getAgreementFileUrl() };
 		label = new Label(applicationAgreement);
 
 		label.add(new Span(new Text(this.iwrb.getLocalizedString(APP_AGREEMENT_TEXT_KEY, APP_AGREEMENT_TEXT_DEFAULT))));
-				
+
 		Layer checkboxAndApplicationAgreement = new Layer(Layer.DIV);
+		checkboxAndApplicationAgreement.setStyleClass("radioButtonItem");
 		checkboxAndApplicationAgreement.add(applicationAgreement);
 		checkboxAndApplicationAgreement.add(new Text(this.iwrb.getLocalizedAndFormattedString(APP_AGREEMENT_TERMSOFUSE_KEY, APP_AGREEMENT_TERMSOFUSE_DEFAULT, linkToAgreement)));
-		formItem.add(label);
 		formItem.add(checkboxAndApplicationAgreement);
+		formItem.add(label);
 		section.add(formItem);
 
 		Layer clearLayer = new Layer(Layer.DIV);
@@ -459,14 +461,14 @@ public class CitizenAccountApplication extends CitizenBlock {
 		}
 
 		boolean agreementAccepted = iwc.getParameter(APP_AGREEMENT_PARAM) != null && iwc.getParameter(APP_AGREEMENT_PARAM).length() > 0;
-		
-		if(!agreementAccepted) {
+
+		if (!agreementAccepted) {
 			errors.add(this.iwrb.getLocalizedString(APP_AGREEMENT_NOTAGREED_KEY, APP_AGREEMENT_NOTAGREED_DEFAULT));
 			hasErrors = true;
 		}
-		
+
 		boolean sendSnailMail = iwc.getParameter(SNAIL_MAIL_KEY) != null && iwc.getParameter(SNAIL_MAIL_KEY).length() > 0;
-		
+
 		String emailRepeat = iwc.getParameter(EMAIL_KEY_REPEAT);
 		String phoneHome = iwc.getParameter(PHONE_HOME_KEY);
 		String phoneWork = iwc.getParameter(PHONE_CELL_KEY);
@@ -604,17 +606,20 @@ public class CitizenAccountApplication extends CitizenBlock {
 
 	/**
 	 * 
-	 * @return a comma seperated values string with unique ids of communes in the IC_COMMUNE table
+	 * @return a comma seperated values string with unique ids of communes in the
+	 *         IC_COMMUNE table
 	 */
 	public String getCommuneUniqueIdsCSV() {
 		return this.communeUniqueIdsCSV;
 	}
 
 	/**
-	 * If the parameter is set then the applications checks if the user has an address registered to one of the commune ids in this string
+	 * If the parameter is set then the applications checks if the user has an
+	 * address registered to one of the commune ids in this string
 	 * 
 	 * @param communeUniqueIdsCSV
-	 *          a comma seperated values string with unique ids of communes in the IC_COMMUNE table
+	 *          a comma seperated values string with unique ids of communes in the
+	 *          IC_COMMUNE table
 	 */
 	public void setCommuneUniqueIdsCSV(String communeUniqueIdsCSV) {
 		this.communeUniqueIdsCSV = communeUniqueIdsCSV;
@@ -695,11 +700,11 @@ public class CitizenAccountApplication extends CitizenBlock {
 	public void setToShowPreferredLocaleChooser(boolean showPreferredLocaleChooser) {
 		this.showPreferredLocaleChooser = showPreferredLocaleChooser;
 	}
-	
+
 	public void setToShowSendSnailMailChooser(boolean showSendSnailMailChooser) {
 		this.showSendSnailMailChooser = showSendSnailMailChooser;
 	}
-	
+
 	public boolean isSetToShowSendSnailMailChooser() {
 		return showSendSnailMailChooser;
 	}
@@ -727,7 +732,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 	public void setRedirectUrlOnSubmit(String redirectUrlOnSubmit) {
 		this.redirectUrlOnSubmit = redirectUrlOnSubmit;
 	}
-	
+
 	public String getAgreementFileUrl() {
 		return agreementFileUrl == null || agreementFileUrl.equals("") ? "#" : agreementFileUrl;
 	}
