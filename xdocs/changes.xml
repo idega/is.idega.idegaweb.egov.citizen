@@ -6,6 +6,11 @@
 		</author>
 	</properties>
 	<body>
+		<release version="1.0.21" date="2007-08-31">
+			<action dev="alexis" type="update">
+				Update dependency to com.idega.block.process to 3.1.14
+			</action>
+		</release>
 		<release version="1.0.20" date="2007-07-17">
 			<action dev="civilis" type="update">
 				Added checkbox of use of terms agreement in the citizen account application together with a link to the agreement file.
