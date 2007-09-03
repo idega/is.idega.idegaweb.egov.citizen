@@ -5,7 +5,7 @@
   <pomVersion>3</pomVersion>
   <name>eGov Citizen</name>
   <artifactId>is.idega.idegaweb.egov.citizen</artifactId>
-  <currentVersion>1.0.2</currentVersion>
+  <currentVersion>1.0.21</currentVersion>
   <inceptionYear>2005</inceptionYear>
   <shortDescription>eGov Citizen</shortDescription>
   <versions>
@@ -113,6 +113,11 @@
       <id>1.0.2</id>
       <name>1.0.2</name>
       <tag>PKI_1_0_2</tag>
+    </version>
+    <version>
+      <id>1.0.21</id>
+      <name>1.0.21</name>
+      <tag>CITIZEN_1_0_21</tag>
     </version>
   </versions>
   <branches/>
