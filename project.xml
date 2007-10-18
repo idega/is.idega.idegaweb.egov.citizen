@@ -5,7 +5,7 @@
   <pomVersion>3</pomVersion>
   <name>eGov Citizen</name>
   <artifactId>is.idega.idegaweb.egov.citizen</artifactId>
-  <currentVersion>1.0.21</currentVersion>
+  <currentVersion>1.0.22</currentVersion>
   <inceptionYear>2005</inceptionYear>
   <shortDescription>eGov Citizen</shortDescription>
   <versions>

@@ -6,6 +6,11 @@
 		</author>
 	</properties>
 	<body>
+		<release version="1.0.22" date="2007-10-18">
+			<action dev="palli" type="update">
+				Added application property to set the version of the style sheet used at rb, when sending passwords to bank.
+			</action>
+		</release>
 		<release version="1.0.21" date="2007-08-31">
 			<action dev="alexis" type="update">
 				Update dependency to com.idega.block.process to 3.1.14

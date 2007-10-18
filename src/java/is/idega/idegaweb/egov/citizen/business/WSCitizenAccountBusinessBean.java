@@ -60,6 +60,8 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean imp
 
 	protected static final String BANK_SENDER_TYPE = "BANK_SENDER_TYPE";
 	
+	protected static final String BANK_SENDER_TYPE_VERSION = "BANK_SENDER_TYPE_VERSION";
+
 	protected static final String USER_CREATION_TYPE = "RVKLB";
 	
 
@@ -100,8 +102,9 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean imp
 				String logoLink = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_LOGOLINK);
 				String ssn = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_PIN);
 				String user3 = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_TYPE);
+				String user3version = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_TYPE_VERSION, "001");
 
-				String xml = getXML(login, password, pageLink, logoLink, sendUsingLandsbankan() ? "1" : citizen.getPrimaryKey().toString(), citizen.getPersonalID(), user3);
+				String xml = getXML(login, password, pageLink, logoLink, sendUsingLandsbankan() ? "1" : citizen.getPrimaryKey().toString(), citizen.getPersonalID(), user3, user3version);
 				
 				if(sendUsingLandsbankan()) {
 					
@@ -147,13 +150,16 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean imp
 		return getIWApplicationContext().getApplicationSettings().getBoolean(USE_LANDSBANKINN, false);
 	}
 
-	private String getXML(String login, String password, String pageLink, String logo, String xkey, String user1, String user3) {
+	private String getXML(String login, String password, String pageLink, String logo, String xkey, String user1, String user3, String user3version) {
 		
 		String pin = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_PIN);
 
 		String definitionName = "idega.is";
 		String acct = pin + user1;
-		user3 = user3 + "-001";
+		if (user3version == null || user3version.equals("")) {
+			user3version = "001";
+		}
+		user3 = user3 + "-" + user3version;
 		String user4 = acct + xkey;
 		
 		String encoding = sendUsingLandsbankan() ? "UTF-8" : "iso-8859-1";
