@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- $Id: pom.xml,v 1.5 2007/10/09 11:04:37 civilis Exp $ -->
+<!-- $Id: pom.xml,v 1.6 2007/11/16 13:51:52 civilis Exp $ -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -49,7 +49,7 @@
     <dependency>
       <groupId>xstream</groupId>
       <artifactId>xstream</artifactId>
-      <version>1.2.2</version>
+      <version>${xstream-xstream-version}</version>
       <type>jar</type>
     </dependency>
     <dependency>
