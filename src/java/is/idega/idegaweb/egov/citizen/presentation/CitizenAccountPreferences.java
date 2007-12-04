@@ -406,6 +406,14 @@ public class CitizenAccountPreferences extends CitizenBlock {
 
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
+		formItem.setStyleClass("indentedCheckbox");
+		label = new Label(this.iwrb.getLocalizedString(KEY_CO_ADDRESS_SELECT, DEFAULT_CO_ADDRESS_SELECT), useCOAddress);
+		formItem.add(useCOAddress);
+		formItem.add(label);
+		layer.add(formItem);
+
+		formItem = new Layer(Layer.DIV);
+		formItem.setStyleClass("formItem");
 		label = new Label(this.iwrb.getLocalizedString(KEY_CO_STREET_ADDRESS, DEFAULT_CO_STREET_ADDRESS), tiCOStreetAddress);
 		formItem.add(label);
 		formItem.add(tiCOStreetAddress);
@@ -430,14 +438,6 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		label = new Label(this.iwrb.getLocalizedString(KEY_CO_COUNTRY, DEFAULT_CO_COUNTRY), tiCOCountry);
 		formItem.add(label);
 		formItem.add(tiCOCountry);
-		layer.add(formItem);
-
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("indentedCheckbox");
-		label = new Label(this.iwrb.getLocalizedString(KEY_CO_ADDRESS_SELECT, DEFAULT_CO_ADDRESS_SELECT), useCOAddress);
-		formItem.add(useCOAddress);
-		formItem.add(label);
 		layer.add(formItem);
 
 		DropdownMenu localesDrop = LocalePresentationUtil.getAvailableLocalesDropdown(iwc.getIWMainApplication(), PARAMETER_PREFERRED_LOCALE);
