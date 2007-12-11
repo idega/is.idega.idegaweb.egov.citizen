@@ -567,12 +567,16 @@ public class CitizenAccountPreferences extends CitizenBlock {
 			}
 			if (useCOAddress) {
 				Address coAddress = getCOAddress(iwc);
-				coAddress.setStreetName(coStreetAddress);
+				//coAddress.setStreetName(coStreetAddress);
 
 				AddressBusiness addressBusiness = (AddressBusiness) IBOLookup.getServiceInstance(iwc, AddressBusiness.class);
 				Country country = addressBusiness.getCountryHome().findByPrimaryKey(new Integer(coCountry));
 				PostalCode pc = addressBusiness.getPostalCodeAndCreateIfDoesNotExist(coPostalCode, coCity, country);
-
+				String streetName = addressBusiness.getStreetNameFromAddressString(coStreetAddress);
+				String streetNumber = addressBusiness.getStreetNumberFromAddressString(coStreetAddress);
+				coAddress.setStreetName(streetName);
+				coAddress.setStreetNumber(streetNumber);
+				
 				coAddress.setPostalCode(pc);
 				coAddress.setCity(coCity);
 				coAddress.store();

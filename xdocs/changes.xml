@@ -6,6 +6,11 @@
 		</author>
 	</properties>
 	<body>
+		<release version="1.0.23" date="2007-12-11">
+			<action dev="palli" type="fix">
+				Fixed bug in saving address in CitizenAccountPreferences.
+			</action>
+		</release>
 		<release version="1.0.22" date="2007-10-18">
 			<action dev="palli" type="update">
 				Added application property to set the version of the style sheet used at rb, when sending passwords to bank.
