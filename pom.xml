@@ -18,9 +18,8 @@
     <connection>scm:cvs:ext:${user.name}@code.idega.com:/idega/cvs:${groupId}/${artifactId}/</connection>
     <developerConnection>scm:cvs:ext:${user.name}@code.idega.com:/idega/cvs:${groupId}/${artifactId}/</developerConnection> 
      -->
-    <connection>scm:cvs:ext:${user.name}@code.idega.com:/idega/cvs:${groupId}/${artifactId}/</connection>
-    <developerConnection>scm:cvs:ext:${user.name}@code.idega.com:/idega/cvs:${groupId}/${artifactId}/</developerConnection>
-    <tag>is_idega_idegaweb_egov_citizen-4_0_0</tag>
+    <connection>scm:cvs:ext:civilis@code.idega.com:/idega/cvs:com.idega.block.egov/is.idega.idegaweb.egov.citizen/</connection>
+    <developerConnection>scm:cvs:ext:civilis@code.idega.com:/idega/cvs:com.idega.block.egov/is.idega.idegaweb.egov.citizen/</developerConnection>
   </scm>
   <developers>
     <developer>
