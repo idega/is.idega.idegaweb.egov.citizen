@@ -11,7 +11,7 @@ acc.app.appr.subj=Your application for access to Electronic Reykjavik has been h
 accountApplication.agreementNotAgreed=\u00DE\u00FA \u00FEarft a\u00F0 sam\u00FEykkja skilm\u00E1lana fyrst
 accountApplication.agreementText=I agree to the terms of use
 accountApplication.termsOfUse=<a href\="{0}">Terms of use</a>
-accountApplication.termsofuse=I agree to the terms of use\: <a href\="{0}">Terms of use</a>.
+accountApplication.termsofuse=I agree to the terms of use: <a href\="{0}">Terms of use</a>.
 account_application.example=(example: 0110012230)
 address=Address\:
 already_applied_for_password=You have already applied for a new password
@@ -114,7 +114,7 @@ next=Next
 no_login_found_for_user=The resident with this ID does not have access to Electronic Reykjavik
 no_user_found_with_personal_id=No user was found with the personal ID you entered
 not_a_valid_email=Not a valid e-mail
-not_a_valid_personal_id=Not a valid persona ID
+not_a_valid_personal_id=Not a valid personal ID
 not_valid_citizen_account_age=Only those that acquire {0} years of age and older may apply for access
 password_was_created=New password created
 password_was_created_text=A new password has been created and has been sent to you e-mail, {0}.  The new password has been activated and can be used to login.
