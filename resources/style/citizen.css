@@ -1,14 +1,53 @@
-form.citizenForm div.buttonLayer {	margin: 0;	padding: 0;	text-align: left;	padding-left: 175px;}
+form.citizenForm div.buttonLayer {
+	margin: 0;
+	padding: 0;
+	text-align: left;
+	margin-top: 16px;
+	clear: both;
+}
 
 form#citizenAccountPreferences div.helperText {
 	display: none;	
-}form.citizenForm div.buttonLayer a {	text-decoration: underline;
-	color: #000;
-	background: url(images/button_image.gif) right no-repeat;	font-family: Verdana, Arial, Helvetica, sans-serif;
-	font-size: 10px;	padding-right: 14px;	text-align: left;}div.citizenImage img {	width: 79px;	border: 1px #8A8A8A solid;}form.citizenForm div.formItem img {	float: left;	margin-bottom: 8px;	width: 79px;	border: 1px #A8A8A8 solid;}
+}
 
-form.citizenForm div.formItem input.checkbox {
-	
-	width: default;
-	height: default;
-}div.indentedCheckbox input.checkbox {	margin-left: 160px;	margin-right: 5px;}form.citizenForm div.indentedCheckbox label {	width: auto;}div#removeImage input {	margin-bottom: 28px;}div#imageUpload input {	margin-bottom: 28px;}div#messagesViaEmail input {	margin-bottom: 20px;}div#mobilePhone input {	margin-bottom: 20px;}
+div.citizenImage img {
+	width: 79px;
+	border: 1px #8A8A8A solid;
+}
+
+form.citizenForm div.formItem img {
+	float: left;
+	margin-bottom: 8px;
+	width: 79px;
+	border: 1px #A8A8A8 solid;
+}
+
+form.citizenForm div.formItem input.checkbox {	
+	width: 14px;
+	height: 14px;
+}
+
+div.indentedCheckbox input.checkbox {
+	margin-right: 5px;
+	margin-left: 160px;
+}
+
+form.citizenForm div.indentedCheckbox label {
+	width: auto;
+}
+
+div#removeImage input {
+	margin-bottom: 28px;
+}
+
+div#imageUpload input {
+	margin-bottom: 28px;
+}
+
+div#messagesViaEmail input {
+	margin-bottom: 20px;
+}
+
+div#mobilePhone input {
+	margin-bottom: 20px;
+}
