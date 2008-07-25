@@ -8,10 +8,12 @@ import java.rmi.RemoteException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 
 import javax.ejb.FinderException;
 
 import com.idega.business.IBOLookup;
+import com.idega.core.accesscontrol.data.ICPermission;
 import com.idega.core.builder.data.ICPage;
 import com.idega.core.contact.data.Email;
 import com.idega.core.contact.data.Phone;
@@ -43,6 +45,7 @@ import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.TextInput;
 import com.idega.user.business.NoPhoneFoundException;
 import com.idega.user.business.UserBusiness;
+import com.idega.user.data.Group;
 import com.idega.user.data.User;
 import com.idega.util.EmailValidator;
 import com.idega.util.FileUtil;
@@ -78,6 +81,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	private final static String PARAMETER_MESSAGES_VIA_EMAIL = "cap_m_v_e";
 	private final static String PARAMETER_REMOVE_IMAGE = "cap_remove_image";
 	private final static String PARAMETER_PREFERRED_LOCALE = "cap_pref_locale";
+	private final static String PARAMETER_PREFERRED_ROLE = "cap_pref_role";
 
 	private final static String KEY_PREFIX = "citizen.";
 	private final static String KEY_EMAIL = KEY_PREFIX + "email";
@@ -98,6 +102,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	private final static String KEY_PREFERENCES_SAVED = KEY_PREFIX + "preferenced_saved";
 	private final static String KEY_NO_EMAIL_FOR_LETTERS = KEY_PREFIX + "no_email_to_send_letter_to";
 	private final static String PREFERRED_LANGUAGE = "preferred_language";
+	private final static String PREFERRED_ROLE = "preferred_role";
 
 	private final static String DEFAULT_EMAIL = "E-mail";
 	private final static String DEFAULT_UPDATE = "Update";
@@ -124,6 +129,8 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	private IWResourceBundle iwrb;
 
 	private boolean showPreferredLocaleChooser = false;
+	
+	private boolean showPreferredRoleChooser = true;
 
 	public CitizenAccountPreferences() {
 	}
@@ -441,6 +448,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		layer.add(formItem);
 
 		DropdownMenu localesDrop = LocalePresentationUtil.getAvailableLocalesDropdown(iwc.getIWMainApplication(), PARAMETER_PREFERRED_LOCALE);
+				
 		if (localesDrop.getChildCount() > 1 && isSetToShowPreferredLocaleChooser()) {
 			section.add(clearLayer);
 			formItem = new Layer(Layer.DIV);
@@ -457,6 +465,37 @@ public class CitizenAccountPreferences extends CitizenBlock {
 			label = new Label(this.iwrb.getLocalizedString(PREFERRED_LANGUAGE, "Preferred language"), localesDrop);
 			formItem.add(label);
 			formItem.add(localesDrop);
+			layer.add(formItem);
+		}
+		
+		DropdownMenu rolesDrop = new DropdownMenu(PARAMETER_PREFERRED_ROLE);
+
+		Collection<Group> groups = iwc.getCurrentUser().getParentGroups();
+		for (Group group : groups) {
+			if (group.getHomePageID() > 0) {
+				Collection<ICPermission> roles = iwc.getIWMainApplication().getAccessController().getAllRolesForGroup(group);
+				if (roles != null && !roles.isEmpty()) {
+					for (ICPermission permission : roles) {
+						String localisedPermissionName = iwrb.getLocalizedString("role_name." + permission.getPermissionString(), permission.getPermissionString());
+						rolesDrop.addMenuElement(permission.getPermissionString(), localisedPermissionName);
+					}
+				}
+			}
+		}
+		
+		if (rolesDrop.getChildCount() > 0 && isSetToShowPreferredRoleChooser()) {
+			section.add(clearLayer);
+			formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			formItem.setID("preferredRole");
+
+			if (user.getPreferredRole() != null) {
+				rolesDrop.setSelectedElement(user.getPreferredRole());
+			}
+
+			label = new Label(this.iwrb.getLocalizedString(PREFERRED_ROLE, "Preferred user role"), localesDrop);
+			formItem.add(label);
+			formItem.add(rolesDrop);
 			layer.add(formItem);
 		}
 
@@ -516,6 +555,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		String coCity = iwc.getParameter(PARAMETER_CO_CITY);
 		String coCountry = iwc.getParameter(PARAMETER_CO_COUNTRY);
 		String preferredLocale = iwc.getParameter(PARAMETER_PREFERRED_LOCALE);
+		String preferredRole = iwc.getParameter(PARAMETER_PREFERRED_ROLE);
 		boolean useCOAddress = iwc.isParameterSet(PARAMETER_CO_ADDRESS_SELECT);
 		boolean messagesViaEmail = iwc.isParameterSet(PARAMETER_MESSAGES_VIA_EMAIL);
 		boolean removeImage = iwc.isParameterSet(PARAMETER_REMOVE_IMAGE);
@@ -565,6 +605,10 @@ public class CitizenAccountPreferences extends CitizenBlock {
 			if (preferredLocale != null) {
 				ub.setUsersPreferredLocale(user, preferredLocale, true);
 			}
+			if (preferredRole != null) {
+				ub.setUsersPreferredRole(user, preferredRole, true);
+			}
+			
 			if (useCOAddress) {
 				Address coAddress = getCOAddress(iwc);
 				//coAddress.setStreetName(coStreetAddress);
@@ -677,6 +721,10 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	 */
 	public boolean isSetToShowPreferredLocaleChooser() {
 		return showPreferredLocaleChooser;
+	}
+	
+	public boolean isSetToShowPreferredRoleChooser() {
+		return showPreferredRoleChooser;
 	}
 
 	/**
