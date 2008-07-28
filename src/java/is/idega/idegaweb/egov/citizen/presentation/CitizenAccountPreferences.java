@@ -8,6 +8,7 @@ import java.rmi.RemoteException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 
 import javax.ejb.FinderException;
 
@@ -472,12 +473,16 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		DropdownMenu rolesDrop = new DropdownMenu(PARAMETER_PREFERRED_ROLE);
 
 		IWMainApplication app = iwc.getIWMainApplication();
-		Collection<Group> groups = iwc.getCurrentUser().getParentGroups();
-		for (Group group : groups) {
+		Collection groups = iwc.getCurrentUser().getParentGroups();
+		Iterator it = groups.iterator();
+		while (it.hasNext()) {
+			Group group = (Group) it.next();
 			if (group.getHomePageID() > 0) {
-				Collection<ICPermission> roles = app.getAccessController().getAllRolesForGroup(group);
+				Collection roles = app.getAccessController().getAllRolesForGroup(group);
 				if (roles != null && !roles.isEmpty()) {
-					for (ICPermission permission : roles) {
+					Iterator it2 = roles.iterator();
+					while (it2.hasNext()) {
+						ICPermission permission = (ICPermission) it2.next();
 						ICRole role;
 						try {
 							role = app.getAccessController().getRoleByRoleKey(permission.getPermissionString());
