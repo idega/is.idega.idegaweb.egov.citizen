@@ -14,6 +14,7 @@
 package is.idega.idegaweb.egov.citizen.presentation;
 
 import is.idega.idegaweb.egov.citizen.business.WSCitizenAccountBusiness;
+
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.text.MessageFormat;
@@ -23,9 +24,9 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
 import com.idega.business.IBOLookup;
 import com.idega.core.accesscontrol.business.UserHasLoginException;
-import com.idega.core.accesscontrol.data.ICPermission;
 import com.idega.core.accesscontrol.data.LoginTable;
 import com.idega.core.accesscontrol.data.LoginTableHome;
 import com.idega.core.builder.data.ICPage;
@@ -49,7 +50,6 @@ import com.idega.presentation.ui.HiddenInput;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.TextInput;
 import com.idega.user.business.UserBusiness;
-import com.idega.user.data.Group;
 import com.idega.user.data.User;
 import com.idega.util.Age;
 import com.idega.util.IWTimestamp;
@@ -97,7 +97,6 @@ public class CitizenAccountApplication extends CitizenBlock {
 	private final static String COMMUNE_KEY = "commmune";
 
 	public final static String PARAMETER_PREFERRED_LOCALE = "pref_locale";
-	public final static String PARAMETER_PREFERRED_ROLE = "pref_locale";
 	public final static String PARAMETER_HIDE_PERSONALID_INPUT = "hidePersonalIdInput";
 	public final static String PARAMETER_CREATE_LOGIN_AND_LETTER = "createLoginAndLetter";
 	public final static String PARAMETER_REDIRECT_URI = "redirectUriOnSubmit";
@@ -376,37 +375,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 			formItem.add(localesDrop);
 			section.add(formItem);
 		}
-		
-		DropdownMenu rolesDrop = new DropdownMenu(PARAMETER_PREFERRED_ROLE);
-
-		Collection<Group> groups = iwc.getCurrentUser().getParentGroups();
-		for (Group group : groups) {
-			if (group.getHomePageID() > 0) {
-				Collection<ICPermission> roles = iwc.getIWMainApplication().getAccessController().getAllRolesForGroup(group);
-				if (roles != null && !roles.isEmpty()) {
-					for (ICPermission permission : roles) {
-						String localisedPermissionName = iwrb.getLocalizedString("role_name." + permission.getPermissionString(), permission.getPermissionString());
-						rolesDrop.addMenuElement(permission.getPermissionString(), localisedPermissionName);
-					}
-				}
-			}
-		}
-		
-		if (rolesDrop.getChildCount() > 1 && isSetToShowPreferredRoleChooser()) {
-			formItem = new Layer(Layer.DIV);
-			formItem.setStyleClass("formItem");
-			formItem.setID("preferredRole");
-			
-			if (iwc.getCurrentUser().getPreferredRole() != null) {
-				rolesDrop.setSelectedElement(iwc.getCurrentUser().getPreferredRole());
-			}
-			
-			label = new Label(this.iwrb.getLocalizedString(PREFERRED_ROLE, "Preferred user role"), localesDrop);
-			formItem.add(label);
-			formItem.add(rolesDrop);
-			section.add(formItem);
-		}
-		
+						
 		//		TODO: localize the url to agreement file
 		Object[] linkToAgreement = new Object[] { getAgreementFileUrl() };
 		formItem = new Layer(Layer.DIV);

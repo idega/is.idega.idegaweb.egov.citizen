@@ -8,12 +8,12 @@ import java.rmi.RemoteException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 
 import javax.ejb.FinderException;
 
 import com.idega.business.IBOLookup;
 import com.idega.core.accesscontrol.data.ICPermission;
+import com.idega.core.accesscontrol.data.ICRole;
 import com.idega.core.builder.data.ICPage;
 import com.idega.core.contact.data.Email;
 import com.idega.core.contact.data.Phone;
@@ -25,6 +25,7 @@ import com.idega.core.location.data.AddressHome;
 import com.idega.core.location.data.AddressType;
 import com.idega.core.location.data.Country;
 import com.idega.core.location.data.PostalCode;
+import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.io.UploadFile;
 import com.idega.presentation.ExceptionWrapper;
@@ -470,14 +471,21 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		
 		DropdownMenu rolesDrop = new DropdownMenu(PARAMETER_PREFERRED_ROLE);
 
+		IWMainApplication app = iwc.getIWMainApplication();
 		Collection<Group> groups = iwc.getCurrentUser().getParentGroups();
 		for (Group group : groups) {
 			if (group.getHomePageID() > 0) {
-				Collection<ICPermission> roles = iwc.getIWMainApplication().getAccessController().getAllRolesForGroup(group);
+				Collection<ICPermission> roles = app.getAccessController().getAllRolesForGroup(group);
 				if (roles != null && !roles.isEmpty()) {
 					for (ICPermission permission : roles) {
+						ICRole role;
+						try {
+							role = app.getAccessController().getRoleByRoleKey(permission.getPermissionString());
+						} catch (FinderException e) {
+							continue;
+						}
 						String localisedPermissionName = iwrb.getLocalizedString("role_name." + permission.getPermissionString(), permission.getPermissionString());
-						rolesDrop.addMenuElement(permission.getPermissionString(), localisedPermissionName);
+						rolesDrop.addMenuElement(role.getId(), localisedPermissionName);
 					}
 				}
 			}
@@ -490,7 +498,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 			formItem.setID("preferredRole");
 
 			if (user.getPreferredRole() != null) {
-				rolesDrop.setSelectedElement(user.getPreferredRole());
+				rolesDrop.setSelectedElement(user.getPreferredRole().getId());
 			}
 
 			label = new Label(this.iwrb.getLocalizedString(PREFERRED_ROLE, "Preferred user role"), localesDrop);
@@ -555,7 +563,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		String coCity = iwc.getParameter(PARAMETER_CO_CITY);
 		String coCountry = iwc.getParameter(PARAMETER_CO_COUNTRY);
 		String preferredLocale = iwc.getParameter(PARAMETER_PREFERRED_LOCALE);
-		String preferredRole = iwc.getParameter(PARAMETER_PREFERRED_ROLE);
+		String preferredRoleID = iwc.getParameter(PARAMETER_PREFERRED_ROLE);
 		boolean useCOAddress = iwc.isParameterSet(PARAMETER_CO_ADDRESS_SELECT);
 		boolean messagesViaEmail = iwc.isParameterSet(PARAMETER_MESSAGES_VIA_EMAIL);
 		boolean removeImage = iwc.isParameterSet(PARAMETER_REMOVE_IMAGE);
@@ -605,8 +613,10 @@ public class CitizenAccountPreferences extends CitizenBlock {
 			if (preferredLocale != null) {
 				ub.setUsersPreferredLocale(user, preferredLocale, true);
 			}
-			if (preferredRole != null) {
-				ub.setUsersPreferredRole(user, preferredRole, true);
+			if (preferredRoleID != null) {
+				IWMainApplication app = iwc.getIWMainApplication();
+				ICRole role = app.getAccessController().getRoleByRoleKey(preferredRoleID);
+				ub.setUsersPreferredRole(user, role, true);
 			}
 			
 			if (useCOAddress) {
