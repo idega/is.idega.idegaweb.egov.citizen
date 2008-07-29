@@ -8,11 +8,11 @@ import java.rmi.RemoteException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.ejb.FinderException;
 
 import com.idega.business.IBOLookup;
-import com.idega.core.accesscontrol.data.ICPermission;
 import com.idega.core.accesscontrol.data.ICRole;
 import com.idega.core.builder.data.ICPage;
 import com.idega.core.contact.data.Email;
@@ -46,10 +46,11 @@ import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.TextInput;
 import com.idega.user.business.NoPhoneFoundException;
 import com.idega.user.business.UserBusiness;
-import com.idega.user.data.Group;
 import com.idega.user.data.User;
+import com.idega.util.CoreConstants;
 import com.idega.util.EmailValidator;
 import com.idega.util.FileUtil;
+import com.idega.util.ListUtil;
 
 /*
  * import com.idega.presentation.ExceptionWrapper; import com.idega.presentation.IWContext; import com.idega.presentation.*; import
@@ -470,24 +471,12 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		}
 		
 		DropdownMenu rolesDrop = new DropdownMenu(PARAMETER_PREFERRED_ROLE);
-
-		IWMainApplication app = iwc.getIWMainApplication();
-		Collection<Group> groups = iwc.getCurrentUser().getParentGroups();
-		for (Group group : groups) {
-			if (group.getHomePageID() > 0) {
-				Collection<ICPermission> roles = app.getAccessController().getAllRolesForGroup(group);
-				if (roles != null && !roles.isEmpty()) {
-					for (ICPermission permission : roles) {
-						ICRole role;
-						try {
-							role = app.getAccessController().getRoleByRoleKey(permission.getPermissionString());
-						} catch (FinderException e) {
-							continue;
-						}
-						String localisedPermissionName = iwrb.getLocalizedString("role_name." + permission.getPermissionString(), permission.getPermissionString());
-						rolesDrop.addMenuElement(role.getId(), localisedPermissionName);
-					}
-				}
+		List<ICRole> rolesForUser = ub.getAvailableRolesForUserAsPreferredRoles(iwc.getCurrentUser());
+		IWResourceBundle coreIWRB = iwc.getIWMainApplication().getBundle(CoreConstants.CORE_IW_BUNDLE_IDENTIFIER).getResourceBundle(iwc);
+		if (!ListUtil.isEmpty(rolesForUser)) {
+			for (ICRole role: rolesForUser) {
+				String localisedPermissionName = coreIWRB.getLocalizedString(role.getRoleNameLocalizableKey(), role.getRoleKey());
+				rolesDrop.addMenuElement(role.getId(), localisedPermissionName);
 			}
 		}
 		
