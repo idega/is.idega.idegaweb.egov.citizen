@@ -100,8 +100,9 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 		PostMethod response = sendXMLData(req, getLoginRequestXStream());
 
 		InputStream respStream = null;
-
+		
 		try {
+			String temp = response.getResponseBodyAsString();
 			respStream = response.getResponseBodyAsStream();
 			LoginResponse resp = (LoginResponse) getLoginResponseXStream().fromXML(response.getResponseBodyAsStream());
 			return resp.getSessionId();
@@ -200,7 +201,7 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 
 		if (err_xstream == null) {
 
-			XStream xstream = new XStream(new XppDriver(new XmlFriendlyReplacer("_", "_")));
+			XStream xstream = new XStream(new XppDriver(new XmlFriendlyReplacer("$", "_")));
 			xstream.alias("LIVilla", GeneralErrorMessage.class);
 			xstream.aliasField("villa", GeneralErrorMessage.class, GeneralErrorMessage.error_number_field);
 			xstream.aliasField("villubod", GeneralErrorMessage.class, GeneralErrorMessage.error_msg_field);
@@ -217,7 +218,7 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 
 		if (send_data_response_err_xstream == null) {
 
-			XStream xstream = new XStream(new XppDriver(new XmlFriendlyReplacer("_", "_")));
+			XStream xstream = new XStream(new XppDriver(new XmlFriendlyReplacer("$", "_")));
 
 			xstream.alias("LI_Innsending_gagna_svar", SendingInDataResponse.class);
 			xstream.aliasField("timi", SendingInDataResponse.class, SendingInDataResponse.time_field);
@@ -234,9 +235,9 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 
 	protected synchronized XStream getLoginResponseXStream() {
 
-		if (login_resp_xstream == null) {
+		if (login_resp_xstream == null || true) {
 
-			XStream xstream = new XStream(new XppDriver(new XmlFriendlyReplacer("_", "_")));
+			XStream xstream = new XStream(new XppDriver(new XmlFriendlyReplacer("$", "_")));
 
 			xstream.alias("LI_Innskra_svar", LoginResponse.class);
 			xstream.aliasField("seta", LoginResponse.class, LoginResponse.session_id_field);
@@ -255,7 +256,7 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 
 		if (login_xstream == null) {
 
-			XStream xstream = new XStream(new XppDriver(new XmlFriendlyReplacer("_", "_")));
+			XStream xstream = new XStream(new XppDriver(new XmlFriendlyReplacer("$", "_")));
 
 			xstream.alias("LI_Innskra", LoginRequest.class);
 			xstream.aliasField("notandanafn", LoginRequest.class, LoginRequest.login_name_field);
@@ -277,7 +278,7 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 
 		if (logout_xstream == null) {
 
-			XStream xstream = new XStream(new XppDriver(new XmlFriendlyReplacer("_", "_")));
+			XStream xstream = new XStream(new XppDriver(new XmlFriendlyReplacer("$", "_")));
 
 			xstream.alias("LI_Utskra", LogoutRequest.class);
 			xstream.aliasField("seta", LogoutRequest.class, LogoutRequest.session_id_field);
@@ -298,7 +299,7 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 
 		if (send_data_xstream == null) {
 
-			XStream xstream = new XStream(new XppDriver(new XmlFriendlyReplacer("_", "_")));
+			XStream xstream = new XStream(new XppDriver(new XmlFriendlyReplacer("$", "_")));
 
 			xstream.alias("LI_Innsending_gagna", SendingInData.class);
 			xstream.aliasField("seta", SendingInData.class, SendingInData.session_id_field);
