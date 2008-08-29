@@ -63,38 +63,38 @@ import com.idega.util.text.SocialSecurityNumber;
  */
 public class CitizenAccountApplication extends CitizenBlock {
 
-	private final static int ACTION_VIEW_FORM = 0;
-	private final static int ACTION_SUBMIT_SIMPLE_FORM = 1;
+	protected final static int ACTION_VIEW_FORM = 0;
+	protected final static int ACTION_SUBMIT_SIMPLE_FORM = 1;
 
-	private static final String ATTRIBUTE_VALID_ACCOUNT_AGE = "citizen_account_minimum_age";
-	private static final String ATTRIBUTE_VALID_ACCOUNT_AGE_YEAR = "citizen_account_minimum_age_this_year";
+	protected static final String ATTRIBUTE_VALID_ACCOUNT_AGE = "citizen_account_minimum_age";
+	protected static final String ATTRIBUTE_VALID_ACCOUNT_AGE_YEAR = "citizen_account_minimum_age_this_year";
 
-	private final static String EMAIL_DEFAULT = "Email";
-	private final static String EMAIL_KEY = "email";
-	private final static String SNAIL_MAIL_KEY = "snail_mail";
-	private final static String SNAIL_MAIL_DEFAULT = "Send password using ordinary mail";
+	protected final static String EMAIL_DEFAULT = "Email";
+	protected final static String EMAIL_KEY = "email";
+	protected final static String SNAIL_MAIL_KEY = "snail_mail";
+	protected final static String SNAIL_MAIL_DEFAULT = "Send password using ordinary mail";
 
-	private final static String APP_AGREEMENT_PARAM = "applicationAgreement";
+	protected final static String APP_AGREEMENT_PARAM = "applicationAgreement";
 
-	private final static String APP_AGREEMENT_NOTAGREED_KEY = "accountApplication.agreementNotAgreed";
-	private final static String APP_AGREEMENT_NOTAGREED_DEFAULT = "Þú þarft að samþykkja skilmálana fyrst";
-	private final static String APP_AGREEMENT_TERMSOFUSE_KEY = "accountApplication.termsofuse";
-	private final static String APP_AGREEMENT_TERMSOFUSE_DEFAULT = "<a href=\"{0}\">Notkunarskilmálar</a>";
+	protected final static String APP_AGREEMENT_NOTAGREED_KEY = "accountApplication.agreementNotAgreed";
+	protected final static String APP_AGREEMENT_NOTAGREED_DEFAULT = "Þú þarft að samþykkja skilmálana fyrst";
+	protected final static String APP_AGREEMENT_TERMSOFUSE_KEY = "accountApplication.termsofuse";
+	protected final static String APP_AGREEMENT_TERMSOFUSE_DEFAULT = "<a href=\"{0}\">Notkunarskilmálar</a>";
 
-	private final static String EMAIL_KEY_REPEAT = "email_repeat";
-	private final static String EMAIL_REPEAT_DEFAULT = "Email again";
-	private final static String PHONE_HOME_KEY = "home_phone";
-	private final static String PHONE_HOME_DEFAULT = "Phone";
-	private final static String PHONE_CELL_KEY = "mobile_phone";
-	private final static String PREFERRED_LANGUAGE = "preferred_language";
-	private final static String PREFERRED_ROLE = "preferred_role";
-	private final static String PHONE_CELL_DEFAULT = "Cell phone";
-	private final static String UNKNOWN_CITIZEN_KEY = "unknown_citizen";
-	private final static String UNKNOWN_CITIZEN_DEFAULT = "Something is wrong with your personal id. Please try again or contact the responsible";
-	private final static String NOT_VALID_ACCOUNT_AGE_KEY = "not_valid_citizen_account_age";
-	private final static String NOT_VALID_ACCOUNT_AGE_DEFAULT = "You have to be {0} to apply for a citizen account";
-	private final static String COMMUNE_DEFAULT = "Commune";
-	private final static String COMMUNE_KEY = "commmune";
+	protected final static String EMAIL_KEY_REPEAT = "email_repeat";
+	protected final static String EMAIL_REPEAT_DEFAULT = "Email again";
+	protected final static String PHONE_HOME_KEY = "home_phone";
+	protected final static String PHONE_HOME_DEFAULT = "Phone";
+	protected final static String PHONE_CELL_KEY = "mobile_phone";
+	protected final static String PREFERRED_LANGUAGE = "preferred_language";
+	protected final static String PREFERRED_ROLE = "preferred_role";
+	protected final static String PHONE_CELL_DEFAULT = "Cell phone";
+	protected final static String UNKNOWN_CITIZEN_KEY = "unknown_citizen";
+	protected final static String UNKNOWN_CITIZEN_DEFAULT = "Something is wrong with your personal id. Please try again or contact the responsible";
+	protected final static String NOT_VALID_ACCOUNT_AGE_KEY = "not_valid_citizen_account_age";
+	protected final static String NOT_VALID_ACCOUNT_AGE_DEFAULT = "You have to be {0} to apply for a citizen account";
+	protected final static String COMMUNE_DEFAULT = "Commune";
+	protected final static String COMMUNE_KEY = "commmune";
 
 	public final static String PARAMETER_PREFERRED_LOCALE = "pref_locale";
 	public final static String PARAMETER_HIDE_PERSONALID_INPUT = "hidePersonalIdInput";
@@ -105,27 +105,27 @@ public class CitizenAccountApplication extends CitizenBlock {
 
 	private final static String SSN_DEFAULT = "Personal ID";
 	public final static String SSN_KEY = "personal_id";
-	private final static String TEXT_APPLICATION_SUBMITTED_DEFAULT = "Application is submitted.";
-	private final static String TEXT_APPLICATION_SUBMITTED_KEY = "application_submitted";
-	private final static String TEXT_APPLICATION_BANK_SUBMITTED_KEY = "application_bank_submitted";
+	protected final static String TEXT_APPLICATION_SUBMITTED_DEFAULT = "Application is submitted.";
+	protected final static String TEXT_APPLICATION_SUBMITTED_KEY = "application_submitted";
+	protected final static String TEXT_APPLICATION_BANK_SUBMITTED_KEY = "application_bank_submitted";
 
-	private final static String USER_ALLREADY_HAS_A_LOGIN_DEFAULT = "You already have an account";
-	private final static String USER_ALLREADY_HAS_A_LOGIN_KEY = "user_already_has_an_account";
+	protected final static String USER_ALLREADY_HAS_A_LOGIN_DEFAULT = "You already have an account";
+	protected final static String USER_ALLREADY_HAS_A_LOGIN_KEY = "user_already_has_an_account";
 
-	private final static String SIMPLE_FORM_SUBMIT_KEY = "scaa_simpleSubmit";
-	private final static String SIMPLE_FORM_SUBMIT_DEFAULT = "Forward >>";
+	protected final static String SIMPLE_FORM_SUBMIT_KEY = "scaa_simpleSubmit";
+	protected final static String SIMPLE_FORM_SUBMIT_DEFAULT = "Forward >>";
 
-	private final static String ERROR_NO_INSERT_KEY = "unable_to_store";
-	private final static String ERROR_EMAILS_DONT_MATCH = "emails_dont_match";
-	private final static String ERROR_EMAILS_DONT_MATCH_DEFAULT = "Emails don't match";
-	private static final String ERROR_APPLYING_FOR_WRONG_COMMUNE = "user_in_wrong_commune";
-	private static final String ERROR_APPLYING_FOR_WRONG_COMMUNE_DEFAULT = "You do not belong to the commune you are applying for according to our records and the application cannot be finished. Please contact your commune if you think this is an error.";
+	protected final static String ERROR_NO_INSERT_KEY = "unable_to_store";
+	protected final static String ERROR_EMAILS_DONT_MATCH = "emails_dont_match";
+	protected final static String ERROR_EMAILS_DONT_MATCH_DEFAULT = "Emails don't match";
+	protected static final String ERROR_APPLYING_FOR_WRONG_COMMUNE = "user_in_wrong_commune";
+	protected static final String ERROR_APPLYING_FOR_WRONG_COMMUNE_DEFAULT = "You do not belong to the commune you are applying for according to our records and the application cannot be finished. Please contact your commune if you think this is an error.";
 
 	private IWResourceBundle iwrb;
-	private ICPage iPage;
-	private int iRedirectDelay = 15;
+	protected ICPage iPage;
+	protected int iRedirectDelay = 15;
 
-	private boolean iForwardToURL = false;
+	protected boolean iForwardToURL = false;
 	private Map iCommuneMap;
 	private boolean hidePersonalIdInput = false;
 	private boolean createLoginAndLetter = true;
@@ -143,23 +143,22 @@ public class CitizenAccountApplication extends CitizenBlock {
 		try {
 			int action = parseAction(iwc);
 			switch (action) {
-				case ACTION_VIEW_FORM:
-					viewSimpleApplicationForm(iwc);
-					break;
-				case ACTION_SUBMIT_SIMPLE_FORM:
-					submitSimpleForm(iwc);
-					break;
+			case ACTION_VIEW_FORM:
+				viewSimpleApplicationForm(iwc);
+				break;
+			case ACTION_SUBMIT_SIMPLE_FORM:
+				submitSimpleForm(iwc);
+				break;
 			}
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			super.add(new ExceptionWrapper(e, this));
 		}
 	}
 
 	/**
 	 * <p>
-	 * Parse the request parameters and initialize this component with teir values
-	 * if they are set
+	 * Parse the request parameters and initialize this component with teir
+	 * values if they are set
 	 * </p>
 	 * 
 	 * @param iwc
@@ -246,7 +245,8 @@ public class CitizenAccountApplication extends CitizenBlock {
 
 		Layer helpLayer = new Layer(Layer.DIV);
 		helpLayer.setStyleClass("helperText");
-		helpLayer.add(new Text(this.iwrb.getLocalizedString(sendMessageToBank ? "citizen_registraction_bank_help" : "citizen_registraction_help", "Please fill in your personal ID as well as your e-mail.  Your e-mail is required so that you can be contacted directly about changes to you ongoing cases.  If you don't have an e-mail account please contact the commune offices.")));
+		helpLayer.add(new Text(this.iwrb.getLocalizedString(sendMessageToBank ? "citizen_registraction_bank_help" : "citizen_registraction_help",
+				"Please fill in your personal ID as well as your e-mail.  Your e-mail is required so that you can be contacted directly about changes to you ongoing cases.  If you don't have an e-mail account please contact the commune offices.")));
 		section.add(helpLayer);
 
 		maintainHiddenParameters(iwc, form);
@@ -296,8 +296,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 			HiddenInput personalID = new HiddenInput(SSN_KEY);
 			personalID.keepStatusOnAction(true);
 			section.add(personalID);
-		}
-		else {
+		} else {
 			TextInput personalID = new TextInput(SSN_KEY);
 			personalID.setStyleClass("personalID");
 			personalID.setMaxlength(10);
@@ -375,8 +374,11 @@ public class CitizenAccountApplication extends CitizenBlock {
 			formItem.add(localesDrop);
 			section.add(formItem);
 		}
-						
-		//		TODO: localize the url to agreement file
+		
+		renderComponentsBeforeTermOfUseAggreement(section);
+		
+
+		// TODO: localize the url to agreement file
 		Object[] linkToAgreement = new Object[] { getAgreementFileUrl() };
 		formItem = new Layer(Layer.DIV);
 		formItem.setStyleClass("formItem");
@@ -427,8 +429,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 				}
 				iwc.sendRedirect(URL + query.toString());
 				return;
-			}
-			else {
+			} else {
 				errors.add(this.iwrb.getLocalizedString("must_select_commune", "You have to select a commune."));
 				hasErrors = true;
 			}
@@ -439,8 +440,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		if (ssn == null || ssn.length() == 0) {
 			errors.add(this.iwrb.getLocalizedString("must_provide_personal_id", "You have to enter a personal ID."));
 			hasErrors = true;
-		}
-		else if (!SocialSecurityNumber.isValidIcelandicSocialSecurityNumber(ssn)) {
+		} else if (!SocialSecurityNumber.isValidIcelandicSocialSecurityNumber(ssn)) {
 			errors.add(this.iwrb.getLocalizedString("not_a_valid_personal_id", "The personal ID you've entered is not valid."));
 			hasErrors = true;
 		}
@@ -478,11 +478,12 @@ public class CitizenAccountApplication extends CitizenBlock {
 		if (user == null) {
 			errors.add(this.iwrb.getLocalizedString(UNKNOWN_CITIZEN_KEY, UNKNOWN_CITIZEN_DEFAULT));
 			hasErrors = true;
-		}
-		else {
+		} else {
 			// FIRST CHECK IF THE USER IS IN THE CORRECT COMMUNE!
 			boolean inCorrectCommune = false;
-			// TODO check if must be in a certain commune, create a setmethod for that, make sure the user is added to the root commune and the accepted
+			// TODO check if must be in a certain commune, create a setmethod
+			// for that, make sure the user is added to the root commune and the
+			// accepted
 			// group
 			if (getCommuneUniqueIdsCSV() != null) {
 				String communesCSV = getCommuneUniqueIdsCSV();
@@ -519,8 +520,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 					hasErrors = true;
 					userHasLogin = true;
 				}
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				// no problem, no login found
 			}
 
@@ -538,8 +538,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 						hasErrors = true;
 					}
 				}
-			}
-			catch (UserHasLoginException e) {
+			} catch (UserHasLoginException e) {
 				errors.add(this.iwrb.getLocalizedString(USER_ALLREADY_HAS_A_LOGIN_KEY, USER_ALLREADY_HAS_A_LOGIN_DEFAULT));
 				hasErrors = true;
 			}
@@ -552,8 +551,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		if (hasErrors) {
 			showErrors(iwc, userHasLogin ? userLoginError : errors);
 			viewSimpleApplicationForm(iwc);
-		}
-		else {
+		} else {
 			Form form = new Form();
 			form.setID("accountApplicationForm");
 			form.setStyleClass("citizenForm");
@@ -585,14 +583,13 @@ public class CitizenAccountApplication extends CitizenBlock {
 
 			if (this.iPage != null) {
 				iwc.forwardToIBPage(getParentPage(), this.iPage, this.iRedirectDelay, false);
-			}
-			else if (getRedirectUrlOnSubmit() != null) {
+			} else if (getRedirectUrlOnSubmit() != null) {
 
 				try {
 					iwc.getResponse().sendRedirect(getRedirectUrlOnSubmit());
-				}
-				catch (IOException io) {
-					// the response is most likely been committed, i.e. written output to already
+				} catch (IOException io) {
+					// the response is most likely been committed, i.e. written
+					// output to already
 					iwc.forwardToURL(getParentPage(), getRedirectUrlOnSubmit(), this.iRedirectDelay, false);
 				}
 
@@ -602,8 +599,8 @@ public class CitizenAccountApplication extends CitizenBlock {
 
 	/**
 	 * 
-	 * @return a comma seperated values string with unique ids of communes in the
-	 *         IC_COMMUNE table
+	 * @return a comma seperated values string with unique ids of communes in
+	 *         the IC_COMMUNE table
 	 */
 	public String getCommuneUniqueIdsCSV() {
 		return this.communeUniqueIdsCSV;
@@ -614,8 +611,8 @@ public class CitizenAccountApplication extends CitizenBlock {
 	 * address registered to one of the commune ids in this string
 	 * 
 	 * @param communeUniqueIdsCSV
-	 *          a comma seperated values string with unique ids of communes in the
-	 *          IC_COMMUNE table
+	 *            a comma seperated values string with unique ids of communes in
+	 *            the IC_COMMUNE table
 	 */
 	public void setCommuneUniqueIdsCSV(String communeUniqueIdsCSV) {
 		this.communeUniqueIdsCSV = communeUniqueIdsCSV;
@@ -659,8 +656,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 	protected LoginTableHome getLoginTableHome() {
 		try {
 			return (LoginTableHome) IDOLookup.getHome(LoginTable.class);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
 		}
@@ -691,7 +687,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 
 	/**
 	 * @param showPreferredLocaleChooser
-	 *          The showPreferredLocaleChooser to set.
+	 *            The showPreferredLocaleChooser to set.
 	 */
 	public void setToShowPreferredLocaleChooser(boolean showPreferredLocaleChooser) {
 		this.showPreferredLocaleChooser = showPreferredLocaleChooser;
@@ -736,8 +732,17 @@ public class CitizenAccountApplication extends CitizenBlock {
 	public void setAgreementFileUrl(String agreementFileUrl) {
 		this.agreementFileUrl = agreementFileUrl;
 	}
-	
+
 	public boolean isSetToShowPreferredRoleChooser() {
 		return showPreferredRoleChooser;
+	}
+
+	/**
+	 * method to override to add your components to the form before term of use agreement
+	 * @param form 
+	 * @throws RemoteException
+	 */
+	protected void renderComponentsBeforeTermOfUseAggreement(Layer layer) throws RemoteException {
+
 	}
 }
