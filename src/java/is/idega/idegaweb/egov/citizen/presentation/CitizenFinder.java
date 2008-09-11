@@ -56,8 +56,8 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 	protected static final String PARAMETER_PERSONAL_ID = "cul_pid";
 	protected static final String PARAMETER_SEARCH = "cul_search";
 
-	private static final String PARAMETER_USER_PK = "cf_user_pk";
-	private static final String PARAMETER_USER_UNIQUE_ID = "cf_user_unique_id";
+	protected static final String PARAMETER_USER_PK = "cf_user_pk";
+	protected static final String PARAMETER_USER_UNIQUE_ID = "cf_user_unique_id";
 	private static final String PROPERTY_MINIMUM_AGE_CITIZEN_FINDER = "citizen.finder.minimum.age";
 
 	private ICPage iPage;
@@ -331,7 +331,7 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 		return table;
 	}
 
-	private void parseAction(IWContext iwc) {
+	protected int parseAction(IWContext iwc) {
 		if (iwc.isParameterSet(PARAMETER_FIRST_NAME) || iwc.isParameterSet(PARAMETER_MIDDLE_NAME) || iwc.isParameterSet(PARAMETER_LAST_NAME) || iwc.isParameterSet(PARAMETER_PERSONAL_ID)) {
 			String pid = iwc.getParameter(PARAMETER_PERSONAL_ID);
 			String first = iwc.getParameter(PARAMETER_FIRST_NAME);
@@ -351,6 +351,7 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 				throw new IBORuntimeException(re);
 			}
 		}
+		return 0;
 	}
 
 	protected Collection filterResults(IWContext iwc, Collection users) {
