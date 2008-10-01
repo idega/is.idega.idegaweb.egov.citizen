@@ -18,6 +18,8 @@ import javax.transaction.UserTransaction;
 
 import com.idega.business.IBORuntimeException;
 import com.idega.core.accesscontrol.business.UserHasLoginException;
+import com.idega.core.accesscontrol.data.LoginInfo;
+import com.idega.core.accesscontrol.data.LoginInfoHome;
 import com.idega.core.accesscontrol.data.LoginTable;
 import com.idega.data.IDOException;
 import com.idega.data.IDOLookup;
@@ -251,6 +253,11 @@ public class CitizenAccountBusinessBean extends AccountApplicationBusinessBean i
 			// store new password
 			loginTable.setUserPassword(encryptedPassword, newPassword);
 			loginTable.store();
+			
+			LoginInfo loginInfo = ((LoginInfoHome) IDOLookup.getHome(LoginInfo.class)).findByPrimaryKey(loginTable.getPrimaryKey());
+			loginInfo.setFailedAttemptCount(0);
+			loginInfo.setAccessClosed(false);
+			loginInfo.store();
 
 			// set content of letter
 			String userName = user.getName();
