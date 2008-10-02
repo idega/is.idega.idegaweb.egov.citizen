@@ -177,7 +177,6 @@
             </value>
             <type>map</type>
           </key>
-          
           <key>
             <name>:method:1:implied:void:setToShowSendSnailMailChooser:boolean:</name>
             <value>
@@ -232,7 +231,6 @@
             </value>
             <type>map</type>
           </key>
-          
           <key>
             <name>:method:1:implied:void:setAgreementFileUrl:java.lang.String:</name>
             <value>
