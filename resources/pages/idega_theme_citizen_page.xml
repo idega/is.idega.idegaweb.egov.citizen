@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml>
+	<page type="citizenPage">
+		<region id="left" label="left">
+			<module id="" class="com.idega.presentation.Layer">
+				<module id="" class="com.idega.presentation.Layer" locked="false" label="settings">
+					<property>
+						<name>:method:1:implied:java.lang.String:setID:java.lang.String:</name>
+						<value>userSettings</value>
+						<type>java.lang.String</type>
+					</property>
+					<module id="" class="com.idega.presentation.Layer">
+						<module id="" class="is.idega.idegaweb.egov.citizen.presentation.CitizenImage" />
+						<module id="" class="com.idega.idegaweb.widget.general.Greeting">
+							<property>
+								<name>:method:1:implied:void:setStyleClass:java.lang.String:</name>
+								<value>greeting</value>
+								<type>java.lang.String</type>
+							</property>
+						</module>
+						<module id="" class="com.idega.idegaweb.widget.user.Name">
+							<property>
+								<name>:method:1:implied:void:setStyleClass:java.lang.String:</name>
+								<value>userName</value>
+								<type>java.lang.String</type>
+							</property>
+						</module>
+						<module id="" class="com.idega.idegaweb.widget.user.LastLogin">
+							<property>
+								<name>:method:1:implied:void:setStyleClass:java.lang.String:</name>
+								<value>lastLogin</value>
+								<type>java.lang.String</type>
+							</property>
+							<property>
+								<name>:method:1:implied:void:setDateStyle:int:</name>
+								<value>1</value>
+								<type>java.lang.String</type>
+							</property>
+						</module>
+						<module id="" class="com.idega.presentation.text.Lists">
+							<module id="" class="com.idega.presentation.text.ListItem">
+								<property>
+									<name>:method:1:implied:void:setStyleClass:java.lang.String:</name>
+									<value>preferences</value>
+									<type>java.lang.String</type>
+								</property>
+								<module id="" class="com.idega.presentation.text.Link">
+									<property>
+										<name>:method:1:implied:void:setTextOnLink:java.lang.String:</name>
+										<value>citizen_preferences</value>
+										<type>java.lang.String</type>
+									</property>
+								</module>
+							</module>
+							<module id="" class="com.idega.presentation.text.ListItem">
+								<property>
+									<name>:method:1:implied:void:setStyleClass:java.lang.String:</name>
+									<value>password</value>
+									<type>java.lang.String</type>
+								</property>
+								<module id="" class="com.idega.presentation.text.Link">
+									<property>
+										<name>:method:1:implied:void:setTextOnLink:java.lang.String:</name>
+										<value>change_password</value>
+										<type>java.lang.String</type>
+									</property>
+								</module>
+							</module>
+						</module>
+					</module>
+				</module>
+				<module id="" class="com.idega.presentation.Layer">
+					<property>
+						<name>:method:1:implied:java.lang.String:setID:java.lang.String:</name>
+						<value>welcome</value>
+						<type>java.lang.String</type>
+					</property>
+					<property>
+						<name>:method:1:implied:void:setStyleClass:java.lang.String:</name>
+						<value>box</value>
+						<type>java.lang.String</type>
+					</property>
+					<module id="" class="com.idega.presentation.Layer">
+						<property>
+							<name>:method:1:implied:void:setStyleClass:java.lang.String:</name>
+							<value>boxHeader</value>
+							<type>java.lang.String</type>
+						</property>
+						<module id="" class="com.idega.presentation.text.Heading1">
+							<property>
+								<name>:method:1:implied:void:setText:java.lang.String:</name>
+								<value>welcome</value>
+								<type>java.lang.String</type>
+							</property>
+						</module>
+					</module>
+					<module id="" class="com.idega.presentation.Layer" locked="false" label="userApplications">
+						<property>
+							<name>:method:1:implied:void:setStyleClass:java.lang.String:</name>
+							<value>boxContent</value>
+							<type>java.lang.String</type>
+						</property>
+						<module id="" class="com.idega.presentation.text.Paragraph">
+							<module id="" class="com.idega.presentation.text.Text">
+								<property>
+									<name>:method:1:implied:void:setText:java.lang.String:</name>
+									<value>welcome_to_rafraen_reykjavik</value>
+									<type>java.lang.String</type>
+								</property>
+							</module>
+						</module>
+					</module>
+				</module>
+				<module id="" class="com.idega.presentation.Layer">
+					<property>
+						<name>:method:1:implied:void:setStyleClass:java.lang.String:</name>
+						<value>box</value>
+						<type>java.lang.String</type>
+					</property>
+					<module id="" class="com.idega.presentation.Layer">
+						<property>
+							<name>:method:1:implied:void:setStyleClass:java.lang.String:</name>
+							<value>boxHeader</value>
+							<type>java.lang.String</type>
+						</property>
+						<module id="" class="com.idega.presentation.text.Heading1">
+							<property>
+								<name>:method:1:implied:void:setText:java.lang.String:</name>
+								<value>your_case_statuses</value>
+								<type>java.lang.String</type>
+							</property>
+						</module>
+					</module>
+					<module id="" class="com.idega.block.process.presentation.UserCases">
+						<property>
+							<name>:method:1:implied:void:setHideCaseCode:java.lang.String:</name>
+							<value>MBSKOLV</value>
+							<type>java.lang.String</type>
+						</property>
+						<property>
+							<name>:method:1:implied:void:setHideCaseCode:java.lang.String:</name>
+							<value>MUSICCH</value>
+							<type>java.lang.String</type>
+						</property>
+						<property>
+							<name>:method:1:implied:void:setHideCaseCode:java.lang.String:</name>
+							<value>MBFRITV</value>
+							<type>java.lang.String</type>
+						</property>
+						<property>
+							<name>:method:1:implied:void:setHideCaseCode:java.lang.String:</name>
+							<value>COURSEA</value>
+							<type>java.lang.String</type>
+						</property>
+						<property>
+							<name>:method:1:implied:void:setMaximumNumberOfEntries:int:</name>
+							<value>5</value>
+							<type>java.lang.String</type>
+						</property>
+					</module>
+					<property>
+						<name>:method:1:implied:java.lang.String:setID:java.lang.String:</name>
+						<value>casesList</value>
+						<type>java.lang.String</type>
+					</property>
+				</module>
+			</module>
+		</region>
+	</page>
+</xml>
