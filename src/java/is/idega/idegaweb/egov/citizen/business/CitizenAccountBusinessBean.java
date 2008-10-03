@@ -257,6 +257,7 @@ public class CitizenAccountBusinessBean extends AccountApplicationBusinessBean i
 			LoginInfo loginInfo = ((LoginInfoHome) IDOLookup.getHome(LoginInfo.class)).findByPrimaryKey(loginTable.getPrimaryKey());
 			loginInfo.setFailedAttemptCount(0);
 			loginInfo.setAccessClosed(false);
+			loginInfo.setAccountEnabled(true);
 			loginInfo.store();
 
 			// set content of letter
