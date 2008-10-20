@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <page-templates>
-	<page name="Change password" type="changePassword" iconfile="idegaweb/bundles/is.idega.idegaweb.egov.citizen.bundle/resources/images/pageIcons/changePassword.png" templatefile="idegaweb/bundles/is.idega.idegaweb.egov.citizen.bundle/resources/pages/egov_citizen_changepassword.xml"></page>	
+	<page name="Change password" type="changePassword" iconfile="idegaweb/bundles/is.idega.idegaweb.egov.citizen.bundle/resources/images/pageIcons/changePassword.png" templatefile="idegaweb/bundles/is.idega.idegaweb.egov.citizen.bundle/resources/pages/egov_citizen_changepassword.xml"></page>
+	
+	<page name="Lost password" type="lostPassword" iconfile="idegaweb/bundles/is.idega.idegaweb.egov.citizen.bundle/resources/images/pageIcons/changePassword.png" templatefile="idegaweb/bundles/is.idega.idegaweb.egov.citizen.bundle/resources/pages/egov_citizen_lostpassword.xml"></page>		
 
 	<page name="Preferences" type="userProperties" iconfile="idegaweb/bundles/is.idega.idegaweb.egov.citizen.bundle/resources/images/pageIcons/userProperties.png" templatefile="idegaweb/bundles/is.idega.idegaweb.egov.citizen.bundle/resources/pages/egov_citizen_properties.xml"></page>	
 
