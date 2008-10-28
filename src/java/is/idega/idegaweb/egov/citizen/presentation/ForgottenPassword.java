@@ -52,6 +52,9 @@ import com.idega.util.text.SocialSecurityNumber;
  * Copyright: Copyright (c) 2002 Company: idega software
  * 
  * @author <a href="mailto:thomas@idega.is">Thomas Hilbig</a>
+ * 
+ * Last modified: $Date$ by $Author$<br/>
+ * 
  * @version 1.0
  */
 public class ForgottenPassword extends CitizenBlock {
@@ -75,6 +78,7 @@ public class ForgottenPassword extends CitizenBlock {
 	private boolean iForwardToURL = false;
 	private Map iCommuneMap;
 
+	@Override
 	public void present(IWContext iwc) {
 		this.iwrb = getResourceBundle(iwc);
 
@@ -246,7 +250,7 @@ public class ForgottenPassword extends CitizenBlock {
 		header.setStyleClass("header");
 		form.add(header);
 
-		Heading1 heading = new Heading1(this.iwrb.getLocalizedString("forgotten_password", "Forgotten password"));
+		Heading1 heading = new Heading1(getLocalizedString("forgotten_password", "Forgotten password", iwc));
 		header.add(heading);
 
 		Layer contents = new Layer(Layer.DIV);
@@ -258,7 +262,7 @@ public class ForgottenPassword extends CitizenBlock {
 		contents.add(section);
 
 		Paragraph paragraph = new Paragraph();
-		paragraph.add(new Text(this.iwrb.getLocalizedString("forgot_password_helper_text", "Please enter your personal ID and click 'Send'.  A new password will be created and sent to your e-mail address.")));
+		paragraph.add(new Text(getLocalizedString("forgot_password_helper_text", "Please enter your personal ID and click 'Send'.  A new password will be created and sent to your e-mail address.", iwc)));
 		section.add(paragraph);
 
 		TextInput input = new TextInput(SSN_KEY);
