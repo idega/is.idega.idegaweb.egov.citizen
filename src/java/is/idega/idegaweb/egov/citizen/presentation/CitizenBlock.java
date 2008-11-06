@@ -9,6 +9,8 @@
  */
 package is.idega.idegaweb.egov.citizen.presentation;
 
+import is.idega.idegaweb.egov.application.ApplicationConstants;
+
 import java.util.Collection;
 import java.util.Iterator;
 import com.idega.presentation.Block;
@@ -30,6 +32,7 @@ public abstract class CitizenBlock extends Block {
 	}
 
 	public void main(IWContext iwc) {
+		PresentationUtil.addStyleSheetToHeader(iwc, iwc.getIWMainApplication().getBundle("is.idega.idegaweb.egov.application").getVirtualPathWithFileNameString("style/application.css"));
 		PresentationUtil.addStyleSheetToHeader(iwc, getBundle(iwc).getVirtualPathWithFileNameString("style/citizen.css"));
 		present(iwc);
 	}
