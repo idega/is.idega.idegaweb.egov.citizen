@@ -9,8 +9,6 @@
  */
 package is.idega.idegaweb.egov.citizen.presentation;
 
-import is.idega.idegaweb.egov.application.ApplicationConstants;
-
 import java.util.Collection;
 import java.util.Iterator;
 import com.idega.presentation.Block;
