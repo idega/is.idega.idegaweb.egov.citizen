@@ -18,6 +18,7 @@ import com.idega.presentation.text.Heading1;
 import com.idega.presentation.text.ListItem;
 import com.idega.presentation.text.Lists;
 import com.idega.presentation.text.Text;
+import com.idega.util.PresentationUtil;
 
 
 public abstract class CitizenBlock extends Block {
@@ -29,6 +30,7 @@ public abstract class CitizenBlock extends Block {
 	}
 
 	public void main(IWContext iwc) {
+		PresentationUtil.addStyleSheetToHeader(iwc, getBundle(iwc).getVirtualPathWithFileNameString("style/citizen.css"));
 		present(iwc);
 	}
 	

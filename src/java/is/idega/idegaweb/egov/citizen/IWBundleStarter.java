@@ -17,7 +17,6 @@ import com.idega.idegaweb.include.GlobalIncludeManager;
 public class IWBundleStarter implements IWBundleStartable {
 
 	public void start(IWBundle starterBundle) {
-		GlobalIncludeManager.getInstance().addBundleStyleSheet("is.idega.idegaweb.egov.citizen", "/style/citizen.css");
 	}
 
 	public void stop(IWBundle starterBundle) {
