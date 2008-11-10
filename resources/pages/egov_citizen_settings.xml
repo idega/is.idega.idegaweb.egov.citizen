@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml>
+	<page type="citizenSettings">
+		<region id="content" label="content">
+			<module id="" class="com.idega.presentation.Layer">
+				<module id="" class="com.idega.presentation.Layer">
+					<property>
+						<name>:method:1:implied:java.lang.String:setID:java.lang.String:</name>
+						<value>userSettings</value>
+						<type>java.lang.String</type>
+					</property>
+					<module id="" class="com.idega.presentation.Layer">
+						<module id="" class="is.idega.idegaweb.egov.citizen.presentation.CitizenImage" />
+						<module id="" class="com.idega.idegaweb.widget.general.Greeting">
+							<property>
+								<name>:method:1:implied:void:setStyleClass:java.lang.String:</name>
+								<value>greeting</value>
+								<type>java.lang.String</type>
+							</property>
+						</module>
+						<module id="" class="com.idega.idegaweb.widget.user.Name">
+							<property>
+								<name>:method:1:implied:void:setStyleClass:java.lang.String:</name>
+								<value>userName</value>
+								<type>java.lang.String</type>
+							</property>
+						</module>
+						<module id="" class="com.idega.idegaweb.widget.user.LastLogin">
+							<property>
+								<name>:method:1:implied:void:setStyleClass:java.lang.String:</name>
+								<value>lastLogin</value>
+								<type>java.lang.String</type>
+							</property>
+							<property>
+								<name>:method:1:implied:void:setDateStyle:int:</name>
+								<value>1</value>
+								<type>java.lang.String</type>
+							</property>
+						</module>
+						<module id="" class="com.idega.presentation.text.Lists">
+							<module id="" class="com.idega.presentation.text.ListItem">
+								<property>
+									<name>:method:1:implied:void:setStyleClass:java.lang.String:</name>
+									<value>password</value>
+									<type>java.lang.String</type>
+								</property>
+								<module id="" class="com.idega.presentation.text.Link">
+									<property>
+										<name>:method:1:implied:void:setTextOnLink:java.lang.String:</name>
+										<value>Breyta lykilorði</value>
+										<type>java.lang.String</type>
+									</property>
+									<property>
+										<name>:method:1:implied:void:setPage:com.idega.builder.data.IBPage:</name>
+										<value>1</value>
+										<type>java.lang.String</type>
+									</property>
+								</module>
+							</module>
+						</module>
+					</module>
+				</module>
+				<module id="" class="com.idega.presentation.Layer">
+					<property>
+						<name>:method:1:implied:java.lang.String:setID:java.lang.String:</name>
+						<value>welcome</value>
+						<type>java.lang.String</type>
+					</property>
+					<property>
+						<name>:method:1:implied:void:setStyleClass:java.lang.String:</name>
+						<value>box</value>
+						<type>java.lang.String</type>
+					</property>
+					<module id="" class="com.idega.presentation.Layer">
+						<property>
+							<name>:method:1:implied:void:setStyleClass:java.lang.String:</name>
+							<value>boxHeader</value>
+							<type>java.lang.String</type>
+						</property>
+						<module id="" class="com.idega.presentation.text.Heading1">
+							<property>
+								<name>:method:1:implied:void:setText:java.lang.String:</name>
+								<value>Velkomin</value>
+								<type>java.lang.String</type>
+							</property>
+						</module>
+					</module>
+					<module id="" class="com.idega.presentation.Layer">
+						<property>
+							<name>:method:1:implied:void:setStyleClass:java.lang.String:</name>
+							<value>boxContent</value>
+							<type>java.lang.String</type>
+						</property>
+						<module id="" class="com.idega.presentation.text.Paragraph">
+							<module id="" class="com.idega.presentation.text.Text">
+								<property>
+									<name>:method:1:implied:void:setText:java.lang.String:</name>
+									<value>Velkomin í Rafræna Reykjavík. Í kerfinu er hægt að afgreiða hin ýmsu mál gagnvart stjórnsýslu sveitarfélagsins og íbúum þess. Til að skoða hvaða mál þú hefur aðgang að og bíða afgreiðslu þinnar smellir þú á flipann UMSJÓN.</value>
+									<type>java.lang.String</type>
+								</property>
+							</module>
+						</module>
+					</module>
+				</module>
+				<module id="" class="com.idega.presentation.Layer">
+					<property>
+						<name>:method:1:implied:void:setStyleClass:java.lang.String:</name>
+						<value>box</value>
+						<type>java.lang.String</type>
+					</property>
+					<module id="" class="com.idega.presentation.Layer">
+						<property>
+							<name>:method:1:implied:void:setStyleClass:java.lang.String:</name>
+							<value>boxHeader</value>
+							<type>java.lang.String</type>
+						</property>
+						<property>
+							<name>:method:1:implied:void:setStyleClass:java.lang.String:</name>
+							<value>boxHeaderBig</value>
+							<type>java.lang.String</type>
+						</property>
+						<module id="" class="com.idega.presentation.text.Heading1">
+							<property>
+								<name>:method:1:implied:void:setText:java.lang.String:</name>
+								<value>Umsjón</value>
+								<type>java.lang.String</type>
+							</property>
+						</module>
+					</module>
+					<module id="" class="com.idega.presentation.Layer">
+						<module id="" class="com.idega.presentation.text.Heading2">
+							<property>
+								<name>:method:1:implied:void:setText:java.lang.String:</name>
+								<value>Þú hefur aðgang að eftirtöldum þjónustum</value>
+								<type>java.lang.String</type>
+							</property>
+						</module>
+						<property>
+							<name>:method:1:implied:void:setStyleClass:java.lang.String:</name>
+							<value>adminHeader</value>
+							<type>java.lang.String</type>
+						</property>
+						<property>
+							<name>:method:1:implied:java.lang.String:setID:java.lang.String:</name>
+							<value>afterSchoolCareHeader</value>
+							<type>java.lang.String</type>
+						</property>
+					</module>
+					<module id="" class="com.idega.block.navigation.presentation.NavigationList">
+						<property>
+							<name>:method:1:implied:void:setRootPage:com.idega.core.builder.data.ICPage:</name>
+							<value>1</value>
+							<type>java.lang.String</type>
+						</property>
+						<property>
+							<name>:method:1:implied:void:setHideSubPages:boolean:</name>
+							<value>Y</value>
+							<type>java.lang.String</type>
+						</property>
+						<property>
+							<name>:method:1:implied:void:setShowRoot:boolean:</name>
+							<value>N</value>
+							<type>java.lang.String</type>
+						</property>
+						<property>
+							<name>:method:1:implied:void:setStyleClass:java.lang.String:</name>
+							<value>adminList</value>
+							<type>java.lang.String</type>
+						</property>
+					</module>
+					<property>
+						<name>:method:1:implied:java.lang.String:setID:java.lang.String:</name>
+						<value>casesList</value>
+						<type>java.lang.String</type>
+					</property>
+				</module>
+			</module>
+		</region>
+		<region id="toolbar" label="toolbar">
+	    	<module id="" class="com.idega.block.navigation.presentation.NavigationList">
+	    		<property>
+	    			<name>:method:1:implied:void:setAddStyleClassOnSelectedItem:boolean:</name>
+	    			<value>N</value>
+	    			<type>java.lang.String</type>
+	    		</property>
+	    		<property>
+					<name>:method:1:implied:void:setShowRoot:boolean:</name>
+					<value>Y</value>
+					<type>java.lang.String</type>
+				</property>
+				<property>
+					<name>:method:1:implied:void:setDisplaySelectedPageAsLink:boolean:</name>
+					<value>Y</value>
+					<type>java.lang.String</type>
+				</property>
+	    	</module>
+	    </region>
+	    <region id="breadcrumb" label="breadcrumb">
+	    	<module id="" class="com.idega.block.navigation.presentation.NavigationBreadCrumbsList" />
+	    </region>
+	    <region id="sidebar" label="sidebar">
+	    	<module id="" class="com.idega.content.themes.presentation.ApplicationPropertyViewer">
+	      		<property>
+	        		<name>:method:1:implied:void:setApplicationPropertyKey:java.lang.String:</name>
+	        		<value>sidebar</value>
+	        		<type>java.lang.String</type>
+	      		</property>
+	    	</module>
+	    	<module id="" class="com.idega.block.navigation.presentation.UserRoleChanger" />
+	    </region>
+	    <region id="footer" label="footer">
+	    	<module id="" class="com.idega.content.themes.presentation.ApplicationPropertyViewer">
+	      		<property>
+	        		<name>:method:1:implied:void:setApplicationPropertyKey:java.lang.String:</name>
+	        		<value>footer</value>
+	        		<type>java.lang.String</type>
+	      		</property>
+	    	</module>
+	    </region>
+	    <region id="sidebar_title" label="sidebar_title">
+	    	<module id="" class="com.idega.content.themes.presentation.ApplicationPropertyViewer">
+	      		<property>
+	        		<name>:method:1:implied:void:setApplicationPropertyKey:java.lang.String:</name>
+	        		<value>sidebar_title</value>
+	        		<type>java.lang.String</type>
+	      		</property>
+	    	</module>
+	    </region>
+	    <region id="site_slogan" label="site_slogan">
+	    	<module id="" class="com.idega.content.themes.presentation.ApplicationPropertyViewer">
+	      		<property>
+	        		<name>:method:1:implied:void:setApplicationPropertyKey:java.lang.String:</name>
+	        		<value>site_slogan</value>
+	        		<type>java.lang.String</type>
+	      		</property>
+	    	</module>
+	    </region>
+	    <region id="site_title" label="site_title">
+	    	<module id="" class="com.idega.content.themes.presentation.ApplicationPropertyViewer">
+	      		<property>
+	        		<name>:method:1:implied:void:setApplicationPropertyKey:java.lang.String:</name>
+	        		<value>site_title</value>
+	        		<type>java.lang.String</type>
+	      		</property>
+	    	</module>
+	    </region>
+	    <region id="title" label="title">
+	    	<module id="" class="com.idega.content.themes.presentation.ApplicationPropertyViewer">
+	      		<property>
+	        		<name>:method:1:implied:void:setApplicationPropertyKey:java.lang.String:</name>
+	        		<value>title</value>
+	        		<type>java.lang.String</type>
+	      		</property>
+	    	</module>
+	    </region>
+	    <region id="logo" label="logo">
+	    	<module id="" class="com.idega.content.themes.presentation.ApplicationPropertyViewer">
+	      		<property>
+	        		<name>:method:1:implied:void:setApplicationPropertyKey:java.lang.String:</name>
+	        		<value>logo</value>
+	        		<type>java.lang.String</type>
+	      		</property>
+	    	</module>
+	    </region>
+	</page>
+</xml>

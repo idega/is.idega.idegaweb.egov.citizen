@@ -7,4 +7,6 @@
 	<page name="Preferences" type="userProperties" iconfile="idegaweb/bundles/is.idega.idegaweb.egov.citizen.bundle/resources/images/pageIcons/userProperties.png" templatefile="idegaweb/bundles/is.idega.idegaweb.egov.citizen.bundle/resources/pages/egov_citizen_properties.xml"></page>	
 
 	<page name="Citizen page" type="citizenPage" iconfile="idegaweb/bundles/is.idega.idegaweb.egov.citizen.bundle/resources/images/pageIcons/citizenPage.png" templatefile="idegaweb/bundles/is.idega.idegaweb.egov.citizen.bundle/resources/pages/idega_theme_citizen_page.xml"></page>	
+	
+	<page name="User settings" type="citizenSettings" iconfile="idegaweb/bundles/is.idega.idegaweb.egov.citizen.bundle/resources/images/pageIcons/userProperties.png" templatefile="idegaweb/bundles/is.idega.idegaweb.egov.citizen.bundle/resources/pages/egov_citizen_settings.xml"></page>
 </page-templates>
