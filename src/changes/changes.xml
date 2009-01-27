@@ -1,0 +1,156 @@
+<document xmlns="http://maven.apache.org/changes/1.0.0">
+	<properties>
+		<title>Citizen changes</title>
+		<author email="laddi@idega.com">
+			Thorhallur "Laddi" Helgason
+		</author>
+	</properties>
+	<body>
+		<release version="1.0.23" date="2007-12-11">
+			<action dev="palli" type="fix">
+				Fixed bug in saving address in CitizenAccountPreferences.
+			</action>
+		</release>
+		<release version="1.0.22" date="2007-10-18">
+			<action dev="palli" type="update">
+				Added application property to set the version of the style sheet used at rb, when sending passwords to bank.
+			</action>
+		</release>
+		<release version="1.0.21" date="2007-08-31">
+			<action dev="alexis" type="update">
+				Update dependency to com.idega.block.process to 3.1.14
+			</action>
+		</release>
+		<release version="1.0.20" date="2007-07-17">
+			<action dev="civilis" type="update">
+				Added checkbox of use of terms agreement in the citizen account application together with a link to the agreement file.
+			</action>
+		</release>
+		<release version="1.0.19" date="2007-07-14">
+			<action dev="civilis" type="update">
+				Added using landsbankan to send login and pass to RB
+			</action>
+		</release>
+		<release version="1.0.18" date="2007-07-02">
+			<action dev="laddi" type="update">
+				Added possibility to press Enter to submit form.
+				Added further extension possibilities.
+			</action>
+		</release>
+
+		<release version="1.0.17" date="2007-04-10">
+			<action dev="laddi" type="update">
+				Added email to message displayed for user when requesting a new password.
+			</action>
+		</release>
+
+		<release version="1.0.16" date="2007-03-28">
+			<action dev="laddi" type="update">
+				Changed so that all personal ID inputs allow a maximum of 10 letters/numbers.
+			</action>
+		</release>
+
+		<release version="1.0.15" date="2007-03-27">
+			<action dev="laddi" type="update">
+				Refactoring/Elimination of se bundles.
+			</action>
+		</release>
+
+		<release version="1.0.14" date="2007-03-09">
+			<action dev="palli" type="update">
+				Updating and fixing dependencies to create a new sunnan3
+				application.
+			</action>
+		</release>
+
+		<release version="1.0.13" date="2007-03-06">
+			<action dev="tryggvil" type="update">
+				Update to handle Icelandic PKI Authentication and
+				registration (first time) which is done with
+				CitizenAccountApplication and module is.idega.block.pki.
+			</action>
+		</release>
+
+		<release version="1.0.12" date="2007-03-01">
+			<action dev="laddi" type="update">
+				Added displaying of current email when changing user
+				email.
+			</action>
+			<action dev="laddi" type="update">
+				Added displaying of current email in citizen finder
+				result table.
+			</action>
+		</release>
+
+		<release version="1.0.11" date="2007-02-07">
+			<action dev="laddi" type="fix">
+				Fixed so that when a user has applied for a new password
+				he can't do it multiple times in the same session.
+			</action>
+		</release>
+
+		<release version="1.0.10" date="2007-02-05">
+			<action dev="eiki" type="update">
+				Localization for Neytendastofa
+			</action>
+		</release>
+
+		<release version="1.0.9" date="2007-01-30">
+			<action dev="eiki" type="update">
+				Added a preferred locale dropdown menu for
+				CitizenAccountApplication and CitizenAccountPreferences.
+				So the system will know in which language to send
+				messages to citizens.
+			</action>
+		</release>
+
+		<release version="1.0.8" date="2007-01-10">
+			<action dev="eiki" type="update">Localizing.</action>
+		</release>
+
+		<release version="1.0.7" date="2006-11-06">
+			<action dev="laddi" type="update">
+				Added help texts to citizen preferences.
+			</action>
+		</release>
+
+		<release version="1.0.6" date="2006-10-06">
+			<action dev="laddi" type="fix">
+				Fixed error when entering a valid personal ID but no
+				user is found.
+			</action>
+		</release>
+
+		<release version="1.0.5" date="2006-09-27">
+			<action dev="laddi" type="update">
+				Translation updates.
+			</action>
+		</release>
+
+		<release version="1.0.4" date="2006-09-20">
+			<action dev="laddi" type="fix">
+				Fixed so that when changing passwords all user plugins
+				are called.
+			</action>
+		</release>
+
+		<release version="1.0.3" date="2006-09-15">
+			<action dev="laddi" type="update">
+				Translation updates.
+			</action>
+		</release>
+
+		<release version="1.0.2" date="2006-09-07">
+			<action dev="laddi" type="update">
+				Translation updates.
+			</action>
+		</release>
+
+		<release version="1.0.1" date="2006-07-11">
+			<action dev="laddi" type="update">
+				Declaring new version of block.
+			</action>
+		</release>
+
+	</body>
+</document>
