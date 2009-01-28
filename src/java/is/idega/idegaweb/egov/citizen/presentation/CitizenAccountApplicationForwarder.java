@@ -17,13 +17,13 @@ import com.idega.presentation.text.Text;
 import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.TextInput;
 
-public class CitizenAccountApplicationForwarder extends Block {
+public class CitizenAccountApplicationForwarder extends CitizenBlock {
 
 	private final static String IW_BUNDLE_IDENTIFIER = "is.idega.idegaweb.egov.citizen";
 
 	private ICPage iForwardPage;
 
-	public void main(IWContext iwc) {
+	public void present(IWContext iwc) {
 		IWResourceBundle iwrb = getResourceBundle(iwc);
 
 		Form form = new Form();
@@ -59,10 +59,6 @@ public class CitizenAccountApplicationForwarder extends Block {
 		form.add(link);
 
 		add(form);
-	}
-
-	public String getBundleIdentifier() {
-		return IW_BUNDLE_IDENTIFIER;
 	}
 
 	public void setForwardPage(ICPage forwardPage) {
