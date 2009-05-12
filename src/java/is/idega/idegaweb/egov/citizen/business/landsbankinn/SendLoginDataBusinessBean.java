@@ -70,11 +70,16 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 			if (err.getErrorMsg() == null && err.getErrorNumber() == null) {
 				return;
 			}
+			
+			System.out.println("ERROR SENDING TO LANDSBANKI");
+			System.out.println("err = " + err.getErrorMsg());
+			System.out.println("errNumber = " + err.getErrorNumber());
+			System.out.println("xml = " + xml_str);
 
 		}
 		catch (Exception e) {
-
-			//			TODO: provide response as a string
+			e.printStackTrace();
+			
 			RuntimeException ex = new RuntimeException("Exception while parsing sendXMLData response");
 			ex.initCause(e);
 
