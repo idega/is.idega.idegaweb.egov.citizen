@@ -2,6 +2,8 @@ package is.idega.idegaweb.egov.citizen.business;
 
 import java.rmi.RemoteException;
 
+import com.idega.business.IBOSession;
+
 /**
  * @author alindman
  *
@@ -10,7 +12,7 @@ import java.rmi.RemoteException;
  * To enable and disable the creation of type comments go to
  * Window>Preferences>Java>Code Generation.
  */
-public interface CitizenAccountSession {
+public interface CitizenAccountSession extends IBOSession {
 
 	public boolean getIfUserUsesCOAddress() throws RemoteException;
 	public void setIfUserUsesCOAddress(boolean preference) throws RemoteException;
