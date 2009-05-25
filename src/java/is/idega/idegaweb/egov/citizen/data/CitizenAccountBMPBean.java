@@ -15,12 +15,15 @@ import javax.ejb.FinderException;
 import com.idega.block.process.data.AbstractCaseBMPBean;
 import com.idega.block.process.data.Case;
 import com.idega.block.process.data.CaseStatus;
+import com.idega.data.IDOAddRelationshipException;
 import com.idega.data.IDOException;
 import com.idega.data.IDOQuery;
+import com.idega.data.IDORemoveRelationshipException;
 import com.idega.data.query.MatchCriteria;
 import com.idega.data.query.SelectQuery;
 import com.idega.data.query.Table;
 import com.idega.data.query.WildCardColumn;
+import com.idega.user.data.User;
 
 /**
  * @author <a href="mail:palli@idega.is">Pall Helgason</a>
@@ -47,6 +50,7 @@ public class CitizenAccountBMPBean extends AbstractCaseBMPBean implements Citize
 	private final static String CHILDREN_COUNT = "children_count";
 	private final static String APPLICATION_REASON = "application_reason";
 
+	@Override
 	public void initializeAttributes() {
 		// addAttribute (getIDColumnName());
 		super.addGeneralCaseRelation();
@@ -65,14 +69,17 @@ public class CitizenAccountBMPBean extends AbstractCaseBMPBean implements Citize
 		addAttribute(APPLICATION_REASON, "Application Reason", true, true, String.class, 40);
 	}
 
+	@Override
 	public String getEntityName() {
 		return ENTITY_NAME;
 	}
 
+	@Override
 	public String getCaseCodeKey() {
 		return CASE_CODE_KEY;
 	}
 
+	@Override
 	public String getCaseCodeDescription() {
 		return CASE_CODE_KEY_DESC;
 	}
@@ -210,6 +217,7 @@ public class CitizenAccountBMPBean extends AbstractCaseBMPBean implements Citize
 	/**
 	 * Finds all cases for all users with the specified caseStatus and the associated caseCode
 	 */
+	@Override
 	public Collection ejbFindAllCasesByStatus(CaseStatus caseStatus) throws FinderException {
 		return super.ejbFindAllCasesByStatus(caseStatus.getStatus());
 	}
@@ -217,6 +225,7 @@ public class CitizenAccountBMPBean extends AbstractCaseBMPBean implements Citize
 	/**
 	 * Finds all cases for all users with the specified caseStatus and the associated caseCode
 	 */
+	@Override
 	public Collection ejbFindAllCasesByStatus(String caseStatus) throws FinderException {
 		return super.ejbFindAllCasesByStatus(caseStatus);
 	}
@@ -244,5 +253,19 @@ public class CitizenAccountBMPBean extends AbstractCaseBMPBean implements Citize
 		query.addCriteria(new MatchCriteria(pCase, "case_status", MatchCriteria.EQUALS, status));
 
 		return idoGetNumberOfRecords(query);
+	}
+
+	public void addSubscriber(User subscriber)
+			throws IDOAddRelationshipException {
+		throw new UnsupportedOperationException("This method is not implemented!");
+	}
+
+	public Collection<User> getSubscribers() {
+		throw new UnsupportedOperationException("This method is not implemented!");
+	}
+
+	public void removeSubscriber(User subscriber)
+			throws IDORemoveRelationshipException {
+		throw new UnsupportedOperationException("This method is not implemented!");
 	}
 }
