@@ -106,15 +106,17 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 
 		InputStream respStream = null;
 		
+		String temp = null;
 		try {
-			String temp = response.getResponseBodyAsString();
+			temp = response.getResponseBodyAsString();
 			respStream = response.getResponseBodyAsStream();
 			LoginResponse resp = (LoginResponse) getLoginResponseXStream().fromXML(response.getResponseBodyAsStream());
 			return resp.getSessionId();
 
 		}
 		catch (BaseException e) {
-
+			e.printStackTrace();
+			System.out.println("error = " + temp);
 			handleResponseParseException(respStream, e);
 		}
 		catch (Exception e) {
@@ -183,8 +185,10 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 			StringPart userPart = new StringPart("processXML", XML_HEADER + xstream.toXML(req), "UTF-8");
 			userPart.setContentType("text/xml");
 
+			System.out.println("xml = " + XML_HEADER + xstream.toXML(req));
+			
 			Part[] parts = { userPart };
-
+			
 			post.setRequestEntity(new MultipartRequestEntity(parts, post.getParams()));
 
 			HttpClient client = new HttpClient();
@@ -196,7 +200,7 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 
 		}
 		catch (Exception e) {
-
+			e.printStackTrace();
 			logger.log(Level.SEVERE, "Exception while sending xml data.", e);
 			return null;
 		}
@@ -340,6 +344,10 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 			login = ct.doDeCypher(login, ck);
 			pass = ct.doDeCypher(pass, ck);
 
+			System.out.println("login = " + login);
+			System.out.println("pass = " + pass);
+			
+			
 			return new String[] { login, pass };
 		}
 
