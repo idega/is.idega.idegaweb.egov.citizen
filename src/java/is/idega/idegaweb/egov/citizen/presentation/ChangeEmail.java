@@ -52,7 +52,11 @@ public class ChangeEmail extends CitizenBlock {
 	private boolean iUseSessionUser = false;
 
 	private IWResourceBundle iwrb;
+	
+	private ICPage backPage = null;
 
+	private boolean allowNonCitizens = false;
+	
 	public void present(IWContext iwc) {
 		this.iwrb = getResourceBundle(iwc);
 
@@ -152,6 +156,17 @@ public class ChangeEmail extends CitizenBlock {
 				throw new IBORuntimeException(re);
 			}
 
+			if (this.backPage != null) {
+				Layer span = new Layer(Layer.SPAN);
+				span.add(new Text(this.iwrb.getLocalizedString("back", "Back")));
+				Link link = new Link(span);
+				link.setStyleClass("homeLink");
+				link.setPage(this.backPage);
+				paragraph.add(new Break(2));
+				paragraph.add(link);
+				
+			}
+			
 			if (userHomePage != null) {
 				Layer span = new Layer(Layer.SPAN);
 				span.add(new Text(this.iwrb.getLocalizedString("my_page", "My page")));
@@ -185,7 +200,7 @@ public class ChangeEmail extends CitizenBlock {
 		User user = getUser(iwc);
 		if (user != null) {
 			LoginTable loginTable = LoginDBHandler.getUserLogin(user);
-			if (loginTable == null) {
+			if (loginTable == null && !allowNonCitizens) {
 				Layer header = new Layer(Layer.DIV);
 				header.setStyleClass("header");
 				form.add(header);
@@ -324,5 +339,21 @@ public class ChangeEmail extends CitizenBlock {
 
 	public void setUseSessionUser(boolean useSessionUser) {
 		this.iUseSessionUser = useSessionUser;
+	}
+	
+	public void setBackPage(ICPage page) {
+		this.backPage = page;
+	}
+	
+	public ICPage getBackPage() {
+		return this.backPage;
+	}
+	
+	public void setAllowNonCitizens(boolean allow) {
+		this.allowNonCitizens = allow;
+	}
+	
+	public boolean getAllowNonCitizens() {
+		return this.allowNonCitizens;
 	}
 }
