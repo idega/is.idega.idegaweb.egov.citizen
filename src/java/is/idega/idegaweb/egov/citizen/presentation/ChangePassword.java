@@ -311,8 +311,8 @@ public class ChangePassword extends CitizenBlock {
 						login, newPassword1);
 				
 				if (iShowExtraInfo) {
-					boolean accountEnabled = iwc.getBooleanParameter(PARAMETER_ACCOUNT_ENABLED);
-					boolean changeNextTime = iwc.getBooleanParameter(PARAMETER_CHANGE_PWD_NEXT);
+					boolean accountEnabled = iwc.isParameterSet(PARAMETER_ACCOUNT_ENABLED);
+					boolean changeNextTime = iwc.isParameterSet(PARAMETER_CHANGE_PWD_NEXT);
 					
 					LoginInfo info = LoginDBHandler.getLoginInfo(loginTable);
 					info.setAccountEnabled(accountEnabled);
@@ -324,6 +324,7 @@ public class ChangePassword extends CitizenBlock {
 						.callAllUserGroupPluginAfterUserCreateOrUpdateMethod(
 								this.user);
 			} catch (Exception e) {
+				e.printStackTrace();
 				hasErrors = true;
 				errors.add(this.iwrb.getLocalizedString(
 						"citizen.password_update_failed",
