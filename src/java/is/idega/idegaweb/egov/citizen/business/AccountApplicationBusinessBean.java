@@ -9,6 +9,7 @@
 package is.idega.idegaweb.egov.citizen.business;
 
 import is.idega.idegaweb.egov.accounting.business.CitizenBusiness;
+import is.idega.idegaweb.egov.citizen.IWBundleStarter;
 import is.idega.idegaweb.egov.citizen.data.AccountApplication;
 import is.idega.idegaweb.egov.message.business.CommuneMessageBusiness;
 
@@ -36,8 +37,6 @@ import com.idega.util.IWTimestamp;
  * @version 1.0
  */
 public abstract class AccountApplicationBusinessBean extends CaseBusinessBean implements AccountBusiness {
-
-	private static final String IW_BUNDLE_IDENTIFIER = "is.idega.idegaweb.egov.citizen";
 
 	protected abstract Class getCaseEntityClass();
 
@@ -225,8 +224,9 @@ public abstract class AccountApplicationBusinessBean extends CaseBusinessBean im
 		return (CitizenBusiness) this.getServiceInstance(CitizenBusiness.class);
 	}
 
+	@Override
 	public String getBundleIdentifier() {
-		return IW_BUNDLE_IDENTIFIER;
+		return IWBundleStarter.IW_BUNDLE_IDENTIFIER;
 	}
 
 	protected boolean shouldEmailBeSentWhenANewAccountIsInserted() {

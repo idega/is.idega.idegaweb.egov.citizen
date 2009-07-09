@@ -9,7 +9,6 @@ package is.idega.idegaweb.egov.citizen.presentation;
 
 import com.idega.core.builder.data.ICPage;
 import com.idega.idegaweb.IWResourceBundle;
-import com.idega.presentation.Block;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
 import com.idega.presentation.text.Link;
@@ -19,10 +18,9 @@ import com.idega.presentation.ui.TextInput;
 
 public class CitizenAccountApplicationForwarder extends CitizenBlock {
 
-	private final static String IW_BUNDLE_IDENTIFIER = "is.idega.idegaweb.egov.citizen";
-
 	private ICPage iForwardPage;
 
+	@Override
 	public void present(IWContext iwc) {
 		IWResourceBundle iwrb = getResourceBundle(iwc);
 

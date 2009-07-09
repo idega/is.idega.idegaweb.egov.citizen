@@ -1,5 +1,6 @@
 package is.idega.idegaweb.egov.citizen.business;
 
+import is.idega.idegaweb.egov.citizen.IWBundleStarter;
 import is.idega.idegaweb.egov.citizen.business.landsbankinn.SendLoginDataBusiness;
 import is.idega.idegaweb.egov.citizen.data.AccountApplication;
 import is.idega.idegaweb.egov.citizen.wsclient.BirtingakerfiWSLocator;
@@ -77,6 +78,7 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean imp
 	 * @throws LoginCreateException
 	 *           If an error occurs creating login for the user.
 	 */
+	@Override
 	protected void createLoginAndSendMessage(AccountApplication theCase, boolean createUserMessage, boolean createPasswordMessage, boolean sendEmail, boolean sendSnailMail) throws RemoteException, CreateException, LoginCreateException {
 
 		boolean sendLetter = false;
@@ -215,7 +217,7 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean imp
 		String userId = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_USER_ID);
 
 		try {
-			StringBuffer file = new StringBuffer(this.getIWMainApplication().getBundle("is.idega.idegaweb.egov.citizen").getResourcesRealPath());
+			StringBuffer file = new StringBuffer(this.getIWMainApplication().getBundle(IWBundleStarter.IW_BUNDLE_IDENTIFIER).getResourcesRealPath());
 			file.append(FileUtil.getFileSeparator());
 			// Do not change the name of this file because the stupid autodeployer will start it up otherwise.
 			file.append("deploy_client.wsdd");
