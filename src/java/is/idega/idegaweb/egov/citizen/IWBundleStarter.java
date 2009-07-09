@@ -11,11 +11,11 @@ package is.idega.idegaweb.egov.citizen;
 
 import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWBundleStartable;
-import com.idega.idegaweb.include.GlobalIncludeManager;
-
 
 public class IWBundleStarter implements IWBundleStartable {
 
+	public final static String IW_BUNDLE_IDENTIFIER = "is.idega.idegaweb.egov.citizen";
+	
 	public void start(IWBundle starterBundle) {
 	}
 
