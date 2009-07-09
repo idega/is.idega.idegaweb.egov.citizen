@@ -9,8 +9,9 @@
  */
 package is.idega.idegaweb.egov.citizen.presentation;
 
+import is.idega.idegaweb.egov.citizen.IWBundleStarter;
+
 import java.util.Collection;
-import java.util.Iterator;
 import com.idega.presentation.Block;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
@@ -18,20 +19,21 @@ import com.idega.presentation.text.Heading1;
 import com.idega.presentation.text.ListItem;
 import com.idega.presentation.text.Lists;
 import com.idega.presentation.text.Text;
+import com.idega.util.ListUtil;
 import com.idega.util.PresentationUtil;
 
 
 public abstract class CitizenBlock extends Block {
 
-	private final static String IW_BUNDLE_IDENTIFIER = "is.idega.idegaweb.egov.citizen";
-
+	@Override
 	public String getBundleIdentifier() {
-		return IW_BUNDLE_IDENTIFIER;
+		return IWBundleStarter.IW_BUNDLE_IDENTIFIER;
 	}
 
+	@Override
 	public void main(IWContext iwc) {
 		PresentationUtil.addStyleSheetToHeader(iwc, iwc.getIWMainApplication().getBundle("is.idega.idegaweb.egov.application").getVirtualPathWithFileNameString("style/application.css"));
-		PresentationUtil.addStyleSheetToHeader(iwc, getBundle(iwc).getVirtualPathWithFileNameString("style/citizen.css"));
+		PresentationUtil.addStyleSheetToHeader(iwc, iwc.getIWMainApplication().getBundle(IWBundleStarter.IW_BUNDLE_IDENTIFIER).getVirtualPathWithFileNameString("style/citizen.css"));
 		present(iwc);
 	}
 	
@@ -40,7 +42,7 @@ public abstract class CitizenBlock extends Block {
 	 * @param iwc
 	 * @param errors
 	 */
-	protected void showErrors(IWContext iwc, Collection errors) {
+	protected void showErrors(IWContext iwc, Collection<String> errors) {
 		Layer layer = new Layer(Layer.DIV);
 		layer.setStyleClass("errorLayer");
 		
@@ -54,13 +56,13 @@ public abstract class CitizenBlock extends Block {
 		Lists list = new Lists();
 		layer.add(list);
 		
-		Iterator iter = errors.iterator();
-		while (iter.hasNext()) {
-			String element = (String) iter.next();
-			ListItem item = new ListItem();
-			item.add(new Text(element));
-			
-			list.add(item);
+		if (!ListUtil.isEmpty(errors)) {
+			for (String error: errors) {
+				ListItem item = new ListItem();
+				item.add(new Text(error));
+				
+				list.add(item);
+			}
 		}
 		
 		add(layer);
