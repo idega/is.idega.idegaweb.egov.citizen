@@ -108,6 +108,7 @@ public class ChangePassword extends CitizenBlock {
 		}
 	}
 
+	@Override
 	public void present(IWContext iwc) {
 		if (!iwc.isLoggedOn()) {
 			return;
@@ -267,7 +268,7 @@ public class ChangePassword extends CitizenBlock {
 		String newPassword2 = iwc.getParameter(PARAMETER_NEW_PASSWORD_REPEATED);
 
 		boolean hasErrors = false;
-		Collection errors = new ArrayList();
+		Collection<String> errors = new ArrayList<String>();
 
 		if (!iUseSessionUser) {
 			if (!LoginDBHandler.verifyPassword(login, currentPassword)) {

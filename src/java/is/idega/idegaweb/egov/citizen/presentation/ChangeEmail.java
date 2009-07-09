@@ -57,6 +57,7 @@ public class ChangeEmail extends CitizenBlock {
 
 	private boolean allowNonCitizens = false;
 	
+	@Override
 	public void present(IWContext iwc) {
 		this.iwrb = getResourceBundle(iwc);
 
@@ -93,7 +94,7 @@ public class ChangeEmail extends CitizenBlock {
 		String emailRepeat = iwc.getParameter(PARAMETER_EMAIL_REPEAT);
 
 		boolean hasErrors = false;
-		Collection errors = new ArrayList();
+		Collection<String> errors = new ArrayList<String>();
 
 		if (email == null || email.length() == 0) {
 			errors.add(this.iwrb.getLocalizedString("must_provide_email", "You have to enter an e-mail address."));

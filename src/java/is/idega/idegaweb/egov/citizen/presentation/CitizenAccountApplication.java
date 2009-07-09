@@ -126,7 +126,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 	protected int iRedirectDelay = 15;
 
 	protected boolean iForwardToURL = false;
-	private Map iCommuneMap;
+	private Map<String, String> iCommuneMap;
 	private boolean hidePersonalIdInput = false;
 	private boolean createLoginAndLetter = true;
 	private String redirectUrlOnSubmit;
@@ -136,6 +136,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 	private boolean showPreferredRoleChooser = false;
 	private boolean showSendSnailMailChooser = false;
 
+	@Override
 	public void present(IWContext iwc) {
 
 		this.iwrb = getResourceBundle(iwc);
@@ -273,10 +274,8 @@ public class CitizenAccountApplication extends CitizenBlock {
 
 		if (this.iCommuneMap != null) {
 			DropdownMenu communes = new DropdownMenu(COMMUNE_KEY);
-			Iterator iter = this.iCommuneMap.keySet().iterator();
-			while (iter.hasNext()) {
-				String commune = (String) iter.next();
-				communes.addMenuElement((String) this.iCommuneMap.get(commune), commune);
+			for (String commune: iCommuneMap.keySet()) {
+				communes.addMenuElement(this.iCommuneMap.get(commune), commune);
 			}
 			communes.addMenuElementFirst("", this.iwrb.getLocalizedString("select_commune", "Select commune"));
 
@@ -409,18 +408,18 @@ public class CitizenAccountApplication extends CitizenBlock {
 
 	protected void submitSimpleForm(IWContext iwc) throws RemoteException {
 		boolean hasErrors = false;
-		Collection errors = new ArrayList();
+		Collection<String> errors = new ArrayList<String>();
 
 		if (this.iForwardToURL) {
 			if (iwc.isParameterSet(COMMUNE_KEY)) {
 				String URL = iwc.getParameter(COMMUNE_KEY);
 				StringBuffer query = new StringBuffer();
-				Enumeration enumeration = iwc.getParameterNames();
+				Enumeration<String> enumeration = iwc.getParameterNames();
 				if (enumeration != null) {
 					query.append("?");
 
 					while (enumeration.hasMoreElements()) {
-						String element = (String) enumeration.nextElement();
+						String element = enumeration.nextElement();
 						query.append(element).append("=").append(iwc.getParameter(element));
 						if (enumeration.hasMoreElements()) {
 							query.append("&");
@@ -474,7 +473,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		User user = business.getUserIcelandic(ssn);
 
 		boolean userHasLogin = false;
-		Collection userLoginError = new ArrayList();
+		Collection<String> userLoginError = new ArrayList<String>();
 		if (user == null) {
 			errors.add(this.iwrb.getLocalizedString(UNKNOWN_CITIZEN_KEY, UNKNOWN_CITIZEN_DEFAULT));
 			hasErrors = true;
@@ -672,7 +671,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 
 	public void setCommunePage(String name, String URL) {
 		if (this.iCommuneMap == null) {
-			this.iCommuneMap = new HashMap();
+			this.iCommuneMap = new HashMap<String, String>();
 		}
 		this.iCommuneMap.put(name, URL);
 		this.iForwardToURL = true;
