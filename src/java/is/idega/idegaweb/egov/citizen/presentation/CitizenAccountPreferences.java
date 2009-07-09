@@ -1,5 +1,6 @@
 package is.idega.idegaweb.egov.citizen.presentation;
 
+import is.idega.idegaweb.egov.citizen.IWBundleStarter;
 import is.idega.idegaweb.egov.citizen.business.CitizenAccountSession;
 import is.idega.idegaweb.egov.message.business.MessageSession;
 
@@ -11,6 +12,7 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.ejb.FinderException;
+import javax.faces.component.UIComponent;
 
 import com.idega.business.IBOLookup;
 import com.idega.core.accesscontrol.data.ICRole;
@@ -25,9 +27,11 @@ import com.idega.core.location.data.AddressHome;
 import com.idega.core.location.data.AddressType;
 import com.idega.core.location.data.Country;
 import com.idega.core.location.data.PostalCode;
+import com.idega.data.IDOLookup;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.io.UploadFile;
+import com.idega.presentation.CSSSpacer;
 import com.idega.presentation.ExceptionWrapper;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Image;
@@ -42,15 +46,20 @@ import com.idega.presentation.ui.CountryDropdownMenu;
 import com.idega.presentation.ui.DropdownMenu;
 import com.idega.presentation.ui.FileInput;
 import com.idega.presentation.ui.Form;
+import com.idega.presentation.ui.InterfaceObject;
 import com.idega.presentation.ui.Label;
+import com.idega.presentation.ui.RadioGroup;
 import com.idega.presentation.ui.TextInput;
 import com.idega.user.business.NoPhoneFoundException;
 import com.idega.user.business.UserBusiness;
+import com.idega.user.data.Gender;
+import com.idega.user.data.GenderHome;
 import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
 import com.idega.util.EmailValidator;
 import com.idega.util.FileUtil;
 import com.idega.util.ListUtil;
+import com.idega.util.StringUtil;
 
 /*
  * import com.idega.presentation.ExceptionWrapper; import com.idega.presentation.IWContext; import com.idega.presentation.*; import
@@ -84,7 +93,10 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	private final static String PARAMETER_REMOVE_IMAGE = "cap_remove_image";
 	private final static String PARAMETER_PREFERRED_LOCALE = "cap_pref_locale";
 	private final static String PARAMETER_PREFERRED_ROLE = "cap_pref_role";
-
+	private final static String PARAMETER_NAME = "cap_name";
+	private final static String PARAMETER_SSN = "cap_ssn";
+	private final static String PARAMETER_GENDER = "cap_gender";
+	
 	private final static String KEY_PREFIX = "citizen.";
 	private final static String KEY_EMAIL = KEY_PREFIX + "email";
 	private final static String KEY_UPDATE = KEY_PREFIX + "update";
@@ -137,11 +149,12 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	public CitizenAccountPreferences() {
 	}
 
+	@Override
 	public void present(IWContext iwc) {
 		if (!iwc.isLoggedOn()) {
 			return;
 		}
-		this.iwrb = getResourceBundle(iwc);
+		this.iwrb = iwc.getIWMainApplication().getBundle(IWBundleStarter.IW_BUNDLE_IDENTIFIER).getResourceBundle(iwc);
 		this.user = iwc.getCurrentUser();
 		try {
 			int action = parseAction(iwc);
@@ -166,20 +179,29 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		}
 		return action;
 	}
+	
+	protected Layer getHeader(String text) {
+		Layer header = new Layer(Layer.DIV);
+		header.setStyleClass("header");
 
-	private void viewForm(IWContext iwc) throws java.rmi.RemoteException {
+		Heading1 heading = new Heading1(text);
+		header.add(heading);
+		
+		return header;
+	}
+
+	protected void viewForm(IWContext iwc) throws Exception {
+		add(getPreferencesForm(iwc));
+	}
+	
+	protected Form getPreferencesForm(IWContext iwc) throws Exception {
 		Form form = new Form();
 		form.setMultiPart();
 		form.addParameter(PARAMETER_FORM_SUBMIT, Boolean.TRUE.toString());
 		form.setID("citizenAccountPreferences");
 		form.setStyleClass("citizenForm");
 
-		Layer header = new Layer(Layer.DIV);
-		header.setStyleClass("header");
-		form.add(header);
-
-		Heading1 heading = new Heading1(this.iwrb.getLocalizedString("citizen_preferences", "Citizen preferences"));
-		header.add(heading);
+		form.add(getHeader(this.iwrb.getLocalizedString("citizen_preferences", "Citizen preferences")));
 
 		Layer contents = new Layer(Layer.DIV);
 		contents.setStyleClass("formContents");
@@ -206,23 +228,20 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		try {
 			homePhone = ub.getUsersHomePhone(this.user);
 		}
-		catch (NoPhoneFoundException e) {
-			e.printStackTrace();
-		}
+		catch (NoPhoneFoundException e) {}
+		
 		Phone mobilePhone = null;
 		try {
 			mobilePhone = ub.getUsersMobilePhone(this.user);
 		}
-		catch (NoPhoneFoundException e) {
-			e.printStackTrace();
-		}
+		catch (NoPhoneFoundException e) {}
+		
 		Phone workPhone = null;
 		try {
 			workPhone = ub.getUsersWorkPhone(this.user);
 		}
-		catch (NoPhoneFoundException e) {
-			e.printStackTrace();
-		}
+		catch (NoPhoneFoundException e) {}
+		
 		Address coAddress = getCOAddress(iwc);
 		PostalCode postal = null;
 		if (coAddress != null) {
@@ -299,9 +318,13 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		removeImage.setStyleClass("checkbox");
 		removeImage.keepStatusOnAction(true);
 
-		Layer formItem;
-		Label label;
-
+		
+		TextInput name = new TextInput(PARAMETER_NAME, user.getName());
+		createFormItem(this.iwrb.getLocalizedString("name", "Name"), name, section);
+		
+		TextInput ssn = new TextInput(PARAMETER_SSN, user.getPersonalID());
+		createFormItem(this.iwrb.getLocalizedString("social_security_number", "Social security number"), ssn, section);
+		
 		Layer layer = new Layer(Layer.DIV);
 		layer.setID("citizenImage");
 		section.add(layer);
@@ -312,37 +335,15 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		layer.add(helpLayer);
 
 		if (image != null) {
-			formItem = new Layer(Layer.DIV);
-			formItem.setStyleClass("formItem");
-			label = new Label();
-			label.add(new Text(this.iwrb.getLocalizedString("image", "Image")));
-			formItem.add(label);
-			formItem.add(image);
-			layer.add(formItem);
-
-			formItem = new Layer(Layer.DIV);
-			formItem.setStyleClass("formItem");
-			formItem.setStyleClass("indentedCheckbox");
-			formItem.setID("removeImage");
-			label = new Label(this.iwrb.getLocalizedString("remove_image", "Remove image"), removeImage);
-			formItem.add(removeImage);
-			formItem.add(label);
-			layer.add(formItem);
+			createFormItem(null, null, this.iwrb.getLocalizedString("image", "Image"), null, image, layer);
+			createFormItem("indentedCheckbox", "removeImage", this.iwrb.getLocalizedString("remove_image", "Remove image"), removeImage, layer);
 		}
 
-		Layer clearLayer = new Layer(Layer.DIV);
-		clearLayer.setStyleClass("Clear");
-		layer.add(clearLayer);
+		layer.add(new CSSSpacer());
+		
+		createFormItem("imageUpload", this.iwrb.getLocalizedString("image_upload", "Image upload"), file, layer);
 
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		formItem.setID("imageUpload");
-		label = new Label(this.iwrb.getLocalizedString("image_upload", "Image upload"), file);
-		formItem.add(label);
-		formItem.add(file);
-		layer.add(formItem);
-
-		section.add(clearLayer);
+		section.add(new CSSSpacer());
 
 		layer = new Layer(Layer.DIV);
 		layer.setID("citizenEmail");
@@ -353,23 +354,12 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		helpLayer.add(new Text(this.iwrb.getLocalizedString("citizen_preferences_email_help", "Here you can change your current email address or choose not to be notified by email. You will still receive messages under your account even if you do.")));
 		layer.add(helpLayer);
 
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		label = new Label(this.iwrb.getLocalizedString(KEY_EMAIL, DEFAULT_EMAIL), tiEmail);
-		formItem.add(label);
-		formItem.add(tiEmail);
-		layer.add(formItem);
+		createFormItem(this.iwrb.getLocalizedString(KEY_EMAIL, DEFAULT_EMAIL), tiEmail, layer);
 
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("indentedCheckbox");
-		formItem.setID("messagesViaEmail");
-		label = new Label(this.iwrb.getLocalizedString(KEY_MESSAGES_VIA_EMAIL, DEFAULT_MESSAGES_VIA_EMAIL), messagesViaEmail);
-		formItem.add(messagesViaEmail);
-		formItem.add(label);
-		layer.add(formItem);
+		createFormItem("indentedCheckbox", "messagesViaEmail", this.iwrb.getLocalizedString(KEY_MESSAGES_VIA_EMAIL, DEFAULT_MESSAGES_VIA_EMAIL), messagesViaEmail,
+				layer);
 
-		section.add(clearLayer);
+		section.add(new CSSSpacer());
 
 		layer = new Layer(Layer.DIV);
 		layer.setID("citizenPhones");
@@ -380,29 +370,13 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		helpLayer.add(new Text(this.iwrb.getLocalizedString("citizen_preferences_phones_help", "Here you can modify your phone information or delete the numbers by leaving the fields empty.")));
 		layer.add(helpLayer);
 
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		label = new Label(this.iwrb.getLocalizedString(KEY_PHONE_HOME, DEFAULT_PHONE_HOME), tiPhoneHome);
-		formItem.add(label);
-		formItem.add(tiPhoneHome);
-		layer.add(formItem);
+		createFormItem(this.iwrb.getLocalizedString(KEY_PHONE_HOME, DEFAULT_PHONE_HOME), tiPhoneHome, layer);
 
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		label = new Label(this.iwrb.getLocalizedString(KEY_PHONE_WORK, DEFAULT_PHONE_WORK), tiPhoneWork);
-		formItem.add(label);
-		formItem.add(tiPhoneWork);
-		layer.add(formItem);
+		createFormItem(this.iwrb.getLocalizedString(KEY_PHONE_WORK, DEFAULT_PHONE_WORK), tiPhoneWork, layer);
 
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		formItem.setID("mobilePhone");
-		label = new Label(this.iwrb.getLocalizedString(KEY_PHONE_MOBILE, DEFAULT_PHONE_MOBILE), tiPhoneMobile);
-		formItem.add(label);
-		formItem.add(tiPhoneMobile);
-		layer.add(formItem);
+		createFormItem("mobilePhone", this.iwrb.getLocalizedString(KEY_PHONE_MOBILE, DEFAULT_PHONE_MOBILE), tiPhoneMobile, layer);
 
-		section.add(clearLayer);
+		section.add(new CSSSpacer());
 
 		layer = new Layer(Layer.DIV);
 		layer.setID("citizenResidence");
@@ -413,49 +387,36 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		helpLayer.add(new Text(this.iwrb.getLocalizedString("citizen_preferences_residence_help", "If you would like to receive letters via your C/O address, rather than your registered one, you can check the checkbox below and fill in your C/O address.")));
 		layer.add(helpLayer);
 
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		formItem.setStyleClass("indentedCheckbox");
-		label = new Label(this.iwrb.getLocalizedString(KEY_CO_ADDRESS_SELECT, DEFAULT_CO_ADDRESS_SELECT), useCOAddress);
-		formItem.add(useCOAddress);
-		formItem.add(label);
-		layer.add(formItem);
+		createFormItem("indentedCheckbox", null, this.iwrb.getLocalizedString(KEY_CO_ADDRESS_SELECT, DEFAULT_CO_ADDRESS_SELECT), useCOAddress, layer);
 
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		label = new Label(this.iwrb.getLocalizedString(KEY_CO_STREET_ADDRESS, DEFAULT_CO_STREET_ADDRESS), tiCOStreetAddress);
-		formItem.add(label);
-		formItem.add(tiCOStreetAddress);
-		layer.add(formItem);
+		createFormItem(this.iwrb.getLocalizedString(KEY_CO_STREET_ADDRESS, DEFAULT_CO_STREET_ADDRESS), tiCOStreetAddress, layer);
 
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		label = new Label(this.iwrb.getLocalizedString(KEY_CO_POSTAL_CODE, DEFAULT_CO_POSTAL_CODE), tiCOPostalCode);
-		formItem.add(label);
-		formItem.add(tiCOPostalCode);
-		layer.add(formItem);
+		createFormItem(this.iwrb.getLocalizedString(KEY_CO_POSTAL_CODE, DEFAULT_CO_POSTAL_CODE), tiCOPostalCode, layer);
 
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		label = new Label(this.iwrb.getLocalizedString(KEY_CO_CITY, DEFAULT_CO_CITY), tiCOCity);
-		formItem.add(label);
-		formItem.add(tiCOCity);
-		layer.add(formItem);
+		createFormItem(this.iwrb.getLocalizedString(KEY_CO_CITY, DEFAULT_CO_CITY), tiCOCity, layer);
 
-		formItem = new Layer(Layer.DIV);
-		formItem.setStyleClass("formItem");
-		label = new Label(this.iwrb.getLocalizedString(KEY_CO_COUNTRY, DEFAULT_CO_COUNTRY), tiCOCountry);
-		formItem.add(label);
-		formItem.add(tiCOCountry);
-		layer.add(formItem);
+		createFormItem(this.iwrb.getLocalizedString(KEY_CO_COUNTRY, DEFAULT_CO_COUNTRY), tiCOCountry, layer);
 
+		layer = new Layer(Layer.DIV);
+		section.add(layer);
+		
+		GenderHome genderHome = (GenderHome) IDOLookup.getHome(Gender.class);
+		String maleId = genderHome.getMaleGender().getPrimaryKey().toString();
+		String femaleId = genderHome.getFemaleGender().getPrimaryKey().toString();
+		
+		String userGenderId = null;
+		Gender userGender = user.getGender();
+		userGenderId = userGender == null ? CoreConstants.EMPTY : userGender.getPrimaryKey().toString();
+		
+		RadioGroup gender = new RadioGroup(PARAMETER_GENDER);
+		gender.addRadioButton(maleId, new Text(this.iwrb.getLocalizedString("male", "Male")), userGenderId.equals(maleId));
+		gender.addRadioButton(femaleId, new Text(this.iwrb.getLocalizedString("female", "Female")), userGenderId.equals(femaleId));
+		createFormItem(this.iwrb.getLocalizedString("gender", "Gender"), gender, layer);
+		
 		DropdownMenu localesDrop = LocalePresentationUtil.getAvailableLocalesDropdown(iwc.getIWMainApplication(), PARAMETER_PREFERRED_LOCALE);
 				
 		if (localesDrop.getChildCount() > 1 && isSetToShowPreferredLocaleChooser()) {
-			section.add(clearLayer);
-			formItem = new Layer(Layer.DIV);
-			formItem.setStyleClass("formItem");
-			formItem.setID("preferredLang");
+			section.add(new CSSSpacer());
 
 			if (user.getPreferredLocale() != null) {
 				localesDrop.setSelectedElement(user.getPreferredLocale());
@@ -464,10 +425,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 				localesDrop.setSelectedElement(iwc.getCurrentLocale().toString());
 			}
 
-			label = new Label(this.iwrb.getLocalizedString(PREFERRED_LANGUAGE, "Preferred language"), localesDrop);
-			formItem.add(label);
-			formItem.add(localesDrop);
-			layer.add(formItem);
+			createFormItem("preferredLang", this.iwrb.getLocalizedString(PREFERRED_LANGUAGE, "Preferred language"), localesDrop, layer);
 		}
 		
 		DropdownMenu rolesDrop = new DropdownMenu(PARAMETER_PREFERRED_ROLE);
@@ -481,22 +439,16 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		}
 		
 		if (rolesDrop.getChildCount() > 0 && isSetToShowPreferredRoleChooser()) {
-			section.add(clearLayer);
-			formItem = new Layer(Layer.DIV);
-			formItem.setStyleClass("formItem");
-			formItem.setID("preferredRole");
+			section.add(new CSSSpacer());
 
 			if (user.getPreferredRole() != null) {
 				rolesDrop.setSelectedElement(user.getPreferredRole().getId());
 			}
-
-			label = new Label(this.iwrb.getLocalizedString(PREFERRED_ROLE, "Preferred user role"), localesDrop);
-			formItem.add(label);
-			formItem.add(rolesDrop);
-			layer.add(formItem);
+			
+			createFormItem("preferredRole", this.iwrb.getLocalizedString(PREFERRED_ROLE, "Preferred user role"), localesDrop, layer);
 		}
 
-		section.add(clearLayer);
+		section.add(new CSSSpacer());
 
 		Layer buttonLayer = new Layer(Layer.DIV);
 		buttonLayer.setStyleClass("buttonLayer");
@@ -508,12 +460,65 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		send.setToFormSubmit(form);
 		buttonLayer.add(send);
 
-		add(form);
+		return form;
+	}
+	
+	protected void createFormItem(String label, InterfaceObject uiObject, UIComponent container) {
+		createFormItem(null, null, label, uiObject, null, container);
+	}
+	
+	private void createFormItem(String formItemId, String label, InterfaceObject uiObject, UIComponent container) {
+		createFormItem(null, formItemId, label, uiObject, null, container);
+	}
+	
+	private void createFormItem(String formItemStyle, String formItemId, String label, InterfaceObject uiObject, UIComponent container) {
+		createFormItem(formItemStyle, formItemId, label, uiObject, null, container);
+	}
+	
+	private void createFormItem(String formItemStyle, String formItemId, String label, InterfaceObject uiObject, UIComponent child, UIComponent container) {
+		Layer formItem = getFormItem(formItemStyle, formItemId, label, uiObject, child);
+		container.getChildren().add(formItem);
+	}
+	
+	protected Layer getFormItem(String formItemStyle, String formItemId, String label, InterfaceObject uiObject, UIComponent child) {
+		Layer formItem = new Layer();
+		formItem.setStyleClass("formItem");
+		if (!StringUtil.isEmpty(formItemStyle)) {
+			formItem.setStyleClass(formItemStyle);
+		}
+		if (!StringUtil.isEmpty(formItemId)) {
+			formItem.setId(formItemId);
+		}
+		
+		Label uiLabel = null;
+		if (uiObject == null) {
+			uiLabel = new Label();
+			uiLabel.add(new Text(label));
+		} else {
+			uiLabel = new Label(label, uiObject);
+		}
+
+		if (uiObject != null) {
+			if (uiObject instanceof CheckBox) {
+				formItem.add(uiObject);
+				formItem.add(uiLabel);
+			} else {
+				formItem.add(uiLabel);
+				formItem.add(uiObject);
+			}
+		} else {
+			formItem.add(uiLabel);
+		}
+		
+		if (child != null) {
+			formItem.add(child);
+		}
+		
+		return formItem;
 	}
 
-	private void updatePreferences(IWContext iwc) throws Exception {
-		boolean hasErrors = false;
-		Collection errors = new ArrayList();
+	protected boolean updatePreferences(IWContext iwc) throws Exception {
+		Collection<String> errors = new ArrayList<String>();
 
 		int fileID = -1;
 		UploadFile uploadFile = iwc.getUploadedFile();
@@ -542,7 +547,11 @@ public class CitizenAccountPreferences extends CitizenBlock {
 				uploadFile.setId(-1);
 			}
 		}
+		
+		UserBusiness ub = IBOLookup.getServiceInstance(iwc, UserBusiness.class);
 
+		String name = iwc.getParameter(PARAMETER_NAME);
+		String ssn = iwc.getParameter(PARAMETER_SSN);
 		String sEmail = iwc.isParameterSet(PARAMETER_EMAIL) ? iwc.getParameter(PARAMETER_EMAIL) : null;
 		String phoneHome = iwc.getParameter(PARAMETER_PHONE_HOME);
 		String phoneMobile = iwc.getParameter(PARAMETER_PHONE_MOBILE);
@@ -551,19 +560,43 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		String coPostalCode = iwc.getParameter(PARAMETER_CO_POSTAL_CODE);
 		String coCity = iwc.getParameter(PARAMETER_CO_CITY);
 		String coCountry = iwc.getParameter(PARAMETER_CO_COUNTRY);
+		String gender = iwc.getParameter(PARAMETER_GENDER);
 		String preferredLocale = iwc.getParameter(PARAMETER_PREFERRED_LOCALE);
 		String preferredRoleID = iwc.getParameter(PARAMETER_PREFERRED_ROLE);
 		boolean useCOAddress = iwc.isParameterSet(PARAMETER_CO_ADDRESS_SELECT);
 		boolean messagesViaEmail = iwc.isParameterSet(PARAMETER_MESSAGES_VIA_EMAIL);
 		boolean removeImage = iwc.isParameterSet(PARAMETER_REMOVE_IMAGE);
-
+		boolean removeSSN = StringUtil.isEmpty(ssn);
+		boolean removeGender = StringUtil.isEmpty(gender);
+		
+		if (StringUtil.isEmpty(name)) {
+			errors.add(this.iwrb.getLocalizedString("invalid_name", "Name is invalid"));
+		}
+		
+		if (!removeSSN) {
+			if (!ub.validatePersonalId(ssn, iwc.getCurrentLocale())) {
+				errors.add(new StringBuilder(this.iwrb.getLocalizedString("invalid_ssn", "SSN is invalid")).append(CoreConstants.COLON)
+						.append(CoreConstants.SPACE).append(ssn).toString());
+			}
+		}
+		
+		Integer genderId = null;
+		if (!removeGender) {
+			try {
+				genderId = Integer.valueOf(gender);
+			} catch(NumberFormatException e) {
+				e.printStackTrace();
+			}
+			if (genderId == null || genderId.intValue() < 0) {
+				errors.add(this.iwrb.getLocalizedString("invalid_gender", "Invalid gender"));
+			}
+		}
+		
 		boolean updateEmail = false;
-
 		if (sEmail != null) {
 			updateEmail = EmailValidator.getInstance().validateEmail(sEmail);
 			if (!updateEmail) {
 				errors.add(this.iwrb.getLocalizedString(KEY_EMAIL_INVALID, DEFAULT_EMAIL_INVALID));
-				hasErrors = true;
 			}
 		}
 		/*
@@ -571,27 +604,35 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		 */
 		if (messagesViaEmail && !updateEmail) {
 			errors.add(this.iwrb.getLocalizedString(KEY_NO_EMAIL_FOR_LETTERS, DEFAULT_NO_EMAIL_FOR_LETTERS));
-			hasErrors = true;
 		}
 
 		// Validate c/o-address
 		if (useCOAddress) {
 			if (coStreetAddress.equals("")) {
 				errors.add(this.iwrb.getLocalizedString(KEY_CO_STREET_ADDRESS_MISSING, DEFAULT_CO_STREET_ADDRESS_MISSING));
-				hasErrors = true;
 			}
 			if (coPostalCode.equals("")) {
 				errors.add(this.iwrb.getLocalizedString(KEY_CO_POSTAL_CODE_MISSING, DEFAULT_CO_POSTAL_CODE_MISSING));
-				hasErrors = true;
 			}
 			if (coCity.equals("")) {
 				errors.add(this.iwrb.getLocalizedString(KEY_CO_CITY_MISSING, DEFAULT_CO_CITY_MISSING));
-				hasErrors = true;
 			}
 		}
 
-		if (!hasErrors) {
-			UserBusiness ub = (UserBusiness) IBOLookup.getServiceInstance(iwc, UserBusiness.class);
+		if (ListUtil.isEmpty(errors)) {
+			//	No errors found
+			
+			//	Name
+			user.setName(name);
+			
+			//	SSN
+			user.setPersonalID(removeSSN ? null : ssn);
+	
+			//	Gender
+			user.setGender(genderId);
+			
+			user.store();
+			
 			if (updateEmail) {
 				ub.storeUserEmail(this.user, sEmail, true);
 			}
@@ -675,11 +716,15 @@ public class CitizenAccountPreferences extends CitizenBlock {
 			}
 
 			add(layer);
+			
+			return true;
 		}
 		else {
 			showErrors(iwc, errors);
 			viewForm(iwc);
 		}
+		
+		return false;
 	}
 
 	private Address getCOAddress(IWContext iwc) {
@@ -732,5 +777,9 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	 */
 	public void setToShowPreferredLocaleChooser(boolean showPreferredLocaleChooser) {
 		this.showPreferredLocaleChooser = showPreferredLocaleChooser;
+	}
+	
+	protected User getUser() {
+		return this.user;
 	}
 }
