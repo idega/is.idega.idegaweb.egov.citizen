@@ -411,7 +411,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		RadioGroup gender = new RadioGroup(PARAMETER_GENDER);
 		gender.addRadioButton(maleId, new Text(this.iwrb.getLocalizedString("male", "Male")), userGenderId.equals(maleId));
 		gender.addRadioButton(femaleId, new Text(this.iwrb.getLocalizedString("female", "Female")), userGenderId.equals(femaleId));
-		createFormItem(this.iwrb.getLocalizedString("gender", "Gender"), gender, layer);
+		createFormItem("citizenGender", this.iwrb.getLocalizedString("gender", "Gender"), gender, layer);
 		
 		DropdownMenu localesDrop = LocalePresentationUtil.getAvailableLocalesDropdown(iwc.getIWMainApplication(), PARAMETER_PREFERRED_LOCALE);
 				
