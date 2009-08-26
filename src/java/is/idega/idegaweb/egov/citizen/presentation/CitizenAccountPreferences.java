@@ -145,6 +145,10 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	private boolean showPreferredLocaleChooser = false;
 	
 	private boolean showPreferredRoleChooser = true;
+	
+	private boolean showGenderChooser = false;
+	
+	private boolean showGenderChooserReadOnly = false;
 
 	public CitizenAccountPreferences() {
 	}
@@ -400,52 +404,64 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		layer = new Layer(Layer.DIV);
 		section.add(layer);
 		
-		GenderHome genderHome = (GenderHome) IDOLookup.getHome(Gender.class);
-		String maleId = genderHome.getMaleGender().getPrimaryKey().toString();
-		String femaleId = genderHome.getFemaleGender().getPrimaryKey().toString();
-		
-		String userGenderId = null;
-		Gender userGender = user.getGender();
-		userGenderId = userGender == null ? CoreConstants.EMPTY : userGender.getPrimaryKey().toString();
-		
-		RadioGroup gender = new RadioGroup(PARAMETER_GENDER);
-		gender.addRadioButton(maleId, new Text(this.iwrb.getLocalizedString("male", "Male")), userGenderId.equals(maleId));
-		gender.addRadioButton(femaleId, new Text(this.iwrb.getLocalizedString("female", "Female")), userGenderId.equals(femaleId));
-		createFormItem("citizenGender", this.iwrb.getLocalizedString("gender", "Gender"), gender, layer);
-		
-		DropdownMenu localesDrop = LocalePresentationUtil.getAvailableLocalesDropdown(iwc.getIWMainApplication(), PARAMETER_PREFERRED_LOCALE);
-				
-		if (localesDrop.getChildCount() > 1 && isSetToShowPreferredLocaleChooser()) {
-			section.add(new CSSSpacer());
-
-			if (user.getPreferredLocale() != null) {
-				localesDrop.setSelectedElement(user.getPreferredLocale());
-			}
-			else {
-				localesDrop.setSelectedElement(iwc.getCurrentLocale().toString());
-			}
-
-			createFormItem("preferredLang", this.iwrb.getLocalizedString(PREFERRED_LANGUAGE, "Preferred language"), localesDrop, layer);
-		}
-		
-		DropdownMenu rolesDrop = new DropdownMenu(PARAMETER_PREFERRED_ROLE);
-		List<ICRole> rolesForUser = ub.getAvailableRolesForUserAsPreferredRoles(iwc.getCurrentUser());
-		IWResourceBundle coreIWRB = iwc.getIWMainApplication().getBundle(CoreConstants.CORE_IW_BUNDLE_IDENTIFIER).getResourceBundle(iwc);
-		if (!ListUtil.isEmpty(rolesForUser)) {
-			for (ICRole role: rolesForUser) {
-				String localisedPermissionName = coreIWRB.getLocalizedString(role.getRoleNameLocalizableKey(), role.getRoleKey());
-				rolesDrop.addMenuElement(role.getId(), localisedPermissionName);
-			}
-		}
-		
-		if (rolesDrop.getChildCount() > 0 && isSetToShowPreferredRoleChooser()) {
-			section.add(new CSSSpacer());
-
-			if (user.getPreferredRole() != null) {
-				rolesDrop.setSelectedElement(user.getPreferredRole().getId());
+		if(isSetToShowGenderChooser() || isSetToShowGenderChooserReadOnly()){
+			GenderHome genderHome = (GenderHome) IDOLookup.getHome(Gender.class);
+			String maleId = genderHome.getMaleGender().getPrimaryKey().toString();
+			String femaleId = genderHome.getFemaleGender().getPrimaryKey().toString();
+			
+			String userGenderId = null;
+			Gender userGender = user.getGender();
+			userGenderId = userGender == null ? CoreConstants.EMPTY : userGender.getPrimaryKey().toString();
+			
+			RadioGroup gender = new RadioGroup(PARAMETER_GENDER);
+			gender.addRadioButton(maleId, new Text(this.iwrb.getLocalizedString("male", "Male")), userGenderId.equals(maleId));
+			gender.addRadioButton(femaleId, new Text(this.iwrb.getLocalizedString("female", "Female")), userGenderId.equals(femaleId));
+			
+			if(isSetToShowGenderChooserReadOnly()){
+				gender.setReadOnly(true);
 			}
 			
-			createFormItem("preferredRole", this.iwrb.getLocalizedString(PREFERRED_ROLE, "Preferred user role"), localesDrop, layer);
+			createFormItem("citizenGender", this.iwrb.getLocalizedString("gender", "Gender"), gender, layer);
+		}
+		
+		
+		if(isSetToShowPreferredLocaleChooser()){
+			DropdownMenu localesDrop = LocalePresentationUtil.getAvailableLocalesDropdown(iwc.getIWMainApplication(), PARAMETER_PREFERRED_LOCALE);
+					
+			if (localesDrop.getChildCount() > 1) {
+				section.add(new CSSSpacer());
+	
+				if (user.getPreferredLocale() != null) {
+					localesDrop.setSelectedElement(user.getPreferredLocale());
+				}
+				else {
+					localesDrop.setSelectedElement(iwc.getCurrentLocale().toString());
+				}
+	
+				createFormItem("preferredLang", this.iwrb.getLocalizedString(PREFERRED_LANGUAGE, "Preferred language"), localesDrop, layer);
+			}
+		}
+		
+		if(isSetToShowPreferredRoleChooser()){
+			DropdownMenu rolesDrop = new DropdownMenu(PARAMETER_PREFERRED_ROLE);
+			List<ICRole> rolesForUser = ub.getAvailableRolesForUserAsPreferredRoles(iwc.getCurrentUser());
+			IWResourceBundle coreIWRB = iwc.getIWMainApplication().getBundle(CoreConstants.CORE_IW_BUNDLE_IDENTIFIER).getResourceBundle(iwc);
+			if (!ListUtil.isEmpty(rolesForUser)) {
+				for (ICRole role: rolesForUser) {
+					String localisedPermissionName = coreIWRB.getLocalizedString(role.getRoleNameLocalizableKey(), role.getRoleKey());
+					rolesDrop.addMenuElement(role.getId(), localisedPermissionName);
+				}
+			}
+			
+			if (rolesDrop.getChildCount() > 1) {
+				section.add(new CSSSpacer());
+	
+				if (user.getPreferredRole() != null) {
+					rolesDrop.setSelectedElement(user.getPreferredRole().getId());
+				}
+				
+				createFormItem("preferredRole", this.iwrb.getLocalizedString(PREFERRED_ROLE, "Preferred user role"), rolesDrop, layer);
+			}
 		}
 
 		section.add(new CSSSpacer());
@@ -461,6 +477,10 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		buttonLayer.add(send);
 
 		return form;
+	}
+
+	public boolean isSetToShowGenderChooserReadOnly() {
+		return showGenderChooserReadOnly;
 	}
 	
 	protected void createFormItem(String label, InterfaceObject uiObject, UIComponent container) {
@@ -567,7 +587,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		boolean messagesViaEmail = iwc.isParameterSet(PARAMETER_MESSAGES_VIA_EMAIL);
 		boolean removeImage = iwc.isParameterSet(PARAMETER_REMOVE_IMAGE);
 		boolean removeSSN = StringUtil.isEmpty(ssn);
-		boolean removeGender = StringUtil.isEmpty(gender);
+		boolean updateGender = !StringUtil.isEmpty(gender);
 		
 		if (StringUtil.isEmpty(name)) {
 			errors.add(this.iwrb.getLocalizedString("invalid_name", "Name is invalid"));
@@ -581,7 +601,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		}
 		
 		Integer genderId = null;
-		if (!removeGender) {
+		if (updateGender) {
 			try {
 				genderId = Integer.valueOf(gender);
 			} catch(NumberFormatException e) {
@@ -629,7 +649,9 @@ public class CitizenAccountPreferences extends CitizenBlock {
 			user.setPersonalID(removeSSN ? null : ssn);
 	
 			//	Gender
-			user.setGender(genderId);
+			if(updateGender){
+				user.setGender(genderId);
+			}
 			
 			user.store();
 			
@@ -770,6 +792,10 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	public boolean isSetToShowPreferredRoleChooser() {
 		return showPreferredRoleChooser;
 	}
+	
+	public boolean isSetToShowGenderChooser() {
+		return showGenderChooser;
+	}
 
 	/**
 	 * @param showPreferredLocaleChooser
@@ -777,6 +803,26 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	 */
 	public void setToShowPreferredLocaleChooser(boolean showPreferredLocaleChooser) {
 		this.showPreferredLocaleChooser = showPreferredLocaleChooser;
+	}
+	
+	/**
+	 * @param showPreferredRoleChooser
+	 *          The showPreferredRoleChooser to set.
+	 */
+	public void setToShowPreferredRoleChooser(boolean showPreferredRoleChooser) {
+		this.showPreferredRoleChooser = showPreferredRoleChooser;
+	}
+	
+	/**
+	 * @param showGenderChooser
+	 *          The showGenderChooser to set.
+	 */
+	public void setToShowGenderChooser(boolean showGenderChooser) {
+		this.showGenderChooser = showGenderChooser;
+	}
+	
+	public void setToShowGenderChooserReadOnly(boolean showGenderChooserReadOnly) {
+		this.showGenderChooserReadOnly = showGenderChooserReadOnly;
 	}
 	
 	protected User getUser() {
