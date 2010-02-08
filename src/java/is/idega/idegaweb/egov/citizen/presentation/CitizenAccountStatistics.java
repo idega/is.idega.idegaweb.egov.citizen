@@ -33,9 +33,6 @@ public class CitizenAccountStatistics extends CitizenBlock {
 			section.setStyleClass("statisticsLayer");
 			add(section);
 
-			Layer clearLayer = new Layer(Layer.DIV);
-			clearLayer.setStyleClass("Clear");
-
 			Heading1 heading = new Heading1(iwrb.getLocalizedString("citizen_account.statistics", "Citizen account statistics"));
 			section.add(heading);
 
@@ -49,6 +46,8 @@ public class CitizenAccountStatistics extends CitizenBlock {
 			formItem.add(span);
 			section.add(formItem);
 
+			Layer clearLayer = new Layer(Layer.DIV);
+			clearLayer.setStyleClass("Clear");
 			section.add(clearLayer);
 		}
 		catch (RemoteException re) {
