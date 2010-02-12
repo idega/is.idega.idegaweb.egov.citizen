@@ -3,6 +3,8 @@ package is.idega.idegaweb.egov.citizen.business;
 import is.idega.idegaweb.egov.citizen.IWBundleStarter;
 import is.idega.idegaweb.egov.citizen.business.landsbankinn.SendLoginDataBusiness;
 import is.idega.idegaweb.egov.citizen.data.AccountApplication;
+import is.idega.idegaweb.egov.citizen.data.UnsentCitizenAccount;
+import is.idega.idegaweb.egov.citizen.data.UnsentCitizenAccountHome;
 import is.idega.idegaweb.egov.citizen.wsclient.BirtingakerfiWSLocator;
 import is.idega.idegaweb.egov.citizen.wsclient.BirtingakerfiWSSoap_PortType;
 
@@ -41,12 +43,14 @@ import com.idega.user.data.User;
 import com.idega.util.FileUtil;
 import com.idega.util.IWTimestamp;
 
-public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean implements WSCitizenAccountBusiness, CitizenAccountBusiness, CallbackHandler {
+public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
+		implements WSCitizenAccountBusiness, CitizenAccountBusiness,
+		CallbackHandler {
 
 	private static final long serialVersionUID = -8824721140289363380L;
 
 	protected static final String BANK_SEND_REGISTRATION = "BANK_SEND_REGISTRATION";
-	
+
 	protected static final String USE_LANDSBANKINN = "USE_LANDSBANKINN";
 
 	protected static final String BANK_SENDER_PIN = "BANK_SENDER_PIN";
@@ -60,101 +64,140 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean imp
 	protected static final String BANK_SENDER_LOGOLINK = "BANK_SENDER_LOGOLINK";
 
 	protected static final String BANK_SENDER_TYPE = "BANK_SENDER_TYPE";
-	
+
 	protected static final String BANK_SENDER_TYPE_VERSION = "BANK_SENDER_TYPE_VERSION";
 
 	protected static final String USER_CREATION_TYPE = "RVKLB";
-	
 
 	protected static final String SERVICE_URL = "https://ws.isb.is/adgerdirv1/birtingakerfi.asmx";
 
 	/**
-	 * Creates a Login for a user with application theCase and send a message to the user that applies if it is successful.
+	 * Creates a Login for a user with application theCase and send a message to
+	 * the user that applies if it is successful.
 	 * 
 	 * @param theCase
-	 *          The Account Application
+	 *            The Account Application
 	 * @throws CreateException
-	 *           Error creating data objects.
+	 *             Error creating data objects.
 	 * @throws LoginCreateException
-	 *           If an error occurs creating login for the user.
+	 *             If an error occurs creating login for the user.
 	 */
 	@Override
-	protected void createLoginAndSendMessage(AccountApplication theCase, boolean createUserMessage, boolean createPasswordMessage, boolean sendEmail, boolean sendSnailMail) throws RemoteException, CreateException, LoginCreateException {
+	protected void createLoginAndSendMessage(AccountApplication theCase,
+			boolean createUserMessage, boolean createPasswordMessage,
+			boolean sendEmail, boolean sendSnailMail) throws RemoteException,
+			CreateException, LoginCreateException {
 
 		boolean sendLetter = false;
 		User citizen = theCase.getOwner();
 		LoginTable lt = getUserBusiness().generateUserLogin(citizen);
 		String login = lt.getUserLogin();
-		
+
 		try {
 			String password = lt.getUnencryptedUserPassword();
 
-			String messageBody = this.getAcceptMessageBody(theCase, login, password);
+			String messageBody = this.getAcceptMessageBody(theCase, login,
+					password);
 			String messageSubject = this.getAcceptMessageSubject(theCase);
-			
+
 			if (createPasswordMessage && sendSnailMail)
-				this.getMessageBusiness().createPasswordMessage(citizen, login, password);
+				this.getMessageBusiness().createPasswordMessage(citizen, login,
+						password);
 
 			createUserMessage = sendEmail;
 
 			boolean sendMessageToBank = sendMessageToBank();
-			
+
 			if (sendMessageToBank) {
-				String pageLink = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_PAGELINK);
-				String logoLink = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_LOGOLINK);
-				String ssn = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_PIN);
-				String user3 = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_TYPE);
-				String user3version = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_TYPE_VERSION, "001");
+				try {
+					String pageLink = getIWApplicationContext()
+							.getApplicationSettings().getProperty(
+									BANK_SENDER_PAGELINK);
+					String logoLink = getIWApplicationContext()
+							.getApplicationSettings().getProperty(
+									BANK_SENDER_LOGOLINK);
+					String ssn = getIWApplicationContext()
+							.getApplicationSettings().getProperty(
+									BANK_SENDER_PIN);
+					String user3 = getIWApplicationContext()
+							.getApplicationSettings().getProperty(
+									BANK_SENDER_TYPE);
+					String user3version = getIWApplicationContext()
+							.getApplicationSettings().getProperty(
+									BANK_SENDER_TYPE_VERSION, "001");
 
-				String xml = getXML(login, password, pageLink, logoLink, sendUsingLandsbankan() ? "1" : citizen.getPrimaryKey().toString(), citizen.getPersonalID(), user3, user3version);
-				
-				if(sendUsingLandsbankan()) {
-					
-					SendLoginDataBusiness send_data = (SendLoginDataBusiness)getServiceInstance(SendLoginDataBusiness.class);
-					
-					send_data.send(xml);
-					
-					try {
-						LoginInfo loginInfo = getLoginInfoHome().findByPrimaryKey(lt.getPrimaryKey());
-						loginInfo.setCreationType(USER_CREATION_TYPE);
-						loginInfo.store();
-						
-					} catch (Exception e) {
-						throw new RuntimeException("Failed to flag secure user registration", e);
+					String xml = getXML(login, password, pageLink, logoLink,
+							sendUsingLandsbankan() ? "1" : citizen
+									.getPrimaryKey().toString(), citizen
+									.getPersonalID(), user3, user3version);
+
+					if (sendUsingLandsbankan()) {
+
+						SendLoginDataBusiness send_data = (SendLoginDataBusiness) getServiceInstance(SendLoginDataBusiness.class);
+
+						send_data.send(xml);
+
+						try {
+							LoginInfo loginInfo = getLoginInfoHome()
+									.findByPrimaryKey(lt.getPrimaryKey());
+							loginInfo.setCreationType(USER_CREATION_TYPE);
+							loginInfo.store();
+
+						} catch (Exception e) {
+							throw new RuntimeException(
+									"Failed to flag secure user registration",
+									e);
+						}
+
+					} else {
+
+						StringBuffer filename = new StringBuffer(user3
+								.toLowerCase());
+						filename.append("sunnan3");
+						IdGenerator uidGenerator = IdGeneratorFactory
+								.getUUIDGenerator();
+						filename.append(uidGenerator.generateId());
+						filename.append(".xml");
+
+						encodeAndSendXML(xml, filename.toString(), ssn);
 					}
+				} catch (Exception e) {
+					UnsentCitizenAccount unsent = getUnsentCitizenAccountHome().create();
+					unsent.setLogin(lt);
+					unsent.setKey(password);
+					if (e.getMessage().length() > 1000) {
+						unsent.setOriginalError(e.getMessage().substring(0, 1000));						
+					} else {
+						unsent.setOriginalError(e.getMessage());
+					}
+					unsent.setFailedSendDate(new IWTimestamp().getTimestamp());
 					
-				} else {
-					
-					StringBuffer filename = new StringBuffer(user3.toLowerCase());
-					filename.append("sunnan3");
-					IdGenerator uidGenerator = IdGeneratorFactory.getUUIDGenerator();
-					filename.append(uidGenerator.generateId());
-					filename.append(".xml");
-
-					encodeAndSendXML(xml, filename.toString(), ssn);
+					unsent.store();
 				}
-			}
-			else if (createUserMessage) {
-				this.getMessageBusiness().createUserMessage(citizen, messageSubject, messageBody, sendLetter);
+			} else if (createUserMessage) {
+				this.getMessageBusiness().createUserMessage(citizen,
+						messageSubject, messageBody, sendLetter);
 			}
 
-		}
-		catch (PasswordNotKnown e) {
+		} catch (PasswordNotKnown e) {
 			// e.printStackTrace();
 			throw new IDOCreateException(e);
-		}
-		catch (RemoteException e) {
+		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private boolean sendUsingLandsbankan() {
-		return getIWApplicationContext().getApplicationSettings().getBoolean(USE_LANDSBANKINN, false);
+		return getIWApplicationContext().getApplicationSettings().getBoolean(
+				USE_LANDSBANKINN, false);
 	}
 
-	private String getXML(String login, String password, String pageLink, String logo, String xkey, String user1, String user3, String user3version) {
-		
-		String pin = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_PIN);
+	private String getXML(String login, String password, String pageLink,
+			String logo, String xkey, String user1, String user3,
+			String user3version) {
+
+		String pin = getIWApplicationContext().getApplicationSettings()
+				.getProperty(BANK_SENDER_PIN);
 
 		String definitionName = "idega.is";
 		String acct = pin + user1;
@@ -163,7 +206,7 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean imp
 		}
 		user3 = user3 + "-" + user3version;
 		String user4 = acct + xkey;
-		
+
 		String encoding = sendUsingLandsbankan() ? "UTF-8" : "iso-8859-1";
 
 		StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"");
@@ -198,12 +241,12 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean imp
 		xml.append(password);
 		xml.append("</Field>\n");
 		xml.append("\t\t\t<Field Name=\"PageLink\">");
-		
-		if(pageLink != null)
+
+		if (pageLink != null)
 			xml.append(pageLink);
 		xml.append("</Field>\n");
 		xml.append("\t\t\t<Field Name=\"Logo\">");
-		if(logo != null)
+		if (logo != null)
 			xml.append(logo);
 		xml.append("</Field>\n");
 		xml.append("\t\t</Section>\n");
@@ -212,45 +255,53 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean imp
 
 		return xml.toString();
 	}
-	
+
 	private void encodeAndSendXML(String xml, String filename, String personalID) {
-		String userId = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_USER_ID);
+		String userId = getIWApplicationContext().getApplicationSettings()
+				.getProperty(BANK_SENDER_USER_ID);
 
 		try {
-			StringBuffer file = new StringBuffer(this.getIWMainApplication().getBundle(IWBundleStarter.IW_BUNDLE_IDENTIFIER).getResourcesRealPath());
+			StringBuffer file = new StringBuffer(this.getIWMainApplication()
+					.getBundle(IWBundleStarter.IW_BUNDLE_IDENTIFIER)
+					.getResourcesRealPath());
 			file.append(FileUtil.getFileSeparator());
-			// Do not change the name of this file because the stupid autodeployer will start it up otherwise.
+			// Do not change the name of this file because the stupid
+			// autodeployer will start it up otherwise.
 			file.append("deploy_client.wsdd");
 
-			EngineConfiguration config = new FileProvider(new FileInputStream(file.toString()));
+			EngineConfiguration config = new FileProvider(new FileInputStream(
+					file.toString()));
 			BirtingakerfiWSLocator locator = new BirtingakerfiWSLocator(config);
-			BirtingakerfiWSSoap_PortType port = locator.getBirtingakerfiWSSoap(new URL(SERVICE_URL));
+			BirtingakerfiWSSoap_PortType port = locator
+					.getBirtingakerfiWSSoap(new URL(SERVICE_URL));
 
 			Stub stub = (Stub) port;
-			stub._setProperty(WSHandlerConstants.ACTION, WSHandlerConstants.USERNAME_TOKEN);
-			stub._setProperty(WSHandlerConstants.PASSWORD_TYPE, WSConstants.PW_TEXT);
+			stub._setProperty(WSHandlerConstants.ACTION,
+					WSHandlerConstants.USERNAME_TOKEN);
+			stub._setProperty(WSHandlerConstants.PASSWORD_TYPE,
+					WSConstants.PW_TEXT);
 			stub._setProperty(WSHandlerConstants.USER, userId);
-			stub._setProperty(WSHandlerConstants.PW_CALLBACK_CLASS, this.getClass().getName());
+			stub._setProperty(WSHandlerConstants.PW_CALLBACK_CLASS, this
+					.getClass().getName());
 
 			port.sendaSkra(filename, Base64.encode(xml.getBytes()), personalID);
-		}
-		catch (ServiceException e) {
+		} catch (ServiceException e) {
 			e.printStackTrace();
-		}
-		catch (RemoteException e) {
+		} catch (RemoteException e) {
 			e.printStackTrace();
-		}
-		catch (FileNotFoundException e) {
+		} catch (FileNotFoundException e) {
 			e.printStackTrace();
-		}
-		catch (MalformedURLException e) {
+		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public void handle(Callback[] callbacks) throws UnsupportedCallbackException {
-		String userId = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_USER_ID);
-		String passwd = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_USER_PASSWORD);
+	public void handle(Callback[] callbacks)
+			throws UnsupportedCallbackException {
+		String userId = getIWApplicationContext().getApplicationSettings()
+				.getProperty(BANK_SENDER_USER_ID);
+		String passwd = getIWApplicationContext().getApplicationSettings()
+				.getProperty(BANK_SENDER_USER_PASSWORD);
 
 		for (int i = 0; i < callbacks.length; i++) {
 			if (callbacks[i] instanceof WSPasswordCallback) {
@@ -258,23 +309,32 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean imp
 				if (pc.getIdentifer().equals(userId)) {
 					pc.setPassword(passwd);
 				}
-			}
-			else {
-				throw new UnsupportedCallbackException(callbacks[i], "Unrecognized Callback");
+			} else {
+				throw new UnsupportedCallbackException(callbacks[i],
+						"Unrecognized Callback");
 			}
 		}
 	}
 
 	public boolean sendMessageToBank() {
-		return getIWApplicationContext().getApplicationSettings().getBoolean(BANK_SEND_REGISTRATION, false);
+		return getIWApplicationContext().getApplicationSettings().getBoolean(
+				BANK_SEND_REGISTRATION, false);
 	}
-	
+
 	private LoginInfoHome getLoginInfoHome() {
 		try {
 			return (LoginInfoHome) IDOLookup.getHome(LoginInfo.class);
-		}
-		catch (IDOLookupException ile) {
+		} catch (IDOLookupException ile) {
 			throw new IBORuntimeException(ile);
 		}
 	}
+	
+	private UnsentCitizenAccountHome getUnsentCitizenAccountHome() {
+		try {
+			return (UnsentCitizenAccountHome) IDOLookup.getHome(UnsentCitizenAccount.class);
+		} catch (IDOLookupException ile) {
+			throw new IBORuntimeException(ile);
+		}
+	}
+
 }
