@@ -11,11 +11,7 @@ import is.idega.idegaweb.egov.citizen.business.landsbankinn.Time;
 import java.io.InputStream;
 
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
-import org.apache.commons.httpclient.methods.multipart.Part;
-import org.apache.commons.httpclient.methods.multipart.StringPart;
 
 import com.idega.util.CypherText;
 import com.idega.util.IWTimestamp;
