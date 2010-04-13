@@ -1,12 +1,18 @@
 package is.idega.idegaweb.egov.citizen.business.landsbankinn;
 
+
+import java.rmi.RemoteException;
 import com.idega.business.IBOService;
 
-/**
- * @author <a href="mailto:civilis@idega.com">Vytautas Čivilis</a>
- * @version 1.0
- */
 public interface SendLoginDataBusiness extends IBOService {
+	/**
+	 * @see is.idega.idegaweb.egov.citizen.business.landsbankinn.SendLoginDataBusinessBean#verifyBankAccount
+	 */
+	public boolean verifyBankAccount(String bankNumber, String accountType,
+			String accountNumber, String personalID) throws RemoteException;
 
-	public abstract void send(String xml_str);
+	/**
+	 * @see is.idega.idegaweb.egov.citizen.business.landsbankinn.SendLoginDataBusinessBean#send
+	 */
+	public void send(String xml_str) throws RemoteException;
 }

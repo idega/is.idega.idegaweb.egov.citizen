@@ -1,5 +1,6 @@
 package is.idega.idegaweb.egov.citizen;
 
+import is.idega.idegaweb.egov.citizen.business.landsbankinn.BankAccount;
 import is.idega.idegaweb.egov.citizen.business.landsbankinn.GeneralErrorMessage;
 import is.idega.idegaweb.egov.citizen.business.landsbankinn.LoginRequest;
 import is.idega.idegaweb.egov.citizen.business.landsbankinn.LoginResponse;
@@ -7,12 +8,15 @@ import is.idega.idegaweb.egov.citizen.business.landsbankinn.LogoutRequest;
 import is.idega.idegaweb.egov.citizen.business.landsbankinn.SendingInData;
 import is.idega.idegaweb.egov.citizen.business.landsbankinn.SendingInDataResponse;
 import is.idega.idegaweb.egov.citizen.business.landsbankinn.Time;
+import is.idega.idegaweb.egov.citizen.business.landsbankinn.VerifyBankAccount;
+import is.idega.idegaweb.egov.citizen.business.landsbankinn.VerifyBankAccountResponse;
 
 import java.io.InputStream;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
 
+import com.ibm.icu.text.NumberFormat;
 import com.idega.util.CypherText;
 import com.idega.util.IWTimestamp;
 import com.thoughtworks.xstream.XStream;
@@ -28,6 +32,8 @@ public class TestClient {
 	private XStream err_xstream;
 	private XStream send_data_xstream;
 	private XStream send_data_response_err_xstream;
+	private XStream verify_xstream;
+	private XStream verify_resp_xstream;
 
 	private static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 
@@ -39,9 +45,86 @@ public class TestClient {
 	 */
 	public static void main(String[] args) {
 		TestClient client = new TestClient();
-		client.sendPassword();
+		client.printOutXML();
 	}
 
+	private void printOutXML() {
+		String bankNumber = "115";
+		String ledger = "5";
+		String accountNumber = "1234";
+		NumberFormat f = NumberFormat.getIntegerInstance();
+		f.setGroupingUsed(false);
+		if (bankNumber.length() < 4) {
+			f.setMinimumIntegerDigits(4);
+			f.setMaximumIntegerDigits(4);
+
+			bankNumber = f.format(Integer.parseInt(bankNumber));
+		}
+		
+		if (ledger.length() < 2) {
+			f.setMinimumIntegerDigits(2);
+			f.setMaximumIntegerDigits(2);
+
+			ledger = f.format(Integer.parseInt(ledger));
+		}
+		
+		if (accountNumber.length() < 6) {
+			f.setMinimumIntegerDigits(6);
+			f.setMaximumIntegerDigits(6);
+
+			accountNumber = f.format(Integer.parseInt(accountNumber));
+		}
+
+		System.out.println(bankNumber + "-" + ledger + "-" + accountNumber);
+		
+		
+		String session_id = login();
+
+		if (session_id == null) {
+			throw new RuntimeException("Session id couldn't be retrieved while logging in");
+		}
+
+		VerifyBankAccount verify = new VerifyBankAccount();
+		BankAccount account = new BankAccount();
+		account.setBank("0115");
+		account.setAccount_type("26");
+		account.setAccount_number("000156");
+		verify.setSession_id(session_id);
+		verify.setPersonal_id("6210779029");
+		verify.setBank_account(account);
+		
+		//String data = XML_HEADER + getVerifyBankAccountRequestXStream().toXML(verify);
+		//System.out.println(data);
+		
+		PostMethod response = sendXMLData(verify, getVerifyBankAccountRequestXStream());
+
+		InputStream respStream = null;
+		
+		String temp = null;
+		try {
+			temp = response.getResponseBodyAsString();
+			respStream = response.getResponseBodyAsStream();
+			VerifyBankAccountResponse resp = (VerifyBankAccountResponse) getVerifyBankAccountResponseXStream().fromXML(response.getResponseBodyAsStream());
+			//return resp.getSessionId();
+			System.out.println("sent = " + resp.getTime().getQueryDataAndTime());
+			System.out.println("response = " + resp.getTime().getReplyDataAndTime());
+			System.out.println("exists = " + resp.getAccountExists());
+		}
+		catch (BaseException e) {
+			e.printStackTrace();
+			System.out.println("error = " + temp);
+			handleResponseParseException(respStream, e);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+
+		}
+		finally {
+			response.releaseConnection();
+		}
+
+	}
+	
 	private void sendPassword() {
 		String login = "0610703899";
 
@@ -251,8 +334,8 @@ public class TestClient {
 	}
 
 	protected PostMethod sendXMLData(Object req, XStream xstream) {
-		//PostMethod post = new PostMethod("https://b2b.fbl.is/lib2b.dll?processXML");
-		PostMethod post = new PostMethod("https://b2b.fbl.is/test/lib2btest.dll?processXML");
+		PostMethod post = new PostMethod("https://b2b.fbl.is/lib2b.dll?processXML");
+		//PostMethod post = new PostMethod("https://b2b.fbl.is/test/lib2btest.dll?processXML");
 
 		try {
 			String data = XML_HEADER + xstream.toXML(req);
@@ -268,8 +351,8 @@ public class TestClient {
 
 			client.getHttpConnectionManager().getParams().setConnectionTimeout(5000);
 			
-			System.out.print("post = ");
-			post.getRequestEntity().writeRequest(System.out);
+			//System.out.print("post = ");
+			//post.getRequestEntity().writeRequest(System.out);
 			
 			client.executeMethod(post);
 
@@ -348,9 +431,9 @@ public class TestClient {
 			xstream.aliasField("lykilord", LoginRequest.class, LoginRequest.login_password_field);
 
 			xstream.useAttributeFor(LoginRequest.class, LoginRequest.xsd_field);
-			xstream.aliasAttribute(LoginRequest.class, LoginRequest.xsd_field, "xmlns:xsd");
+			xstream.aliasAttribute(LoginRequest.class, LoginRequest.xsd_field, "xmlns:xsi");
 			xstream.useAttributeFor(LoginRequest.class, LoginRequest.xsi_field);
-			xstream.aliasAttribute(LoginRequest.class, LoginRequest.xsi_field, "xmlns:xsi");
+			xstream.aliasAttribute(LoginRequest.class, LoginRequest.xsi_field, "xsi:noNamespaceSchemeLocation");
 			xstream.useAttributeFor(LoginRequest.class, LoginRequest.version_field);
 
 			login_xstream = xstream;
@@ -358,6 +441,48 @@ public class TestClient {
 
 		return login_xstream;
 	}
+
+	protected synchronized XStream getVerifyBankAccountRequestXStream() {
+		if (verify_xstream == null) {
+			XStream xstream = new XStream(new XppDriver(new XmlFriendlyReplacer("$", "_")));
+
+			xstream.alias("LI_Fyrirspurn_er_reikningur_til", VerifyBankAccount.class);
+			xstream.aliasField("seta", VerifyBankAccount.class, VerifyBankAccount.session_id_field);
+			xstream.aliasField("kennitala", VerifyBankAccount.class, VerifyBankAccount.personal_id_field);
+			xstream.aliasField("reikningur", VerifyBankAccount.class, VerifyBankAccount.bank_account_field);
+			xstream.aliasField("utibu", BankAccount.class, BankAccount.bank_field);
+			xstream.aliasField("hb", BankAccount.class, BankAccount.account_type_field);
+			xstream.aliasField("reikningsnr", BankAccount.class, BankAccount.account_number_field);
+
+			xstream.useAttributeFor(VerifyBankAccount.class, VerifyBankAccount.xsi_field);
+			xstream.aliasAttribute(VerifyBankAccount.class, VerifyBankAccount.xsi_field, "xmlns:xsi");
+			xstream.useAttributeFor(VerifyBankAccount.class, VerifyBankAccount.xsi_no_nmspc_field);
+			xstream.aliasAttribute(VerifyBankAccount.class, VerifyBankAccount.xsi_no_nmspc_field, "xsi:noNamespaceSchemeLocation");
+			xstream.useAttributeFor(VerifyBankAccount.class, VerifyBankAccount.version_field);
+
+			verify_xstream = xstream;
+		}
+
+		return verify_xstream;
+	}
+	
+	protected synchronized XStream getVerifyBankAccountResponseXStream() {
+		if (verify_resp_xstream == null || true) {
+			XStream xstream = new XStream(new XppDriver(new XmlFriendlyReplacer("$", "_")));
+
+			xstream.alias("LI_Fyrirspurn_er_reikningur_til_svar", VerifyBankAccountResponse.class);
+			xstream.aliasField("er_til", VerifyBankAccountResponse.class, VerifyBankAccountResponse.exists_field);
+			xstream.alias("timi", Time.class);
+			xstream.aliasField("timi", VerifyBankAccountResponse.class, VerifyBankAccountResponse.time_field);
+			xstream.aliasField("dags_mottekid", Time.class, Time.query_data_and_time_field);
+			xstream.aliasField("dags_svarad", Time.class, Time.reply_data_and_time_field);
+
+			verify_resp_xstream = xstream;
+		}
+
+		return verify_resp_xstream;
+	}
+
 
 	protected synchronized XStream getLogoutRequestXStream() {
 
@@ -371,7 +496,7 @@ public class TestClient {
 			xstream.useAttributeFor(LogoutRequest.class, LogoutRequest.xsi_field);
 			xstream.aliasAttribute(LogoutRequest.class, LogoutRequest.xsi_field, "xmlns:xsi");
 			xstream.useAttributeFor(LogoutRequest.class, LogoutRequest.xsi_no_nmspc_field);
-			xstream.aliasAttribute(LogoutRequest.class, LogoutRequest.xsi_no_nmspc_field, "xsi:noNamespaceSchemaLocationi");
+			xstream.aliasAttribute(LogoutRequest.class, LogoutRequest.xsi_no_nmspc_field, "xsi:noNamespaceSchemaLocation");
 			xstream.useAttributeFor(LogoutRequest.class, LogoutRequest.version_field);
 
 			logout_xstream = xstream;
@@ -416,8 +541,8 @@ public class TestClient {
 			login = ct.doDeCypher(login, ck);
 			pass = ct.doDeCypher(pass, ck);
 			
-			login = "L621077B2B";
-			pass = "L6192965";
+			//login = "L621077B2B";
+			//pass = "L6192965";
 
 			return new String[] { login, pass };
 	}

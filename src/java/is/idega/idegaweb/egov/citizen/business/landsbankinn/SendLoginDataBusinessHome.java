@@ -1,14 +1,11 @@
 package is.idega.idegaweb.egov.citizen.business.landsbankinn;
 
+
 import javax.ejb.CreateException;
-import com.idega.business.IBOHome;
 import java.rmi.RemoteException;
+import com.idega.business.IBOHome;
 
-/**
- * @author <a href="mailto:civilis@idega.com">Vytautas Čivilis</a>
- * @version 1.0
- */
 public interface SendLoginDataBusinessHome extends IBOHome {
-
-	public SendLoginDataBusiness create() throws CreateException, RemoteException;
+	public SendLoginDataBusiness create() throws CreateException,
+			RemoteException;
 }

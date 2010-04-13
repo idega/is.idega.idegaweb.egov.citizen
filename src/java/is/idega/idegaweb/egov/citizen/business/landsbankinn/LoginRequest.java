@@ -14,8 +14,8 @@ public class LoginRequest {
 	
 	private String login_name;
 	private String login_password;
-	private String xsd = "http://www.w3.org/2001/XMLSchema";
-	private String xsi = "http://www.w3.org/2001/XMLSchema-instance";
+	private String xsi = "https://b2b.fbl.is/schema/LI_Innskra.xsd";
+	private String xsd = "http://www.w3.org/2001/XMLSchema-instance";
 	private String version = "1.1";
 	
 	public String getLoginName() {
