@@ -141,7 +141,7 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 
 						send_data.send(xml);
 
-						System.out.println("xml = " + xml);
+						//System.out.println("xml = " + xml);
 						
 						try {
 							LoginInfo loginInfo = getLoginInfoHome()
@@ -263,7 +263,7 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 
 					send_data.send(xml);
 					
-					System.out.println("xml (forgotten) = " + xml);
+					//System.out.println("xml (forgotten) = " + xml);
 					
 					loginInfo.setCreationType(USER_CREATION_TYPE);
 					loginInfo.store();
