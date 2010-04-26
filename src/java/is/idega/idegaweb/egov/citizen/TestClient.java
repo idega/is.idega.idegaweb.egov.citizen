@@ -44,8 +44,33 @@ public class TestClient {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		TestClient client = new TestClient();
-		client.printOutXML();
+		IWTimestamp dateNow = new IWTimestamp();
+		dateNow.setAsDate();
+		
+		IWTimestamp currentDay = new IWTimestamp(new IWTimestamp().toSQLDateString());
+		
+		System.out.println("dateNow = " + dateNow.toString());
+		System.out.println("currentDay = " + currentDay.toString());
+		
+		IWTimestamp now = new IWTimestamp();
+		now.setAsTime();
+		now.setHour(16);
+		now.setMinute(11);
+		
+		IWTimestamp groupStamp = new IWTimestamp();
+		groupStamp.setAsTime();
+		groupStamp.setHour(16);
+		groupStamp.setMinute(10);
+
+		System.out.println("now = " + now.toString());
+		System.out.println("groupStamp = " + groupStamp.toString());
+
+		
+		boolean isOpen = dateNow.isLaterThan(currentDay) || (dateNow.isEqualTo(currentDay) && now.isLaterThan(groupStamp));
+
+		System.out.println("isOpen = " + isOpen);
+		//TestClient client = new TestClient();
+		//client.printOutXML();
 	}
 
 	private void printOutXML() {

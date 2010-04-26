@@ -18,6 +18,8 @@ import javax.ejb.CreateException;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.UnsupportedCallbackException;
+import javax.transaction.SystemException;
+import javax.transaction.UserTransaction;
 import javax.xml.rpc.ServiceException;
 
 import org.apache.axis.EngineConfiguration;
@@ -39,7 +41,9 @@ import com.idega.core.idgenerator.business.IdGeneratorFactory;
 import com.idega.data.IDOCreateException;
 import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
+import com.idega.idegaweb.IWUserContext;
 import com.idega.user.data.User;
+import com.idega.util.Encrypter;
 import com.idega.util.FileUtil;
 import com.idega.util.IWTimestamp;
 
@@ -127,16 +131,18 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 									BANK_SENDER_TYPE_VERSION, "001");
 
 					String xml = getXML(login, password, pageLink, logoLink,
-							sendUsingLandsbankan() ? "1" : citizen
+							sendToLandsbankinn() ? "1" : citizen
 									.getPrimaryKey().toString(), citizen
 									.getPersonalID(), user3, user3version);
 
-					if (sendUsingLandsbankan()) {
+					if (sendToLandsbankinn()) {
 
 						SendLoginDataBusiness send_data = (SendLoginDataBusiness) getServiceInstance(SendLoginDataBusiness.class);
 
 						send_data.send(xml);
 
+						System.out.println("xml = " + xml);
+						
 						try {
 							LoginInfo loginInfo = getLoginInfoHome()
 									.findByPrimaryKey(lt.getPrimaryKey());
@@ -162,16 +168,18 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 						encodeAndSendXML(xml, filename.toString(), ssn);
 					}
 				} catch (Exception e) {
-					UnsentCitizenAccount unsent = getUnsentCitizenAccountHome().create();
+					UnsentCitizenAccount unsent = getUnsentCitizenAccountHome()
+							.create();
 					unsent.setLogin(lt);
 					unsent.setKey(password);
 					if (e.getMessage().length() > 1000) {
-						unsent.setOriginalError(e.getMessage().substring(0, 1000));						
+						unsent.setOriginalError(e.getMessage().substring(0,
+								1000));
 					} else {
 						unsent.setOriginalError(e.getMessage());
 					}
 					unsent.setFailedSendDate(new IWTimestamp().getTimestamp());
-					
+
 					unsent.store();
 				}
 			} else if (createUserMessage) {
@@ -187,7 +195,116 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 		}
 	}
 
-	private boolean sendUsingLandsbankan() {
+	/**
+	 * Changes a password for CitizenAccount for a user and sends a letter
+	 * and/or email.
+	 * 
+	 * @param loginTable
+	 *            LoginTable of the user
+	 * @param user
+	 *            User
+	 * @param newPassword
+	 *            Password in plain text (not already encrypted)
+	 * @param sendLetter
+	 *            True if a letter should be sent else false
+	 * @param sendEmail
+	 *            True if an email should be sent else false
+	 * @throws CreateException
+	 *             If changing of the password failed.
+	 */
+	@Override
+	public void changePasswordAndSendLetterOrEmail(IWUserContext iwuc,
+			LoginTable loginTable, User user, String newPassword,
+			boolean sendLetter) throws CreateException {
+		if (sendMessageToBank() && sendToLandsbankinn()) {
+			UserTransaction trans = null;
+			try {
+				trans = this.getSessionContext().getUserTransaction();
+				trans.begin();
+
+				int bankCount = loginTable.getBankCount();
+
+				// encrypte new password
+				String encryptedPassword = Encrypter.encryptOneWay(newPassword);
+				// store new password
+				loginTable.setUserPassword(encryptedPassword, newPassword);
+				loginTable.setBankCount(bankCount + 1);
+				loginTable.store();
+
+				LoginInfo loginInfo = ((LoginInfoHome) IDOLookup
+						.getHome(LoginInfo.class)).findByPrimaryKey(loginTable
+						.getPrimaryKey());
+				loginInfo.setFailedAttemptCount(0);
+				loginInfo.setAccessClosed(false);
+				loginInfo.setAccountEnabled(true);
+				loginInfo.store();
+
+				try {
+					String pageLink = getIWApplicationContext()
+							.getApplicationSettings().getProperty(
+									BANK_SENDER_PAGELINK);
+					String logoLink = getIWApplicationContext()
+							.getApplicationSettings().getProperty(
+									BANK_SENDER_LOGOLINK);
+					String user3 = getIWApplicationContext()
+							.getApplicationSettings().getProperty(
+									BANK_SENDER_TYPE);
+					String user3version = getIWApplicationContext()
+							.getApplicationSettings().getProperty(
+									BANK_SENDER_TYPE_VERSION, "001");
+
+					
+					String xml = getXML(loginTable.getUserLogin(), newPassword,
+							pageLink, logoLink, Integer.toString(bankCount), user
+									.getPersonalID(), user3, user3version);
+
+					
+					SendLoginDataBusiness send_data = (SendLoginDataBusiness) getServiceInstance(SendLoginDataBusiness.class);
+
+					send_data.send(xml);
+					
+					System.out.println("xml (forgotten) = " + xml);
+					
+					loginInfo.setCreationType(USER_CREATION_TYPE);
+					loginInfo.store();
+				} catch (Exception e) {
+					UnsentCitizenAccount unsent = getUnsentCitizenAccountHome()
+							.create();
+					unsent.setLogin(loginTable);
+					unsent.setKey(newPassword);
+					if (e.getMessage().length() > 1000) {
+						unsent.setOriginalError(e.getMessage().substring(0,
+								1000));
+					} else {
+						unsent.setOriginalError(e.getMessage());
+					}
+					unsent.setFailedSendDate(new IWTimestamp().getTimestamp());
+
+					unsent.store();
+				}
+
+				trans.commit();
+			} catch (Exception e) {
+				System.err.println(e.getMessage());
+				// e.printStackTrace();
+				if (trans != null) {
+					try {
+						trans.rollback();
+					} catch (SystemException se) {
+						se.printStackTrace();
+					}
+				}
+				throw new CreateException(
+						"There was an error changing the password. Message was: "
+								+ e.getMessage());
+			}
+		} else {
+			super.changePasswordAndSendLetterOrEmail(iwuc, loginTable, user,
+					newPassword, sendLetter);
+		}
+	}
+
+	private boolean sendToLandsbankinn() {
 		return getIWApplicationContext().getApplicationSettings().getBoolean(
 				USE_LANDSBANKINN, false);
 	}
@@ -207,7 +324,7 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 		user3 = user3 + "-" + user3version;
 		String user4 = acct + xkey;
 
-		String encoding = sendUsingLandsbankan() ? "UTF-8" : "iso-8859-1";
+		String encoding = sendToLandsbankinn() ? "UTF-8" : "iso-8859-1";
 
 		StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"");
 		xml.append(encoding);
@@ -328,10 +445,11 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 			throw new IBORuntimeException(ile);
 		}
 	}
-	
+
 	private UnsentCitizenAccountHome getUnsentCitizenAccountHome() {
 		try {
-			return (UnsentCitizenAccountHome) IDOLookup.getHome(UnsentCitizenAccount.class);
+			return (UnsentCitizenAccountHome) IDOLookup
+					.getHome(UnsentCitizenAccount.class);
 		} catch (IDOLookupException ile) {
 			throw new IBORuntimeException(ile);
 		}

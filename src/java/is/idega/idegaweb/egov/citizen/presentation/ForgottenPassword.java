@@ -1,6 +1,7 @@
 package is.idega.idegaweb.egov.citizen.presentation;
 
 import is.idega.idegaweb.egov.citizen.business.CitizenAccountBusiness;
+import is.idega.idegaweb.egov.citizen.business.WSCitizenAccountBusiness;
 
 import java.rmi.RemoteException;
 import java.text.MessageFormat;
@@ -334,9 +335,9 @@ public class ForgottenPassword extends CitizenBlock {
 	 * @param iwc
 	 * @return a service bean CitizenAccountBusiness.
 	 */
-	private CitizenAccountBusiness getBusiness(IWContext iwc) {
+	private WSCitizenAccountBusiness getBusiness(IWContext iwc) {
 		try {
-			return (CitizenAccountBusiness) IBOLookup.getServiceInstance(iwc, CitizenAccountBusiness.class);
+			return (WSCitizenAccountBusiness) IBOLookup.getServiceInstance(iwc, WSCitizenAccountBusiness.class);
 		}
 		catch (IBOLookupException ile) {
 			throw new IBORuntimeException(ile);
