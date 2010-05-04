@@ -13,6 +13,7 @@ import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.rmi.RemoteException;
+import java.text.MessageFormat;
 
 import javax.ejb.CreateException;
 import javax.security.auth.callback.Callback;
@@ -41,6 +42,7 @@ import com.idega.core.idgenerator.business.IdGeneratorFactory;
 import com.idega.data.IDOCreateException;
 import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
+import com.idega.idegaweb.IWResourceBundle;
 import com.idega.idegaweb.IWUserContext;
 import com.idega.user.data.User;
 import com.idega.util.Encrypter;
@@ -141,8 +143,8 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 
 						send_data.send(xml);
 
-						//System.out.println("xml = " + xml);
-						
+						// System.out.println("xml = " + xml);
+
 						try {
 							LoginInfo loginInfo = getLoginInfoHome()
 									.findByPrimaryKey(lt.getPrimaryKey());
@@ -253,18 +255,16 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 							.getApplicationSettings().getProperty(
 									BANK_SENDER_TYPE_VERSION, "001");
 
-					
 					String xml = getXML(loginTable.getUserLogin(), newPassword,
-							pageLink, logoLink, Integer.toString(bankCount), user
-									.getPersonalID(), user3, user3version);
+							pageLink, logoLink, Integer.toString(bankCount),
+							user.getPersonalID(), user3, user3version);
 
-					
 					SendLoginDataBusiness send_data = (SendLoginDataBusiness) getServiceInstance(SendLoginDataBusiness.class);
 
 					send_data.send(xml);
-					
-					//System.out.println("xml (forgotten) = " + xml);
-					
+
+					// System.out.println("xml (forgotten) = " + xml);
+
 					loginInfo.setCreationType(USER_CREATION_TYPE);
 					loginInfo.store();
 				} catch (Exception e) {
@@ -453,6 +453,38 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 		} catch (IDOLookupException ile) {
 			throw new IBORuntimeException(ile);
 		}
+	}
+
+	public void sendLostPasswordMessage(User citizen, String login,
+			String password) throws RemoteException, CreateException {
+		String messageBody = this
+				.getAcceptMessageBody(citizen, login, password);
+		String messageSubject = this.getAcceptMessageSubject(citizen);
+
+		this.getMessageBusiness().createUserMessage(citizen, messageSubject,
+				messageBody, false);
+		
+		this.getMessageBusiness().createPasswordMessage(citizen, login, password);
+	}
+
+	protected String getAcceptMessageBody(User owner, String login,
+			String password) {
+		IWResourceBundle iwrb = this.getIWResourceBundleForUser(owner);
+
+		Object[] arguments = { owner.getName(), login, password,
+				getApplicationLoginURL() };
+		String body = iwrb
+				.getLocalizedString(
+						"lost.pass.body",
+						"Dear mr./ms./mrs. {0}\n\nYour can now login to the system with the following login information:\n\nUserName: {1}\nPassword: {2}\n\nYou can log on via: {3}.");
+		return MessageFormat.format(body, arguments);
+
+	}
+
+	public String getAcceptMessageSubject(User owner) {
+		IWResourceBundle iwrb = this.getIWResourceBundleForUser(owner);
+		return iwrb.getLocalizedString("lost.pass.subj",
+				"New password");
 	}
 
 }

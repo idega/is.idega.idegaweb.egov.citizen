@@ -1,6 +1,5 @@
 package is.idega.idegaweb.egov.citizen.presentation;
 
-import is.idega.idegaweb.egov.citizen.business.CitizenAccountBusiness;
 import is.idega.idegaweb.egov.citizen.business.WSCitizenAccountBusiness;
 
 import java.rmi.RemoteException;
@@ -25,10 +24,12 @@ import com.idega.core.contact.data.Email;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
+import com.idega.presentation.Span;
 import com.idega.presentation.text.Heading1;
 import com.idega.presentation.text.Link;
 import com.idega.presentation.text.Paragraph;
 import com.idega.presentation.text.Text;
+import com.idega.presentation.ui.CheckBox;
 import com.idega.presentation.ui.DropdownMenu;
 import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.Label;
@@ -71,6 +72,10 @@ public class ForgottenPassword extends CitizenBlock {
 	private final static String ACTION_VIEW_FORM = "action_view_form";
 	private final static String ACTION_FORM_SUBMIT = "action_form_submit";
 	private static final String hasAppliedForPsw = "has_applied_before";
+	
+	protected final static String SNAIL_MAIL_KEY = "snail_mail";
+	protected final static String SNAIL_MAIL_DEFAULT = "Send password using ordinary mail";
+
 
 	private IWResourceBundle iwrb;
 	private ICPage iPage;
@@ -78,6 +83,8 @@ public class ForgottenPassword extends CitizenBlock {
 
 	private boolean iForwardToURL = false;
 	private Map iCommuneMap;
+
+	private boolean showSendSnailMailChooser = false;
 
 	@Override
 	public void present(IWContext iwc) {
@@ -117,6 +124,8 @@ public class ForgottenPassword extends CitizenBlock {
 			return;
 		}
 
+		boolean sendSnailMail = iwc.getParameter(SNAIL_MAIL_KEY) != null && iwc.getParameter(SNAIL_MAIL_KEY).length() > 0;
+		
 		String ssn = iwc.getParameter(SSN_KEY);
 
 		boolean hasErrors = false;
@@ -177,9 +186,11 @@ public class ForgottenPassword extends CitizenBlock {
 			}
 			else if (LoginDBHandler.hasLoggedIn(loginTable) && restrictLoginAccess) {
 				String newPassword = createNewPassword();
-				CitizenAccountBusiness business = getBusiness(iwc);
 				try {
-					business.changePasswordAndSendLetterOrEmail(iwc, loginTable, user, newPassword, false);
+					getBusiness(iwc).changePasswordAndSendLetterOrEmail(iwc, loginTable, user, newPassword, false);
+					if (sendSnailMail) {
+						getBusiness(iwc).sendLostPasswordMessage(user, loginTable.getUserLogin(), newPassword);
+					}
 				}
 				catch (RemoteException re) {
 					throw new IBORuntimeException(re);
@@ -272,6 +283,10 @@ public class ForgottenPassword extends CitizenBlock {
 		input.setLength(10);
 		input.keepStatusOnAction(true);
 
+		CheckBox snailMail = new CheckBox(SNAIL_MAIL_KEY);
+		snailMail.setStyleClass("checkbox");
+		snailMail.keepStatusOnAction(true);
+		
 		if (this.iCommuneMap != null) {
 			DropdownMenu communes = new DropdownMenu(COMMUNE_KEY);
 			Iterator iter = this.iCommuneMap.keySet().iterator();
@@ -297,10 +312,23 @@ public class ForgottenPassword extends CitizenBlock {
 		formItem.add(input);
 		section.add(formItem);
 
+		if (isSetToShowSendSnailMailChooser()) {
+			formItem = new Layer(Layer.DIV);
+			formItem.setStyleClass("formItem");
+			formItem.setStyleClass("radioButtonItem");
+			formItem.setID("snail_mail");
+			snailMail.setStyleClass("checkbox");
+			label = new Label(snailMail);
+			label.add(new Span(new Text(this.iwrb.getLocalizedString(SNAIL_MAIL_KEY, SNAIL_MAIL_DEFAULT))));
+			formItem.add(snailMail);
+			formItem.add(label);
+			section.add(formItem);
+		}
+
 		Layer clearLayer = new Layer(Layer.DIV);
 		clearLayer.setStyleClass("Clear");
 		section.add(clearLayer);
-
+		
 		Layer buttonLayer = new Layer(Layer.DIV);
 		buttonLayer.setStyleClass("buttonLayer");
 		contents.add(buttonLayer);
@@ -367,5 +395,13 @@ public class ForgottenPassword extends CitizenBlock {
 		}
 		this.iCommuneMap.put(name, URL);
 		this.iForwardToURL = true;
+	}
+	
+	public boolean isSetToShowSendSnailMailChooser() {
+		return showSendSnailMailChooser;
+	}
+
+	public void setToShowSendSnailMailChooser(boolean showSendSnailMailChooser) {
+		this.showSendSnailMailChooser = showSendSnailMailChooser;
 	}
 }
