@@ -16,7 +16,6 @@ import java.io.InputStream;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
 
-import com.ibm.icu.text.NumberFormat;
 import com.idega.util.CypherText;
 import com.idega.util.IWTimestamp;
 import com.thoughtworks.xstream.XStream;
@@ -73,7 +72,7 @@ public class TestClient {
 		//client.printOutXML();
 	}
 
-	private void printOutXML() {
+	/*private void printOutXML() {
 		String bankNumber = "115";
 		String ledger = "5";
 		String accountNumber = "1234";
@@ -148,9 +147,9 @@ public class TestClient {
 			response.releaseConnection();
 		}
 
-	}
+	}*/
 	
-	private void sendPassword() {
+	/*private void sendPassword() {
 		String login = "0610703899";
 
 		String password = "lykilordid";
@@ -170,9 +169,9 @@ public class TestClient {
 			e.printStackTrace();
 		}
 
-	}
+	}*/
 	
-	private String getXML(String login, String password, String pageLink,
+	/*private String getXML(String login, String password, String pageLink,
 			String logo, String xkey, String user1, String user3,
 			String user3version) {
 
@@ -233,7 +232,7 @@ public class TestClient {
 		xml.append("</XML-S>");
 
 		return xml.toString();
-	}
+	}*/
 
 	public void send(String xml_str) {
 
