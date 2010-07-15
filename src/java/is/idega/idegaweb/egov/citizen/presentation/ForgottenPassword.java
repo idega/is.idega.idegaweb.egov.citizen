@@ -1,6 +1,7 @@
 package is.idega.idegaweb.egov.citizen.presentation;
 
 import is.idega.idegaweb.egov.citizen.business.WSCitizenAccountBusiness;
+import is.idega.idegaweb.egov.citizen.business.WSCitizenAccountBusinessBean;
 
 import java.rmi.RemoteException;
 import java.text.MessageFormat;
@@ -179,31 +180,43 @@ public class ForgottenPassword extends CitizenBlock {
 				// No email found...
 			}
 
+			boolean sendMessageToBank = getIWApplicationContext().getApplicationSettings().getBoolean(WSCitizenAccountBusinessBean.BANK_SEND_REGISTRATION, false);
+			
 			LoginTable loginTable = LoginDBHandler.getUserLogin(user);
 			if (loginTable == null) {
 				errors.add(this.iwrb.getLocalizedString("no_login_found_for_user", "No login was found for the user with the personal ID you entered."));
 				hasErrors = true;
 			}
-			else if (LoginDBHandler.hasLoggedIn(loginTable) && restrictLoginAccess) {
-				String newPassword = createNewPassword();
-				try {
-					getBusiness(iwc).changePasswordAndSendLetterOrEmail(iwc, loginTable, user, newPassword, false);
-					if (sendSnailMail) {
-						getBusiness(iwc).sendLostPasswordMessage(user, loginTable.getUserLogin(), newPassword);
+			else {
+				boolean canSendMessage = false;
+				if (LoginDBHandler.hasLoggedIn(loginTable) && restrictLoginAccess) {
+					canSendMessage = true;
+				}
+				else if (!restrictLoginAccess || sendMessageToBank) {
+					canSendMessage = true;
+				}
+				
+				if (canSendMessage) {
+					String newPassword = createNewPassword();
+					try {
+						getBusiness(iwc).changePasswordAndSendLetterOrEmail(iwc, loginTable, user, newPassword, false);
+						if (sendSnailMail) {
+							getBusiness(iwc).sendLostPasswordMessage(user, loginTable.getUserLogin(), newPassword);
+						}
+					}
+					catch (RemoteException re) {
+						throw new IBORuntimeException(re);
+					}
+					catch (CreateException ce) {
+						ce.printStackTrace();
+						errors.add(this.iwrb.getLocalizedString("password_creation_failed", "Password creation failed."));
+						hasErrors = true;
 					}
 				}
-				catch (RemoteException re) {
-					throw new IBORuntimeException(re);
-				}
-				catch (CreateException ce) {
-					ce.printStackTrace();
-					errors.add(this.iwrb.getLocalizedString("password_creation_failed", "Password creation failed."));
+				else {
+					errors.add(this.iwrb.getLocalizedString("user_has_not_logged_in", "User with the personal ID you entered has never logged in."));
 					hasErrors = true;
 				}
-			}
-			else {
-				errors.add(this.iwrb.getLocalizedString("user_has_not_logged_in", "User with the personal ID you entered has never logged in."));
-				hasErrors = true;
 			}
 		}
 

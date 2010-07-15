@@ -55,7 +55,7 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 
 	private static final long serialVersionUID = -8824721140289363380L;
 
-	protected static final String BANK_SEND_REGISTRATION = "BANK_SEND_REGISTRATION";
+	public static final String BANK_SEND_REGISTRATION = "BANK_SEND_REGISTRATION";
 
 	protected static final String USE_LANDSBANKINN = "USE_LANDSBANKINN";
 
