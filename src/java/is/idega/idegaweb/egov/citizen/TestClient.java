@@ -1,15 +1,15 @@
 package is.idega.idegaweb.egov.citizen;
 
-import is.idega.idegaweb.egov.citizen.business.landsbankinn.BankAccount;
-import is.idega.idegaweb.egov.citizen.business.landsbankinn.GeneralErrorMessage;
-import is.idega.idegaweb.egov.citizen.business.landsbankinn.LoginRequest;
-import is.idega.idegaweb.egov.citizen.business.landsbankinn.LoginResponse;
-import is.idega.idegaweb.egov.citizen.business.landsbankinn.LogoutRequest;
-import is.idega.idegaweb.egov.citizen.business.landsbankinn.SendingInData;
-import is.idega.idegaweb.egov.citizen.business.landsbankinn.SendingInDataResponse;
-import is.idega.idegaweb.egov.citizen.business.landsbankinn.Time;
-import is.idega.idegaweb.egov.citizen.business.landsbankinn.VerifyBankAccount;
-import is.idega.idegaweb.egov.citizen.business.landsbankinn.VerifyBankAccountResponse;
+import is.idega.idegaweb.egov.citizen.wsclient.landsbankinn.BankAccount;
+import is.idega.idegaweb.egov.citizen.wsclient.landsbankinn.GeneralErrorMessage;
+import is.idega.idegaweb.egov.citizen.wsclient.landsbankinn.LoginRequest;
+import is.idega.idegaweb.egov.citizen.wsclient.landsbankinn.LoginResponse;
+import is.idega.idegaweb.egov.citizen.wsclient.landsbankinn.LogoutRequest;
+import is.idega.idegaweb.egov.citizen.wsclient.landsbankinn.SendingInData;
+import is.idega.idegaweb.egov.citizen.wsclient.landsbankinn.SendingInDataResponse;
+import is.idega.idegaweb.egov.citizen.wsclient.landsbankinn.Time;
+import is.idega.idegaweb.egov.citizen.wsclient.landsbankinn.VerifyBankAccount;
+import is.idega.idegaweb.egov.citizen.wsclient.landsbankinn.VerifyBankAccountResponse;
 
 import java.io.InputStream;
 

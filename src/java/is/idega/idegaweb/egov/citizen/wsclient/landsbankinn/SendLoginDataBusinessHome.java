@@ -1,4 +1,4 @@
-package is.idega.idegaweb.egov.citizen.business.landsbankinn;
+package is.idega.idegaweb.egov.citizen.wsclient.landsbankinn;
 
 
 import javax.ejb.CreateException;

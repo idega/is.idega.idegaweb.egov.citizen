@@ -1,13 +1,14 @@
 package is.idega.idegaweb.egov.citizen.business;
 
 import is.idega.idegaweb.egov.citizen.IWBundleStarter;
-import is.idega.idegaweb.egov.citizen.business.landsbankinn.SendLoginDataBusiness;
 import is.idega.idegaweb.egov.citizen.data.AccountApplication;
 import is.idega.idegaweb.egov.citizen.data.UnsentCitizenAccount;
 import is.idega.idegaweb.egov.citizen.data.UnsentCitizenAccountHome;
-import is.idega.idegaweb.egov.citizen.wsclient.BirtingakerfiWSLocator;
-import is.idega.idegaweb.egov.citizen.wsclient.BirtingakerfiWSSoap_PortType;
+import is.idega.idegaweb.egov.citizen.wsclient.islandsbanki.BirtingakerfiWSLocator;
+import is.idega.idegaweb.egov.citizen.wsclient.islandsbanki.BirtingakerfiWSSoap_PortType;
+import is.idega.idegaweb.egov.citizen.wsclient.landsbankinn.SendLoginDataBusiness;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
@@ -46,7 +47,6 @@ import com.idega.idegaweb.IWResourceBundle;
 import com.idega.idegaweb.IWUserContext;
 import com.idega.user.data.User;
 import com.idega.util.Encrypter;
-import com.idega.util.FileUtil;
 import com.idega.util.IWTimestamp;
 
 public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
@@ -381,7 +381,7 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 			StringBuffer file = new StringBuffer(this.getIWMainApplication()
 					.getBundle(IWBundleStarter.IW_BUNDLE_IDENTIFIER)
 					.getResourcesRealPath());
-			file.append(FileUtil.getFileSeparator());
+			file.append(File.separator);
 			// Do not change the name of this file because the stupid
 			// autodeployer will start it up otherwise.
 			file.append("deploy_client.wsdd");

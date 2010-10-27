@@ -5,9 +5,9 @@
  * by the Apache Axis 1.3 Oct 05, 2005 (05:23:37 EDT) WSDL2Java emitter.
  */
 
-package is.idega.idegaweb.egov.citizen.wsclient;
+package is.idega.idegaweb.egov.citizen.wsclient.islandsbanki;
 
-public class BirtingakerfiWSLocator extends org.apache.axis.client.Service implements is.idega.idegaweb.egov.citizen.wsclient.BirtingakerfiWS {
+public class BirtingakerfiWSLocator extends org.apache.axis.client.Service implements is.idega.idegaweb.egov.citizen.wsclient.islandsbanki.BirtingakerfiWS {
 
     public BirtingakerfiWSLocator() {
     }
@@ -39,7 +39,7 @@ public class BirtingakerfiWSLocator extends org.apache.axis.client.Service imple
         this.BirtingakerfiWSSoapWSDDServiceName = name;
     }
 
-    public is.idega.idegaweb.egov.citizen.wsclient.BirtingakerfiWSSoap_PortType getBirtingakerfiWSSoap() throws javax.xml.rpc.ServiceException {
+    public is.idega.idegaweb.egov.citizen.wsclient.islandsbanki.BirtingakerfiWSSoap_PortType getBirtingakerfiWSSoap() throws javax.xml.rpc.ServiceException {
        java.net.URL endpoint;
         try {
             endpoint = new java.net.URL(this.BirtingakerfiWSSoap_address);
@@ -50,9 +50,9 @@ public class BirtingakerfiWSLocator extends org.apache.axis.client.Service imple
         return getBirtingakerfiWSSoap(endpoint);
     }
 
-    public is.idega.idegaweb.egov.citizen.wsclient.BirtingakerfiWSSoap_PortType getBirtingakerfiWSSoap(java.net.URL portAddress) throws javax.xml.rpc.ServiceException {
+    public is.idega.idegaweb.egov.citizen.wsclient.islandsbanki.BirtingakerfiWSSoap_PortType getBirtingakerfiWSSoap(java.net.URL portAddress) throws javax.xml.rpc.ServiceException {
         try {
-            is.idega.idegaweb.egov.citizen.wsclient.BirtingakerfiWSSoap_BindingStub _stub = new is.idega.idegaweb.egov.citizen.wsclient.BirtingakerfiWSSoap_BindingStub(portAddress, this);
+            is.idega.idegaweb.egov.citizen.wsclient.islandsbanki.BirtingakerfiWSSoap_BindingStub _stub = new is.idega.idegaweb.egov.citizen.wsclient.islandsbanki.BirtingakerfiWSSoap_BindingStub(portAddress, this);
             _stub.setPortName(getBirtingakerfiWSSoapWSDDServiceName());
             return _stub;
         }
@@ -72,8 +72,8 @@ public class BirtingakerfiWSLocator extends org.apache.axis.client.Service imple
      */
     public java.rmi.Remote getPort(Class serviceEndpointInterface) throws javax.xml.rpc.ServiceException {
         try {
-            if (is.idega.idegaweb.egov.citizen.wsclient.BirtingakerfiWSSoap_PortType.class.isAssignableFrom(serviceEndpointInterface)) {
-                is.idega.idegaweb.egov.citizen.wsclient.BirtingakerfiWSSoap_BindingStub _stub = new is.idega.idegaweb.egov.citizen.wsclient.BirtingakerfiWSSoap_BindingStub(new java.net.URL(this.BirtingakerfiWSSoap_address), this);
+            if (is.idega.idegaweb.egov.citizen.wsclient.islandsbanki.BirtingakerfiWSSoap_PortType.class.isAssignableFrom(serviceEndpointInterface)) {
+                is.idega.idegaweb.egov.citizen.wsclient.islandsbanki.BirtingakerfiWSSoap_BindingStub _stub = new is.idega.idegaweb.egov.citizen.wsclient.islandsbanki.BirtingakerfiWSSoap_BindingStub(new java.net.URL(this.BirtingakerfiWSSoap_address), this);
                 _stub.setPortName(getBirtingakerfiWSSoapWSDDServiceName());
                 return _stub;
             }

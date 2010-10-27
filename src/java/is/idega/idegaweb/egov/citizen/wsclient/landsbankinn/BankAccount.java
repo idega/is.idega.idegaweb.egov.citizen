@@ -1,4 +1,4 @@
-package is.idega.idegaweb.egov.citizen.business.landsbankinn;
+package is.idega.idegaweb.egov.citizen.wsclient.landsbankinn;
 
 public class BankAccount {
 	public static final String bank_field = "bank";

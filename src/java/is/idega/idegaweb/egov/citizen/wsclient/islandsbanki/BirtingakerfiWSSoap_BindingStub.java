@@ -5,9 +5,9 @@
  * by the Apache Axis 1.3 Oct 05, 2005 (05:23:37 EDT) WSDL2Java emitter.
  */
 
-package is.idega.idegaweb.egov.citizen.wsclient;
+package is.idega.idegaweb.egov.citizen.wsclient.islandsbanki;
 
-public class BirtingakerfiWSSoap_BindingStub extends org.apache.axis.client.Stub implements is.idega.idegaweb.egov.citizen.wsclient.BirtingakerfiWSSoap_PortType {
+public class BirtingakerfiWSSoap_BindingStub extends org.apache.axis.client.Stub implements is.idega.idegaweb.egov.citizen.wsclient.islandsbanki.BirtingakerfiWSSoap_PortType {
     //private java.util.Vector cachedSerClasses = new java.util.Vector();
     //private java.util.Vector cachedSerQNames = new java.util.Vector();
     //private java.util.Vector cachedSerFactories = new java.util.Vector();
