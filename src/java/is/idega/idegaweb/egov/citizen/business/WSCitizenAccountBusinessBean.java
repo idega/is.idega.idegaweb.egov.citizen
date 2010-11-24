@@ -11,10 +11,12 @@ import is.idega.idegaweb.egov.citizen.wsclient.landsbankinn.SendLoginDataBusines
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.text.MessageFormat;
+import java.util.Locale;
 
 import javax.ejb.CreateException;
 import javax.security.auth.callback.Callback;
@@ -43,10 +45,13 @@ import com.idega.core.idgenerator.business.IdGeneratorFactory;
 import com.idega.data.IDOCreateException;
 import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
+import com.idega.idegaweb.IWApplicationContext;
+import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.idegaweb.IWUserContext;
 import com.idega.user.data.User;
 import com.idega.util.Encrypter;
+import com.idega.util.FileUtil;
 import com.idega.util.IWTimestamp;
 
 public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
@@ -378,16 +383,13 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 				.getProperty(BANK_SENDER_USER_ID);
 
 		try {
-			StringBuffer file = new StringBuffer(this.getIWMainApplication()
-					.getBundle(IWBundleStarter.IW_BUNDLE_IDENTIFIER)
-					.getResourcesRealPath());
-			file.append(File.separator);
-			// Do not change the name of this file because the stupid
-			// autodeployer will start it up otherwise.
-			file.append("deploy_client.wsdd");
+			File file  = FileUtil.getFileFromWorkspace(getResourceRealPath(
+						getBundle(getIWApplicationContext()),
+						null)
+						+ "deploy_client.wsdd");
 
 			EngineConfiguration config = new FileProvider(new FileInputStream(
-					file.toString()));
+					file));
 			BirtingakerfiWSLocator locator = new BirtingakerfiWSLocator(config);
 			BirtingakerfiWSSoap_PortType port = locator
 					.getBirtingakerfiWSSoap(new URL(SERVICE_URL));
@@ -410,9 +412,24 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 			e.printStackTrace();
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
+	private IWBundle getBundle(IWApplicationContext iwac) {
+		return iwac.getIWMainApplication().getBundle(getBundleIdentifier());
+	}
+
+	protected String getResourceRealPath(IWBundle iwb, Locale locale) {
+		if (locale != null) {
+			return iwb.getResourcesRealPath(locale) + "/";
+		} else {
+			return iwb.getResourcesRealPath() + "/";
+		}
+	}
+
+	
 	public void handle(Callback[] callbacks)
 			throws UnsupportedCallbackException {
 		String userId = getIWApplicationContext().getApplicationSettings()
