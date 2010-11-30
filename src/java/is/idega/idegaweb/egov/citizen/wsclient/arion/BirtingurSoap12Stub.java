@@ -1,5 +1,5 @@
 /**
- * BirtingurSoap_BindingStub.java
+ * BirtingurSoap12Stub.java
  *
  * This file was auto-generated from WSDL
  * by the Apache Axis 1.4 Apr 22, 2006 (06:55:48 PDT) WSDL2Java emitter.
@@ -7,7 +7,7 @@
 
 package is.idega.idegaweb.egov.citizen.wsclient.arion;
 
-public class BirtingurSoap_BindingStub extends org.apache.axis.client.Stub implements is.idega.idegaweb.egov.citizen.wsclient.arion.BirtingurSoap_PortType {
+public class BirtingurSoap12Stub extends org.apache.axis.client.Stub implements is.idega.idegaweb.egov.citizen.wsclient.arion.BirtingurSoap {
     private java.util.Vector cachedSerClasses = new java.util.Vector();
     private java.util.Vector cachedSerQNames = new java.util.Vector();
     private java.util.Vector cachedSerFactories = new java.util.Vector();
@@ -40,16 +40,16 @@ public class BirtingurSoap_BindingStub extends org.apache.axis.client.Stub imple
 
     }
 
-    public BirtingurSoap_BindingStub() throws org.apache.axis.AxisFault {
+    public BirtingurSoap12Stub() throws org.apache.axis.AxisFault {
          this(null);
     }
 
-    public BirtingurSoap_BindingStub(java.net.URL endpointURL, javax.xml.rpc.Service service) throws org.apache.axis.AxisFault {
+    public BirtingurSoap12Stub(java.net.URL endpointURL, javax.xml.rpc.Service service) throws org.apache.axis.AxisFault {
          this(service);
          super.cachedEndpoint = endpointURL;
     }
 
-    public BirtingurSoap_BindingStub(javax.xml.rpc.Service service) throws org.apache.axis.AxisFault {
+    public BirtingurSoap12Stub(javax.xml.rpc.Service service) throws org.apache.axis.AxisFault {
         if (service == null) {
             super.service = new org.apache.axis.client.Service();
         } else {
@@ -153,7 +153,7 @@ public class BirtingurSoap_BindingStub extends org.apache.axis.client.Stub imple
         _call.setEncodingStyle(null);
         _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
         _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
-        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP12_CONSTANTS);
         _call.setOperationName(new javax.xml.namespace.QName("http://www.kbbanki.is/Netbanki/Services/Birtingur", "SendDocument"));
 
         setRequestHeaders(_call);

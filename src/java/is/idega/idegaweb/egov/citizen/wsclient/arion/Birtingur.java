@@ -15,7 +15,12 @@ public interface Birtingur extends javax.xml.rpc.Service {
  */
     public java.lang.String getBirtingurSoapAddress();
 
-    public is.idega.idegaweb.egov.citizen.wsclient.arion.BirtingurSoap_PortType getBirtingurSoap() throws javax.xml.rpc.ServiceException;
+    public is.idega.idegaweb.egov.citizen.wsclient.arion.BirtingurSoap getBirtingurSoap() throws javax.xml.rpc.ServiceException;
 
-    public is.idega.idegaweb.egov.citizen.wsclient.arion.BirtingurSoap_PortType getBirtingurSoap(java.net.URL portAddress) throws javax.xml.rpc.ServiceException;
+    public is.idega.idegaweb.egov.citizen.wsclient.arion.BirtingurSoap getBirtingurSoap(java.net.URL portAddress) throws javax.xml.rpc.ServiceException;
+    public java.lang.String getBirtingurSoap12Address();
+
+    public is.idega.idegaweb.egov.citizen.wsclient.arion.BirtingurSoap getBirtingurSoap12() throws javax.xml.rpc.ServiceException;
+
+    public is.idega.idegaweb.egov.citizen.wsclient.arion.BirtingurSoap getBirtingurSoap12(java.net.URL portAddress) throws javax.xml.rpc.ServiceException;
 }

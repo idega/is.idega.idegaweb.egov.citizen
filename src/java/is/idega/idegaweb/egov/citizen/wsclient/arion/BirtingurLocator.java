@@ -27,7 +27,7 @@ public class BirtingurLocator extends org.apache.axis.client.Service implements 
     }
 
     // Use to get a proxy class for BirtingurSoap
-    private java.lang.String BirtingurSoap_address = "https://www.kbbanki.is/Netbanki/StandardServices/Birtingur.asmx";
+    private java.lang.String BirtingurSoap_address = "https://www.arionbanki.is/Netbanki4/StandardServices/Birtingur.asmx";
 
     public java.lang.String getBirtingurSoapAddress() {
         return BirtingurSoap_address;
@@ -44,7 +44,7 @@ public class BirtingurLocator extends org.apache.axis.client.Service implements 
         BirtingurSoapWSDDServiceName = name;
     }
 
-    public is.idega.idegaweb.egov.citizen.wsclient.arion.BirtingurSoap_PortType getBirtingurSoap() throws javax.xml.rpc.ServiceException {
+    public is.idega.idegaweb.egov.citizen.wsclient.arion.BirtingurSoap getBirtingurSoap() throws javax.xml.rpc.ServiceException {
        java.net.URL endpoint;
         try {
             endpoint = new java.net.URL(BirtingurSoap_address);
@@ -55,9 +55,9 @@ public class BirtingurLocator extends org.apache.axis.client.Service implements 
         return getBirtingurSoap(endpoint);
     }
 
-    public is.idega.idegaweb.egov.citizen.wsclient.arion.BirtingurSoap_PortType getBirtingurSoap(java.net.URL portAddress) throws javax.xml.rpc.ServiceException {
+    public is.idega.idegaweb.egov.citizen.wsclient.arion.BirtingurSoap getBirtingurSoap(java.net.URL portAddress) throws javax.xml.rpc.ServiceException {
         try {
-            is.idega.idegaweb.egov.citizen.wsclient.arion.BirtingurSoap_BindingStub _stub = new is.idega.idegaweb.egov.citizen.wsclient.arion.BirtingurSoap_BindingStub(portAddress, this);
+        	is.idega.idegaweb.egov.citizen.wsclient.arion.BirtingurSoapStub _stub = new is.idega.idegaweb.egov.citizen.wsclient.arion.BirtingurSoapStub(portAddress, this);
             _stub.setPortName(getBirtingurSoapWSDDServiceName());
             return _stub;
         }
@@ -70,16 +70,68 @@ public class BirtingurLocator extends org.apache.axis.client.Service implements 
         BirtingurSoap_address = address;
     }
 
+
+    // Use to get a proxy class for BirtingurSoap12
+    private java.lang.String BirtingurSoap12_address = "https://www.arionbanki.is/Netbanki4/StandardServices/Birtingur.asmx";
+
+    public java.lang.String getBirtingurSoap12Address() {
+        return BirtingurSoap12_address;
+    }
+
+    // The WSDD service name defaults to the port name.
+    private java.lang.String BirtingurSoap12WSDDServiceName = "BirtingurSoap12";
+
+    public java.lang.String getBirtingurSoap12WSDDServiceName() {
+        return BirtingurSoap12WSDDServiceName;
+    }
+
+    public void setBirtingurSoap12WSDDServiceName(java.lang.String name) {
+        BirtingurSoap12WSDDServiceName = name;
+    }
+
+    public is.idega.idegaweb.egov.citizen.wsclient.arion.BirtingurSoap getBirtingurSoap12() throws javax.xml.rpc.ServiceException {
+       java.net.URL endpoint;
+        try {
+            endpoint = new java.net.URL(BirtingurSoap12_address);
+        }
+        catch (java.net.MalformedURLException e) {
+            throw new javax.xml.rpc.ServiceException(e);
+        }
+        return getBirtingurSoap12(endpoint);
+    }
+
+    public is.idega.idegaweb.egov.citizen.wsclient.arion.BirtingurSoap getBirtingurSoap12(java.net.URL portAddress) throws javax.xml.rpc.ServiceException {
+        try {
+        	is.idega.idegaweb.egov.citizen.wsclient.arion.BirtingurSoap12Stub _stub = new is.idega.idegaweb.egov.citizen.wsclient.arion.BirtingurSoap12Stub(portAddress, this);
+            _stub.setPortName(getBirtingurSoap12WSDDServiceName());
+            return _stub;
+        }
+        catch (org.apache.axis.AxisFault e) {
+            return null;
+        }
+    }
+
+    public void setBirtingurSoap12EndpointAddress(java.lang.String address) {
+        BirtingurSoap12_address = address;
+    }
+
     /**
      * For the given interface, get the stub implementation.
      * If this service has no port for the given interface,
      * then ServiceException is thrown.
+     * This service has multiple ports for a given interface;
+     * the proxy implementation returned may be indeterminate.
      */
     public java.rmi.Remote getPort(Class serviceEndpointInterface) throws javax.xml.rpc.ServiceException {
         try {
-            if (is.idega.idegaweb.egov.citizen.wsclient.arion.BirtingurSoap_PortType.class.isAssignableFrom(serviceEndpointInterface)) {
-                is.idega.idegaweb.egov.citizen.wsclient.arion.BirtingurSoap_BindingStub _stub = new is.idega.idegaweb.egov.citizen.wsclient.arion.BirtingurSoap_BindingStub(new java.net.URL(BirtingurSoap_address), this);
+            if (is.idega.idegaweb.egov.citizen.wsclient.arion.BirtingurSoap.class.isAssignableFrom(serviceEndpointInterface)) {
+            	is.idega.idegaweb.egov.citizen.wsclient.arion.BirtingurSoapStub _stub = new is.idega.idegaweb.egov.citizen.wsclient.arion.BirtingurSoapStub(new java.net.URL(BirtingurSoap_address), this);
                 _stub.setPortName(getBirtingurSoapWSDDServiceName());
+                return _stub;
+            }
+            if (is.idega.idegaweb.egov.citizen.wsclient.arion.BirtingurSoap.class.isAssignableFrom(serviceEndpointInterface)) {
+            	is.idega.idegaweb.egov.citizen.wsclient.arion.BirtingurSoap12Stub _stub = new is.idega.idegaweb.egov.citizen.wsclient.arion.BirtingurSoap12Stub(new java.net.URL(BirtingurSoap12_address), this);
+                _stub.setPortName(getBirtingurSoap12WSDDServiceName());
                 return _stub;
             }
         }
@@ -102,6 +154,9 @@ public class BirtingurLocator extends org.apache.axis.client.Service implements 
         if ("BirtingurSoap".equals(inputPortName)) {
             return getBirtingurSoap();
         }
+        else if ("BirtingurSoap12".equals(inputPortName)) {
+            return getBirtingurSoap12();
+        }
         else  {
             java.rmi.Remote _stub = getPort(serviceEndpointInterface);
             ((org.apache.axis.client.Stub) _stub).setPortName(portName);
@@ -119,6 +174,7 @@ public class BirtingurLocator extends org.apache.axis.client.Service implements 
         if (ports == null) {
             ports = new java.util.HashSet();
             ports.add(new javax.xml.namespace.QName("http://www.kbbanki.is/Netbanki/Services/Birtingur", "BirtingurSoap"));
+            ports.add(new javax.xml.namespace.QName("http://www.kbbanki.is/Netbanki/Services/Birtingur", "BirtingurSoap12"));
         }
         return ports.iterator();
     }
@@ -130,6 +186,10 @@ public class BirtingurLocator extends org.apache.axis.client.Service implements 
         
 if ("BirtingurSoap".equals(portName)) {
             setBirtingurSoapEndpointAddress(address);
+        }
+        else 
+if ("BirtingurSoap12".equals(portName)) {
+            setBirtingurSoap12EndpointAddress(address);
         }
         else 
 { // Unknown Port Name
