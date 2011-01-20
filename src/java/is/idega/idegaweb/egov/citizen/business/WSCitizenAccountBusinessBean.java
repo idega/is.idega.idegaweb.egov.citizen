@@ -478,8 +478,8 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 				.getAcceptMessageBody(citizen, login, password);
 		String messageSubject = this.getAcceptMessageSubject(citizen);
 
-		this.getMessageBusiness().createUserMessage(citizen, messageSubject,
-				messageBody, false);
+		this.getMessageBusiness().createUserMessage(null, citizen, null, null, messageSubject,
+				messageBody, messageBody, false, null, false, false);
 		
 		this.getMessageBusiness().createPasswordMessage(citizen, login, password);
 	}
