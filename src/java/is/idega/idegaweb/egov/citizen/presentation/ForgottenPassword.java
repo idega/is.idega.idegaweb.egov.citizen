@@ -180,7 +180,7 @@ public class ForgottenPassword extends CitizenBlock {
 				// No email found...
 			}
 
-			boolean sendMessageToBank = getIWApplicationContext().getApplicationSettings().getBoolean(WSCitizenAccountBusinessBean.BANK_SEND_REGISTRATION, false);
+			boolean sendMessageToBank = isSendMessageToBank(user);
 			
 			LoginTable loginTable = LoginDBHandler.getUserLogin(user);
 			if (loginTable == null) {
@@ -354,6 +354,10 @@ public class ForgottenPassword extends CitizenBlock {
 		buttonLayer.add(send);
 
 		add(form);
+	}
+	
+	protected boolean isSendMessageToBank(User user) {
+		return getIWApplicationContext().getApplicationSettings().getBoolean(WSCitizenAccountBusinessBean.BANK_SEND_REGISTRATION, false);
 	}
 
 	/**
