@@ -149,6 +149,8 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	private boolean showGenderChooser = false;
 	
 	private boolean showGenderChooserReadOnly = false;
+	
+	private boolean showNameAndPersonalID = false;
 
 	public CitizenAccountPreferences() {
 	}
@@ -322,12 +324,13 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		removeImage.setStyleClass("checkbox");
 		removeImage.keepStatusOnAction(true);
 
-		
-		TextInput name = new TextInput(PARAMETER_NAME, user.getName());
-		createFormItem(this.iwrb.getLocalizedString("name", "Name"), name, section);
-		
-		TextInput ssn = new TextInput(PARAMETER_SSN, user.getPersonalID());
-		createFormItem(this.iwrb.getLocalizedString("social_security_number", "Social security number"), ssn, section);
+		if (isSetToShowNameAndPersonalID()) {
+			TextInput name = new TextInput(PARAMETER_NAME, user.getName());
+			createFormItem(this.iwrb.getLocalizedString("name", "Name"), name, section);
+			
+			TextInput ssn = new TextInput(PARAMETER_SSN, user.getPersonalID());
+			createFormItem(this.iwrb.getLocalizedString("social_security_number", "Social security number"), ssn, section);
+		}
 		
 		Layer layer = new Layer(Layer.DIV);
 		layer.setID("citizenImage");
@@ -642,14 +645,16 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		if (ListUtil.isEmpty(errors)) {
 			//	No errors found
 			
-			//	Name
-			user.setName(name);
+			if (isSetToShowNameAndPersonalID()) {
+				//	Name
+				user.setName(name);
+				
+				//	SSN
+				user.setPersonalID(removeSSN ? null : ssn);
+			}
 			
-			//	SSN
-			user.setPersonalID(removeSSN ? null : ssn);
-	
 			//	Gender
-			if(updateGender){
+			if (updateGender){
 				user.setGender(genderId);
 			}
 			
@@ -797,6 +802,10 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		return showGenderChooser;
 	}
 
+	private boolean isSetToShowNameAndPersonalID() {
+		return showNameAndPersonalID;
+	}
+
 	/**
 	 * @param showPreferredLocaleChooser
 	 *          The showPreferredLocaleChooser to set.
@@ -819,6 +828,10 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	 */
 	public void setToShowGenderChooser(boolean showGenderChooser) {
 		this.showGenderChooser = showGenderChooser;
+	}
+	
+	public void setToShowNameAndPersonalID(boolean showNameAndPersonalID) {
+		this.showNameAndPersonalID = showNameAndPersonalID;
 	}
 	
 	public void setToShowGenderChooserReadOnly(boolean showGenderChooserReadOnly) {
