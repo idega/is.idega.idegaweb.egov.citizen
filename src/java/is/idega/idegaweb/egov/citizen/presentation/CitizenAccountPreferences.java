@@ -592,7 +592,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		boolean removeSSN = StringUtil.isEmpty(ssn);
 		boolean updateGender = !StringUtil.isEmpty(gender);
 		
-		if (StringUtil.isEmpty(name)) {
+		if (isSetToShowNameAndPersonalID() && StringUtil.isEmpty(name)) {
 			errors.add(this.iwrb.getLocalizedString("invalid_name", "Name is invalid"));
 		}
 		
