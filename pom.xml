@@ -63,13 +63,13 @@
       <type>jar</type>
     </dependency>
     <dependency>
-      <groupId>axis</groupId>
+      <groupId>org.apache.axis</groupId>
       <artifactId>axis</artifactId>
       <version>${axis-axis-version}</version>
       <type>jar</type>
     </dependency>
     <dependency>
-      <groupId>axis</groupId>
+      <groupId>org.apache.axis</groupId>
       <artifactId>axis-jaxrpc</artifactId>
       <version>${axis-axis-jaxrpc-version}</version>
       <type>jar</type>
