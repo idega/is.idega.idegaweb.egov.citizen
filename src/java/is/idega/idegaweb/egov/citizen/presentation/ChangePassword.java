@@ -262,76 +262,85 @@ public class ChangePassword extends CitizenBlock {
 	private void updatePassword(IWContext iwc) {
 		LoginTable loginTable = LoginDBHandler
 				.getUserLogin(((Integer) this.user.getPrimaryKey()).intValue());
-		String login = loginTable.getUserLogin();
-		String currentPassword = iwc.getParameter(PARAMETER_CURRENT_PASSWORD);
-		String newPassword1 = iwc.getParameter(PARAMETER_NEW_PASSWORD);
-		String newPassword2 = iwc.getParameter(PARAMETER_NEW_PASSWORD_REPEATED);
 
 		boolean hasErrors = false;
 		Collection<String> errors = new ArrayList<String>();
 
-		if (!iUseSessionUser) {
-			if (!LoginDBHandler.verifyPassword(login, currentPassword)) {
-				hasErrors = true;
-				errors.add(this.iwrb.getLocalizedString(KEY_PASSWORD_INVALID,
-						DEFAULT_PASSWORD_INVALID));
-			}
-		}
-
-		// Validate new password
-		if (!newPassword1.equals("") || !newPassword2.equals("")) {
-			if (newPassword1.equals("")) {
-				hasErrors = true;
-				errors.add(this.iwrb.getLocalizedString(KEY_PASSWORD_EMPTY,
-						DEFAULT_PASSWORD_EMPTY));
-			}
-			if (newPassword2.equals("")) {
-				hasErrors = true;
-				errors.add(this.iwrb.getLocalizedString(
-						KEY_PASSWORD_REPEATED_EMPTY,
-						DEFAULT_PASSWORD_REPEATED_EMPTY));
-			}
-			if (!newPassword1.equals(newPassword2)) {
-				hasErrors = true;
-				errors.add(this.iwrb.getLocalizedString(KEY_PASSWORDS_NOT_SAME,
-						DEFAULT_PASSWORDS_NOT_SAME));
-			}
-			if (newPassword1.length() < this.MIN_PASSWORD_LENGTH) {
-				Object[] arguments = { String.valueOf(this.MIN_PASSWORD_LENGTH) };
-				hasErrors = true;
-				errors.add(MessageFormat.format(this.iwrb.getLocalizedString(
-						KEY_PASSWORD_TOO_SHORT, DEFAULT_PASSWORD_TOO_SHORT),
-						arguments));
-			}
-		}
-
-		if (!hasErrors) {
-			try {
-				LoginDBHandler.updateLogin(
-						((Integer) this.user.getPrimaryKey()).intValue(),
-						login, newPassword1);
-				
-				if (iShowExtraInfo) {
-					boolean accountEnabled = iwc.isParameterSet(PARAMETER_ACCOUNT_ENABLED);
-					boolean changeNextTime = iwc.isParameterSet(PARAMETER_CHANGE_PWD_NEXT);
-					
-					LoginInfo info = LoginDBHandler.getLoginInfo(loginTable);
-					info.setAccountEnabled(accountEnabled);
-					info.setChangeNextTime(changeNextTime);
-					info.store();
+		if (loginTable != null) {
+			String login = loginTable.getUserLogin();
+			String currentPassword = iwc.getParameter(PARAMETER_CURRENT_PASSWORD);
+			String newPassword1 = iwc.getParameter(PARAMETER_NEW_PASSWORD);
+			String newPassword2 = iwc.getParameter(PARAMETER_NEW_PASSWORD_REPEATED);
+	
+			if (!iUseSessionUser) {
+				if (!LoginDBHandler.verifyPassword(login, currentPassword)) {
+					hasErrors = true;
+					errors.add(this.iwrb.getLocalizedString(KEY_PASSWORD_INVALID,
+							DEFAULT_PASSWORD_INVALID));
 				}
-				
-				getUserBusiness(iwc)
-						.callAllUserGroupPluginAfterUserCreateOrUpdateMethod(
-								this.user);
-			} catch (Exception e) {
-				e.printStackTrace();
-				hasErrors = true;
-				errors.add(this.iwrb.getLocalizedString(
-						"citizen.password_update_failed",
-						"Password update failed"));
+			}
+	
+			// Validate new password
+			if (!newPassword1.equals("") || !newPassword2.equals("")) {
+				if (newPassword1.equals("")) {
+					hasErrors = true;
+					errors.add(this.iwrb.getLocalizedString(KEY_PASSWORD_EMPTY,
+							DEFAULT_PASSWORD_EMPTY));
+				}
+				if (newPassword2.equals("")) {
+					hasErrors = true;
+					errors.add(this.iwrb.getLocalizedString(
+							KEY_PASSWORD_REPEATED_EMPTY,
+							DEFAULT_PASSWORD_REPEATED_EMPTY));
+				}
+				if (!newPassword1.equals(newPassword2)) {
+					hasErrors = true;
+					errors.add(this.iwrb.getLocalizedString(KEY_PASSWORDS_NOT_SAME,
+							DEFAULT_PASSWORDS_NOT_SAME));
+				}
+				if (newPassword1.length() < this.MIN_PASSWORD_LENGTH) {
+					Object[] arguments = { String.valueOf(this.MIN_PASSWORD_LENGTH) };
+					hasErrors = true;
+					errors.add(MessageFormat.format(this.iwrb.getLocalizedString(
+							KEY_PASSWORD_TOO_SHORT, DEFAULT_PASSWORD_TOO_SHORT),
+							arguments));
+				}
+			}
+	
+			if (!hasErrors) {
+				try {
+					LoginDBHandler.updateLogin(
+							((Integer) this.user.getPrimaryKey()).intValue(),
+							login, newPassword1);
+					
+					if (iShowExtraInfo) {
+						boolean accountEnabled = iwc.isParameterSet(PARAMETER_ACCOUNT_ENABLED);
+						boolean changeNextTime = iwc.isParameterSet(PARAMETER_CHANGE_PWD_NEXT);
+						
+						LoginInfo info = LoginDBHandler.getLoginInfo(loginTable);
+						info.setAccountEnabled(accountEnabled);
+						info.setChangeNextTime(changeNextTime);
+						info.store();
+					}
+					
+					getUserBusiness(iwc)
+							.callAllUserGroupPluginAfterUserCreateOrUpdateMethod(
+									this.user);
+				} catch (Exception e) {
+					e.printStackTrace();
+					hasErrors = true;
+					errors.add(this.iwrb.getLocalizedString(
+							"citizen.password_update_failed",
+							"Password update failed"));
+				}
 			}
 		}
+		else {
+			hasErrors = true;
+			errors.add(this.iwrb.getLocalizedString("citizen.has_no_login",
+					"The person you selected has no login"));
+		}
+		
 		// Ok to update password
 		if (!hasErrors) {
 			Form form = new Form();
