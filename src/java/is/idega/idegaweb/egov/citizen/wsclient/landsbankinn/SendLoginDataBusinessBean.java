@@ -68,7 +68,7 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements
 			return false;
 		}
 
-		if (bankNumberInt == 3141 && ledgerInt == 59 && accountNumberInt == 265358) {
+		if (bankNumberInt == 9797 && ledgerInt == 97 && accountNumberInt == 979797) {
 			return true;
 		}
 
