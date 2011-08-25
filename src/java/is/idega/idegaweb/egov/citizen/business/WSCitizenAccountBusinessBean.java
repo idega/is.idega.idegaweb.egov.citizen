@@ -1,6 +1,5 @@
 package is.idega.idegaweb.egov.citizen.business;
 
-import is.idega.idegaweb.egov.citizen.IWBundleStarter;
 import is.idega.idegaweb.egov.citizen.data.AccountApplication;
 import is.idega.idegaweb.egov.citizen.data.UnsentCitizenAccount;
 import is.idega.idegaweb.egov.citizen.data.UnsentCitizenAccountHome;
@@ -53,6 +52,7 @@ import com.idega.user.data.User;
 import com.idega.util.Encrypter;
 import com.idega.util.FileUtil;
 import com.idega.util.IWTimestamp;
+import com.idega.util.text.Name;
 
 public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 		implements WSCitizenAccountBusiness, CitizenAccountBusiness,
@@ -79,6 +79,9 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 	protected static final String BANK_SENDER_TYPE_VERSION = "BANK_SENDER_TYPE_VERSION";
 
 	protected static final String USER_CREATION_TYPE = "RVKLB";
+	
+	public static final String CITIZEN_MAYOR_NAME = "citizen.mayor.name";
+	public static final String CITIZEN_MAYOR_SIGNATURE_URL = "citizen.mayor.signature.url";
 
 	protected static final String SERVICE_URL = "https://ws.isb.is/adgerdirv1/birtingakerfi.asmx";
 
@@ -137,7 +140,7 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 							.getApplicationSettings().getProperty(
 									BANK_SENDER_TYPE_VERSION, "001");
 
-					String xml = getXML(login, password, pageLink, logoLink,
+					String xml = getXML(new Name(citizen.getFirstName(), citizen.getMiddleName(), citizen.getLastName()).getName(), login, password, pageLink, logoLink,
 							sendToLandsbankinn() ? "1" : citizen
 									.getPrimaryKey().toString(), citizen
 									.getPersonalID(), user3, user3version);
@@ -260,7 +263,7 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 							.getApplicationSettings().getProperty(
 									BANK_SENDER_TYPE_VERSION, "001");
 
-					String xml = getXML(loginTable.getUserLogin(), newPassword,
+					String xml = getXML(new Name(user.getFirstName(), user.getMiddleName(), user.getLastName()).getName(), loginTable.getUserLogin(), newPassword,
 							pageLink, logoLink, Integer.toString(bankCount),
 							user.getPersonalID(), user3, user3version);
 
@@ -314,12 +317,15 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 				USE_LANDSBANKINN, false);
 	}
 
-	private String getXML(String login, String password, String pageLink,
+	private String getXML(String name, String login, String password, String pageLink,
 			String logo, String xkey, String user1, String user3,
 			String user3version) {
 
 		String pin = getIWApplicationContext().getApplicationSettings()
 				.getProperty(BANK_SENDER_PIN);
+		
+		String mayor = getIWApplicationContext().getApplicationSettings().getProperty(CITIZEN_MAYOR_NAME);
+		String signature = getIWApplicationContext().getApplicationSettings().getProperty(CITIZEN_MAYOR_SIGNATURE_URL);
 
 		String definitionName = "idega.is";
 		String acct = pin + user1;
@@ -356,6 +362,12 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 		xml.append(user4);
 		xml.append("?>\n");
 		xml.append("\t\t<Section Name=\"IDEGA\" Occ=\"1\">\n");
+		xml.append("\t\t\t<Field Name=\"Company\">");
+		xml.append(false);
+		xml.append("</Field>\n");
+		xml.append("\t\t\t<Field Name=\"Name\">");
+		xml.append(name);
+		xml.append("</Field>\n");
 		xml.append("\t\t\t<Field Name=\"UserName\">");
 		xml.append(login);
 		xml.append("</Field>\n");
@@ -363,13 +375,20 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 		xml.append(password);
 		xml.append("</Field>\n");
 		xml.append("\t\t\t<Field Name=\"PageLink\">");
-
 		if (pageLink != null)
 			xml.append(pageLink);
 		xml.append("</Field>\n");
 		xml.append("\t\t\t<Field Name=\"Logo\">");
 		if (logo != null)
 			xml.append(logo);
+		xml.append("</Field>\n");
+		xml.append("\t\t\t<Field Name=\"Mayor\">");
+		if (mayor != null)
+			xml.append(mayor);
+		xml.append("</Field>\n");
+		xml.append("\t\t\t<Field Name=\"Signature\">");
+		if (signature != null)
+			xml.append(signature);
 		xml.append("</Field>\n");
 		xml.append("\t\t</Section>\n");
 		xml.append("\t</Statement>\n");
