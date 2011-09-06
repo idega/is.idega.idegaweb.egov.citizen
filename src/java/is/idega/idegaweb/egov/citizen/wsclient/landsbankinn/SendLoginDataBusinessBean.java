@@ -1,6 +1,7 @@
 package is.idega.idegaweb.egov.citizen.wsclient.landsbankinn;
 
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -159,7 +160,12 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements
 
 		SendingInData data = new SendingInData();
 		data.setSessionId(session_id);
-		data.setData(xml_str);
+		try {
+			data.setData(new String(xml_str.getBytes("iso-8859-1")));
+		}
+		catch (UnsupportedEncodingException uee) {
+			data.setData(xml_str);
+		}
 
 		PostMethod response = sendXMLData(data, getSendDataXStream());
 

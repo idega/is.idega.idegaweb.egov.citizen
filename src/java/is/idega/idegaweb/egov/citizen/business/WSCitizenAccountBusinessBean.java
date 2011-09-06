@@ -335,7 +335,7 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 		user3 = user3 + "-" + user3version;
 		String user4 = acct + xkey;
 
-		String encoding = sendToLandsbankinn() ? "UTF-8" : "iso-8859-1";
+		String encoding = /*sendToLandsbankinn() ? "UTF-8" : */"iso-8859-1";
 
 		StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"");
 		xml.append(encoding);
