@@ -39,7 +39,7 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements
 	private XStream verify_resp_xstream;
 
 
-	private static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+	private static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>";
 	private static final String DEFAULT_SERVICE_URL = "https://b2b.fbl.is/lib2b.dll?processXML";
 	private static final String LANDSBANKINN_SERVICE_URL = "LANDSBANKINN_SERVICE_URL";
 
@@ -279,38 +279,16 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements
 	}
 
 	protected PostMethod sendXMLData(Object req, XStream xstream) {
-
 		PostMethod post = new PostMethod(getIWMainApplication().getSettings()
 				.getProperty(LANDSBANKINN_SERVICE_URL, DEFAULT_SERVICE_URL));
-
+		
 		try {
-			/*
-			 * StringPart userPart = new StringPart("processXML", XML_HEADER +
-			 * xstream.toXML(req), "UTF-8");
-			 * userPart.setContentType("text/xml");
-			 * 
-			 * System.out.println("xml = " + XML_HEADER + xstream.toXML(req));
-			 * 
-			 * Part[] parts = { userPart };
-			 * 
-			 * post.setRequestEntity(new MultipartRequestEntity(parts,
-			 * post.getParams()));
-			 * 
-			 * HttpClient client = new HttpClient();
-			 * 
-			 * 
-			 * client.getHttpConnectionManager().getParams().setConnectionTimeout
-			 * (5000); client.executeMethod(post);
-			 * 
-			 * return post;
-			 */
 			String data = XML_HEADER + xstream.toXML(req);
 			post.setRequestBody(data);
 
 			HttpClient client = new HttpClient();
 
-			client.getHttpConnectionManager().getParams().setConnectionTimeout(
-					5000);
+			client.getHttpConnectionManager().getParams().setConnectionTimeout(5000);
 			client.executeMethod(post);
 
 			return post;
