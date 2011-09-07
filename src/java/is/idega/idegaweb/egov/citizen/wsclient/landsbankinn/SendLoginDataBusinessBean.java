@@ -161,9 +161,10 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements
 		SendingInData data = new SendingInData();
 		data.setSessionId(session_id);
 		try {
-			data.setData(new String(xml_str.getBytes("iso-8859-1")));
+			data.setData(new String(xml_str.getBytes("iso-8859-1"), "iso-8859-1"));
 		}
 		catch (UnsupportedEncodingException uee) {
+			uee.printStackTrace();
 			data.setData(xml_str);
 		}
 
@@ -285,13 +286,22 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements
 		try {
 			String data = XML_HEADER + xstream.toXML(req);
 			post.setRequestBody(data);
+			post.setRequestHeader("Content-type", "text/xml; charset=ISO-8859-1");
 
 			HttpClient client = new HttpClient();
 
 			client.getHttpConnectionManager().getParams().setConnectionTimeout(5000);
-			client.executeMethod(post);
+			
+			int result = client.executeMethod(post);
+            
+            // Display status code
+            System.out.println("Response status code: " + result);
+            
+            // Display response
+            System.out.println("Response body: ");
+            System.out.println(post.getResponseBodyAsString());
 
-			return post;
+            return post;
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.log(Level.SEVERE, "Exception while sending xml data.", e);

@@ -70,9 +70,9 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 
 	protected static final String BANK_SENDER_USER_PASSWORD = "BANK_SENDER_USER_PW";
 
-	protected static final String BANK_SENDER_PAGELINK = "BANK_SENDER_PAGELINK";
+	public static final String BANK_SENDER_PAGELINK = "BANK_SENDER_PAGELINK";
 
-	protected static final String BANK_SENDER_LOGOLINK = "BANK_SENDER_LOGOLINK";
+	public static final String BANK_SENDER_LOGOLINK = "BANK_SENDER_LOGOLINK";
 
 	protected static final String BANK_SENDER_TYPE = "BANK_SENDER_TYPE";
 
