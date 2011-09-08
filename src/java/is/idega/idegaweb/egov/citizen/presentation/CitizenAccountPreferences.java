@@ -46,6 +46,7 @@ import com.idega.presentation.ui.CountryDropdownMenu;
 import com.idega.presentation.ui.DropdownMenu;
 import com.idega.presentation.ui.FileInput;
 import com.idega.presentation.ui.Form;
+import com.idega.presentation.ui.HiddenInput;
 import com.idega.presentation.ui.InterfaceObject;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.RadioGroup;
@@ -161,7 +162,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 			return;
 		}
 		this.iwrb = iwc.getIWMainApplication().getBundle(IWBundleStarter.IW_BUNDLE_IDENTIFIER).getResourceBundle(iwc);
-		this.user = iwc.getCurrentUser();
+		this.user = getUser(iwc);
 		try {
 			int action = parseAction(iwc);
 			switch (action) {
@@ -176,6 +177,10 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		catch (Exception e) {
 			super.add(new ExceptionWrapper(e, this));
 		}
+	}
+	
+	protected User getUser(IWContext iwc) {
+		return iwc.getCurrentUser();
 	}
 
 	private int parseAction(final IWContext iwc) {
@@ -326,10 +331,14 @@ public class CitizenAccountPreferences extends CitizenBlock {
 
 		if (isSetToShowNameAndPersonalID()) {
 			TextInput name = new TextInput(PARAMETER_NAME, user.getName());
+			name.setDisabled(true);
 			createFormItem(this.iwrb.getLocalizedString("name", "Name"), name, section);
+			section.add(new HiddenInput(PARAMETER_NAME, user.getName()));
 			
 			TextInput ssn = new TextInput(PARAMETER_SSN, user.getPersonalID());
+			ssn.setDisabled(true);
 			createFormItem(this.iwrb.getLocalizedString("social_security_number", "Social security number"), ssn, section);
+			section.add(new HiddenInput(PARAMETER_SSN, user.getPersonalID()));
 		}
 		
 		Layer layer = new Layer(Layer.DIV);
@@ -447,7 +456,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		
 		if(isSetToShowPreferredRoleChooser()){
 			DropdownMenu rolesDrop = new DropdownMenu(PARAMETER_PREFERRED_ROLE);
-			List<ICRole> rolesForUser = ub.getAvailableRolesForUserAsPreferredRoles(iwc.getCurrentUser());
+			List<ICRole> rolesForUser = ub.getAvailableRolesForUserAsPreferredRoles(user);
 			IWResourceBundle coreIWRB = iwc.getIWMainApplication().getBundle(CoreConstants.CORE_IW_BUNDLE_IDENTIFIER).getResourceBundle(iwc);
 			if (!ListUtil.isEmpty(rolesForUser)) {
 				for (ICRole role: rolesForUser) {
@@ -761,7 +770,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 			AddressHome ah = ub.getAddressHome();
 			AddressType coType = ah.getAddressType2();
 
-			Address address = ub.getUserAddressByAddressType(iwc.getCurrentUserId(), coType);
+			Address address = ub.getUserAddressByAddressType(new Integer(user.getPrimaryKey().toString()).intValue(), coType);
 			if (address != null) {
 				return address;
 			}
