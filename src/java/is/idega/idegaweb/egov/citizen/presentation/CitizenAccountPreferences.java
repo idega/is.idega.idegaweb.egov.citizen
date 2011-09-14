@@ -152,6 +152,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	private boolean showGenderChooserReadOnly = false;
 	
 	private boolean showNameAndPersonalID = false;
+	private boolean nameAndPersonalIDDisabled = true;
 
 	public CitizenAccountPreferences() {
 	}
@@ -331,14 +332,20 @@ public class CitizenAccountPreferences extends CitizenBlock {
 
 		if (isSetToShowNameAndPersonalID()) {
 			TextInput name = new TextInput(PARAMETER_NAME, user.getName());
-			name.setDisabled(true);
 			createFormItem(this.iwrb.getLocalizedString("name", "Name"), name, section);
-			section.add(new HiddenInput(PARAMETER_NAME, user.getName()));
+			
+			if (isNameAndPersonalIDDisabled()) {
+				name.setDisabled(true);
+				section.add(new HiddenInput(PARAMETER_NAME, user.getName()));
+			}
 			
 			TextInput ssn = new TextInput(PARAMETER_SSN, user.getPersonalID());
-			ssn.setDisabled(true);
 			createFormItem(this.iwrb.getLocalizedString("social_security_number", "Social security number"), ssn, section);
-			section.add(new HiddenInput(PARAMETER_SSN, user.getPersonalID()));
+
+			if (isNameAndPersonalIDDisabled()) {
+				ssn.setDisabled(true);
+				section.add(new HiddenInput(PARAMETER_SSN, user.getPersonalID()));
+			}
 		}
 		
 		Layer layer = new Layer(Layer.DIV);
@@ -849,5 +856,13 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	
 	protected User getUser() {
 		return this.user;
+	}
+
+	public boolean isNameAndPersonalIDDisabled() {
+		return nameAndPersonalIDDisabled;
+	}
+
+	public void setNameAndPersonalIDDisabled(boolean nameAndPersonalIDDisabled) {
+		this.nameAndPersonalIDDisabled = nameAndPersonalIDDisabled;
 	}
 }
