@@ -663,7 +663,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 			
 			if (isSetToShowNameAndPersonalID()) {
 				//	Name
-				user.setName(name);
+				user.setFullName(name);
 				
 				//	SSN
 				user.setPersonalID(removeSSN ? null : ssn);
