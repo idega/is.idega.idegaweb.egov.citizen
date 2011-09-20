@@ -665,7 +665,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		if (ListUtil.isEmpty(errors)) {
 			//	No errors found
 			
-			if (isSetToShowNameAndPersonalID()) {
+			if (isSetToShowNameAndPersonalID() && !isNameAndPersonalIDDisabled()) {
 				//	Name
 				user.setFullName(name);
 				
