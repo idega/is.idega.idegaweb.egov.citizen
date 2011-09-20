@@ -94,8 +94,8 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	private final static String PARAMETER_REMOVE_IMAGE = "cap_remove_image";
 	private final static String PARAMETER_PREFERRED_LOCALE = "cap_pref_locale";
 	private final static String PARAMETER_PREFERRED_ROLE = "cap_pref_role";
-	private final static String PARAMETER_NAME = "cap_name";
-	private final static String PARAMETER_SSN = "cap_ssn";
+	protected final static String PARAMETER_NAME = "cap_name";
+	protected final static String PARAMETER_SSN = "cap_ssn";
 	private final static String PARAMETER_GENDER = "cap_gender";
 	
 	private final static String KEY_PREFIX = "citizen.";
@@ -139,9 +139,9 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	public static final String CITIZEN_ACCOUNT_PREFERENCES_PROPERTIES = "citizen_account_preferences";
 	public static final String USER_PROPERTY_USE_CO_ADDRESS = "cap_use_co_address";
 
-	private User user = null;
+	protected User user = null;
 
-	private IWResourceBundle iwrb;
+	protected IWResourceBundle iwrb;
 
 	private boolean showPreferredLocaleChooser = false;
 	
@@ -331,21 +331,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		removeImage.keepStatusOnAction(true);
 
 		if (isSetToShowNameAndPersonalID()) {
-			TextInput name = new TextInput(PARAMETER_NAME, user.getName());
-			createFormItem(this.iwrb.getLocalizedString("name", "Name"), name, section);
-			
-			if (isNameAndPersonalIDDisabled()) {
-				name.setDisabled(true);
-				section.add(new HiddenInput(PARAMETER_NAME, user.getName()));
-			}
-			
-			TextInput ssn = new TextInput(PARAMETER_SSN, user.getPersonalID());
-			createFormItem(this.iwrb.getLocalizedString("social_security_number", "Social security number"), ssn, section);
-
-			if (isNameAndPersonalIDDisabled()) {
-				ssn.setDisabled(true);
-				section.add(new HiddenInput(PARAMETER_SSN, user.getPersonalID()));
-			}
+			getUserInputs(iwc, form, section);
 		}
 		
 		Layer layer = new Layer(Layer.DIV);
@@ -496,6 +482,24 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		buttonLayer.add(send);
 
 		return form;
+	}
+
+	protected void getUserInputs(IWContext iwc, Form form, Layer section) {
+		TextInput name = new TextInput(PARAMETER_NAME, user.getName());
+		createFormItem(this.iwrb.getLocalizedString("name", "Name"), name, section);
+		
+		if (isNameAndPersonalIDDisabled()) {
+			name.setDisabled(true);
+			section.add(new HiddenInput(PARAMETER_NAME, user.getName()));
+		}
+		
+		TextInput ssn = new TextInput(PARAMETER_SSN, user.getPersonalID());
+		createFormItem(this.iwrb.getLocalizedString("social_security_number", "Social security number"), ssn, section);
+
+		if (isNameAndPersonalIDDisabled()) {
+			ssn.setDisabled(true);
+			section.add(new HiddenInput(PARAMETER_SSN, user.getPersonalID()));
+		}
 	}
 
 	public boolean isSetToShowGenderChooserReadOnly() {
