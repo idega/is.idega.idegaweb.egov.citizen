@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.ejb.CreateException;
@@ -83,7 +84,7 @@ public class ForgottenPassword extends CitizenBlock {
 	private int iRedirectDelay = 15;
 
 	private boolean iForwardToURL = false;
-	private Map iCommuneMap;
+	private Map<String, String> iCommuneMap;
 
 	private boolean showSendSnailMailChooser = false;
 
@@ -109,12 +110,12 @@ public class ForgottenPassword extends CitizenBlock {
 		if (iwc.isParameterSet(COMMUNE_KEY) && this.iForwardToURL) {
 			String URL = iwc.getParameter(COMMUNE_KEY);
 			StringBuffer query = new StringBuffer();
-			Enumeration enumeration = iwc.getParameterNames();
+			Enumeration<String> enumeration = iwc.getParameterNames();
 			if (enumeration != null) {
 				query.append("?");
 
 				while (enumeration.hasMoreElements()) {
-					String element = (String) enumeration.nextElement();
+					String element = enumeration.nextElement();
 					query.append(element).append("=").append(iwc.getParameter(element));
 					if (enumeration.hasMoreElements()) {
 						query.append("&");
@@ -131,14 +132,15 @@ public class ForgottenPassword extends CitizenBlock {
 
 		boolean hasErrors = false;
 		boolean invalidPersonalID = false;
-		Collection errors = new ArrayList();
+		Collection<String> errors = new ArrayList<String>();
 
+		Locale locale = iwc.getCurrentLocale();
+		
 		if (ssn == null || ssn.length() == 0) {
 			errors.add(this.iwrb.getLocalizedString("must_provide_personal_id", "You have to enter a personal ID."));
 			hasErrors = true;
 			invalidPersonalID = true;
-		}
-		else if (!SocialSecurityNumber.isValidIcelandicSocialSecurityNumber(ssn)) {
+		} else if (!SocialSecurityNumber.isValidSocialSecurityNumber(ssn, locale)) {
 			errors.add(this.iwrb.getLocalizedString("not_a_valid_personal_id", "The personal ID you've entered is not valid."));
 			hasErrors = true;
 			invalidPersonalID = true;
@@ -153,13 +155,11 @@ public class ForgottenPassword extends CitizenBlock {
 		User user = null;
 		if (!invalidPersonalID) {
 			try {
-				UserBusiness business = (UserBusiness) IBOLookup.getServiceInstance(iwc, UserBusiness.class);
+				UserBusiness business = IBOLookup.getServiceInstance(iwc, UserBusiness.class);
 				user = business.getUser(ssn);
-			}
-			catch (RemoteException re) {
+			} catch (RemoteException re) {
 				throw new IBORuntimeException(re);
-			}
-			catch (FinderException ex) {
+			} catch (FinderException ex) {
 				errors.add(this.iwrb.getLocalizedString("no_user_found_with_personal_id", "No user was found with the personal ID you entered."));
 				hasErrors = true;
 			}
@@ -302,10 +302,10 @@ public class ForgottenPassword extends CitizenBlock {
 		
 		if (this.iCommuneMap != null) {
 			DropdownMenu communes = new DropdownMenu(COMMUNE_KEY);
-			Iterator iter = this.iCommuneMap.keySet().iterator();
+			Iterator<String> iter = this.iCommuneMap.keySet().iterator();
 			while (iter.hasNext()) {
-				String commune = (String) iter.next();
-				communes.addMenuElement((String) this.iCommuneMap.get(commune), commune);
+				String commune = iter.next();
+				communes.addMenuElement(this.iCommuneMap.get(commune), commune);
 			}
 			communes.addMenuElementFirst("", this.iwrb.getLocalizedString("select_commune", "Select commune"));
 
@@ -408,7 +408,7 @@ public class ForgottenPassword extends CitizenBlock {
 
 	public void setCommunePage(String name, String URL) {
 		if (this.iCommuneMap == null) {
-			this.iCommuneMap = new HashMap();
+			this.iCommuneMap = new HashMap<String, String>();
 		}
 		this.iCommuneMap.put(name, URL);
 		this.iForwardToURL = true;
