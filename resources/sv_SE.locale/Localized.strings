@@ -7,7 +7,7 @@ acc.app.acc.body4=Lösenord\:
 acc.app.acc.body5=Adress\: 
 acc.app.acc.fp.body2=Ett nytt lösenord har skapats för ditt tillträde.
 acc.app.acc.fp.subj=Nytt lösenord för {4}
-acc.app.appr.body=God morgon/eftermiddag, bra dag {0} \n\nDu har fått tillgång till {4} på hemsidan \n\nUsername\: {1} \nPassword\: {2} \n\n {3}.
+acc.app.appr.body=God morgon/eftermiddag, bra dag {0} \n\nDu har fått tillgång till {4} på hemsidan \n\nAnvändarnamn\: {1} \nLösenord\: {2} \n\n {3}.
 acc.app.appr.subj=Din ansökan om tillgång till {4} har hanterats
 
 account_application.example=(example: 0110012230)
