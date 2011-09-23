@@ -29,7 +29,11 @@ import com.idega.idegaweb.IWUserContext;
 import com.idega.presentation.IWContext;
 import com.idega.user.data.User;
 import com.idega.user.data.UserHome;
+import com.idega.util.CoreConstants;
+import com.idega.util.CoreUtil;
 import com.idega.util.Encrypter;
+import com.idega.util.StringHandler;
+import com.idega.util.StringUtil;
 
 /**
  * Last modified: $Date$ by $Author$
@@ -170,6 +174,7 @@ public class CitizenAccountBusinessBean extends AccountApplicationBusinessBean i
 		return user;
 	}
 
+	@Override
 	protected AccountApplication getApplication(int applicationID) throws FinderException {
 		return getAccount(applicationID);
 	}
@@ -184,10 +189,12 @@ public class CitizenAccountBusinessBean extends AccountApplicationBusinessBean i
 		}
 	}
 
+	@Override
 	protected Class getCaseEntityClass() {
 		return CitizenAccount.class;
 	}
 	
+	@Override
 	public void acceptApplication(int applicationID, User performer, boolean createUserMessage, boolean createPasswordMessage, boolean sendEmail, boolean sendSnailMail) throws CreateException {
 		UserTransaction transaction = null;
 		try {
@@ -303,11 +310,15 @@ public class CitizenAccountBusinessBean extends AccountApplicationBusinessBean i
 
 	protected String getNewPasswordWasCreatedSubject(User user) {
 		IWResourceBundle iwrb = this.getIWResourceBundleForUser(user);
-		return iwrb.getLocalizedString("acc.app.acc.fp.subj", "New password for your account");
+		String subject = iwrb.getLocalizedString("acc.app.acc.fp.subj", "New password for your account");
+		if (subject.indexOf("{4}") != -1) {
+			String replace = CoreUtil.getIWContext().getDomain().getName();
+			subject = StringHandler.replace(subject, "{4}", StringUtil.isEmpty(replace) ? CoreConstants.EMPTY : replace);
+		}
+		return subject;
 	}
 
 	protected String getNewPasswordWasCreatedMessageBody(User user, String userName, String loginName, String password) {
-		// int ownerID = ((Integer) theCase.getOwner().getPrimaryKey()).intValue();
 		IWResourceBundle iwrb = this.getIWResourceBundleForUser(user);
 
 		String body = iwrb.getLocalizedString("acc.app.acc.body1", "Dear mr./ms./mrs. ");
@@ -320,6 +331,12 @@ public class CitizenAccountBusinessBean extends AccountApplicationBusinessBean i
 		body += "\n\n";
 		body += iwrb.getLocalizedString("acc.app.acc.body5", "You can log on via:") + " ";
 		body += getApplicationLoginURL();
+		
+		if (body.indexOf("{4}") != -1) {
+			String replace = CoreUtil.getIWContext().getDomain().getName();
+			body = StringHandler.replace(body, "{4}", StringUtil.isEmpty(replace) ? CoreConstants.EMPTY : replace);
+		}
+		
 		return body;
 	}
 
