@@ -1,14 +1,14 @@
 PREFERRED\ LOCALE=Message language
 
 acc.app.acc.body1=God morgon/eftermiddag, bra dag 
-acc.app.acc.body2=Din ansökan för "din sektor" har godkänts.\n
-acc.app.acc.body3=Din tillgång till portalen är nu\:\n\nUser namn\: 
-acc.app.acc.body4=Lösenord\: 
+acc.app.acc.body2=Din ans\u00F6kan f\u00F6r "din sektor" har godk\u00E4nts.\n
+acc.app.acc.body3=Din tillg\u00E5ng till portalen \u00E4r nu\:\n\nAnv\u00E4ndarnamn\: 
+acc.app.acc.body4=L\u00F6senord\: 
 acc.app.acc.body5=Adress\: 
-acc.app.acc.fp.body2=Ett nytt lösenord har skapats för ditt tillträde.
-acc.app.acc.fp.subj=Nytt lösenord för {4}
-acc.app.appr.body=God morgon/eftermiddag, bra dag {0} \n\nDu har fått tillgång till {4} på hemsidan \n\nAnvändarnamn\: {1} \nLösenord\: {2} \n\n {3}.
-acc.app.appr.subj=Din ansökan om tillgång till {4} har hanterats
+acc.app.acc.fp.body2=Ett nytt l\u00F6senord har skapats f\u00F6r ditt tilltr\u00E4de.
+acc.app.acc.fp.subj=Nytt l\u00F6senord f\u00F6r {4}
+acc.app.appr.body=God morgon/eftermiddag, bra dag {0} \n\nDu har f\u00E5tt tillg\u00E5ng till {4} p\u00E5 hemsidan \n\nAnv\u00E4ndarnamn\: {1} \nL\u00F6senord\: {2} \n\n {3}.
+acc.app.appr.subj=Din ans\u00F6kan om tillg\u00E5ng till {4} har hanterats
 
 account_application.example=(example: 0110012230)
 address=Address\:
