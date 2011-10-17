@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.faces.context.FacesContext;
-
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.idega.block.web2.business.JQuery;
@@ -21,7 +19,7 @@ import com.idega.core.accesscontrol.business.LoginContext;
 import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.IWResourceBundle;
-import com.idega.presentation.IWBaseComponent;
+import com.idega.presentation.Block;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
 import com.idega.presentation.Table2;
@@ -36,12 +34,12 @@ import com.idega.presentation.ui.TextInput;
 import com.idega.user.bean.UserDataBean;
 import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
-import com.idega.util.CoreUtil;
 import com.idega.util.PresentationUtil;
 import com.idega.util.expression.ELUtil;
 import com.idega.webface.WFUtil;
 
-public class UserAccessSettings  extends IWBaseComponent{
+public class UserAccessSettings extends Block {
+	
 	private static final String REMOVE_ITEM_CLASS = "remove-item-class";
 	private static final String RELATED_ITEM_CLASS = "simple-user-edit-related-item-class";
 	private static final String ID_CONTANER_CLASS = "id-container-class";
@@ -54,26 +52,28 @@ public class UserAccessSettings  extends IWBaseComponent{
 	
 	private String userId = null;
 	
-
 	@Autowired
 	private CitizenServices citizenServices;
 	
-	
 	private Boolean needFiles = Boolean.TRUE;
 	
-	IWContext iwc = null;
 	IWResourceBundle iwrb = null;
+	
 	public UserAccessSettings(){
-		iwc = CoreUtil.getIWContext();
-		IWBundle bundle = iwc.getIWMainApplication().getBundle(CitizenConstants.IW_BUNDLE_IDENTIFIER);
-		iwrb = bundle.getResourceBundle(iwc);
 		ELUtil.getInstance().autowire(this);
 	}
 	
 	@Override
-	protected void initializeComponent(FacesContext context) {
-		super.initializeComponent(context);
-		User user = getUser();
+	public String getBundleIdentifier() {
+		return CitizenConstants.IW_BUNDLE_IDENTIFIER;
+	}
+	
+	@Override
+	public void main(IWContext iwc) throws Exception {
+		IWBundle bundle = getBundle(iwc);
+		iwrb = bundle.getResourceBundle(iwc);
+		
+		User user = getUser(iwc);
 		if(user == null){
 			Layer layer = new Layer();
 			this.add(layer);
@@ -93,12 +93,13 @@ public class UserAccessSettings  extends IWBaseComponent{
 			PresentationUtil.addStyleSheetsToHeader(iwc, getNeededStyles(iwc));
 		}
 
-//		this.addActions();
 	}
+	
 	public void setNeedFiles(Boolean needFiles) {
 		this.needFiles = needFiles;
 	}
-	private User getUser(){
+	
+	private User getUser(IWContext iwc){
 		if(userId == null){
 			userId = iwc.getParameter(CitizenConstants.USER_EDIT_USER_ID_PARAMETER);
 		}
@@ -118,7 +119,7 @@ public class UserAccessSettings  extends IWBaseComponent{
 	private Form getUserEditForm(User user){
 		UserDataBean userData = null;
 		boolean isData = false;
-		String id = "-1";
+		String id = String.valueOf(-1);
 		String username = CoreConstants.EMPTY;
 		if(user != null){
 			userData = citizenServices.getUserApplicationEngine().getUserInfo(user);
@@ -159,6 +160,7 @@ public class UserAccessSettings  extends IWBaseComponent{
 		cellInfo = new Strong();
 		cell = row.createCell();
 		cell.add(cellInfo);
+		cellInfo.add(name);
 		
 		// Username
 		row = table.createRow();
@@ -174,9 +176,7 @@ public class UserAccessSettings  extends IWBaseComponent{
 		row.createCell().add(cellInfo);
 		cellInfo.addText(iwrb.getLocalizedString("password", "Password"));
 		PasswordInput passwordInput = new PasswordInput(CitizenConstants.USER_EDIT_PASSWORD_PARAMETER);
-		
 		row.createCell().add(passwordInput);
-		
 		
 		// Submit
 		GenericButton buttonSubmit = new GenericButton("buttonSubmit", iwrb.getLocalizedString("save", "Save"));
@@ -186,8 +186,6 @@ public class UserAccessSettings  extends IWBaseComponent{
 		return form;
 	}
 	
-	
-	
 	private void addactions(Layer layer){
 		StringBuilder actions = new StringBuilder("UserAccessSettingsHelper.initialize = function(){")
 		.append("\n}");
@@ -196,14 +194,7 @@ public class UserAccessSettings  extends IWBaseComponent{
 		layer.add(actionString);
 	}
 	
-	/**
-	 * Gets the scripts that is need for this element to work
-	 * if this element is loaded dynamically (ajax) and not
-	 * in frame, than containing element have to add theese
-	 * scriptFiles.
-	 * @return script files uris
-	 */
-	public static List<String> getNeededScripts(IWContext iwc){
+	private List<String> getNeededScripts(IWContext iwc){
 		List<String> scripts = new ArrayList<String>();
 
 		scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
@@ -245,14 +236,7 @@ public class UserAccessSettings  extends IWBaseComponent{
 		return scripts;
 	}
 
-	/**
-	 * Gets the stylesheets that is need for this element to work
-	 * if this element is loaded dynamically (ajax) and not
-	 * in frame, than containing element have to add theese
-	 * files.
-	 * @return style files uris
-	 */
-	public static List<String> getNeededStyles(IWContext iwc){
+	private List<String> getNeededStyles(IWContext iwc){
 		List<String> styles = new ArrayList<String>();
 
 		Web2Business web2 = WFUtil.getBeanInstance(iwc, Web2Business.SPRING_BEAN_IDENTIFIER);
@@ -269,7 +253,7 @@ public class UserAccessSettings  extends IWBaseComponent{
 
 
 		}else{
-			Logger.getLogger("ContentShareComponent").log(Level.WARNING, "Failed getting Web2Business no jQuery and it's plugins files were added");
+			Logger.getLogger(getClass().getName()).log(Level.WARNING, "Failed getting Web2Business no jQuery and it's plugins files were added");
 		}
 		IWMainApplication iwma = iwc.getApplicationContext().getIWMainApplication();
 		IWBundle iwb = iwma.getBundle(CitizenConstants.IW_BUNDLE_IDENTIFIER);
