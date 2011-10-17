@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
+import javax.ejb.RemoveException;
 
 import org.directwebremoting.annotations.Param;
 import org.directwebremoting.annotations.RemoteMethod;
@@ -116,9 +117,19 @@ public class CitizenServices extends DefaultSpringBean implements
 		params = parameters.get(CitizenConstants.USER_EDIT_RESUME_PARAMETER);
 		if(params != null){
 			resume = params.get(0);
-			user.setDescription(resume);
+			user.setResume(resume);
 		}
-		user.store();
+		String personalId = null;
+		params = parameters.get(CitizenConstants.USER_EDIT_PERSONAL_ID_PARAMETER);
+		if(params != null){
+			personalId = params.get(0);
+			user.setPersonalID(personalId);
+		}
+		try{
+			user.store();
+		}catch(Exception e){
+			
+		}
 		
 		// Setting user address data
 		String report = saveAddress(parameters, iwrb, user.getId());
@@ -134,6 +145,8 @@ public class CitizenServices extends DefaultSpringBean implements
 		return successMsg;
 	}
 	private String saveFamilyRelations(Map <String,ArrayList<String>> parameters,IWResourceBundle iwrb,IWContext iwc,User user){
+		String report = CoreConstants.EMPTY;
+		String failure = null;
 		try {
 			FamilyLogic familyLogic = getFamilyLogic(iwc);
 			UserBusiness userBusiness = getUserBusiness();
@@ -142,36 +155,32 @@ public class CitizenServices extends DefaultSpringBean implements
 			if(params != null){
 				maritalStatus = params.get(0);
 			}
-			String family = null;
-			params = parameters.get(familyLogic.getChildRelationType());
-			for(String id : params){
-				User userToSet = userBusiness.getUser(Integer.valueOf(id));
-				familyLogic.setAsChildFor(userToSet, user);
-			}
-			params = parameters.get(familyLogic.getParentRelationType());
-			for(String id : params){
-				User userToSet = userBusiness.getUser(Integer.valueOf(id));
-				familyLogic.setAsParentFor(userToSet, user);
-			}
-			params = parameters.get(familyLogic.getCustodianRelationType());
-			for(String id : params){
-				User userToSet = userBusiness.getUser(Integer.valueOf(id));
-				familyLogic.setAsCustodianFor(userToSet, userToSet);
-			}
-			params = parameters.get(familyLogic.getSiblingRelationType());
-			for(String id : params){
-				User userToSet = userBusiness.getUser(Integer.valueOf(id));
-				familyLogic.setAsSiblingFor(user, userToSet);
-			}
-			params = parameters.get(familyLogic.getSpouseRelationType());
-			for(String id : params){
-				User userToSet = userBusiness.getUser(Integer.valueOf(id));
-				familyLogic.setAsSpouseFor(user, userToSet);
-			}
-			params = parameters.get(familyLogic.getCohabitantRelationType());
-			for(String id : params){
-				User userToSet = userBusiness.getUser(Integer.valueOf(id));
-				familyLogic.setAsCohabitantFor(user, userToSet);
+			Collection<String> relations = getFamilyRelationTypes(iwc);
+			String userId = user.getId();
+			for(String type : relations){
+				params = parameters.get(type);
+				if(params == null){
+					continue;
+				}
+				for(String relatedId : params){
+					if(userId.equals(relatedId)){// User can not be related to himself
+						continue;
+					}
+					User relatedUser = null;
+					try{
+						relatedUser = userBusiness.getUser(Integer.valueOf(relatedId));
+					}catch(RemoteException e){
+						failure = iwrb.getLocalizedString("failed_to_find_related_person", "Failed to find related person");
+						continue;
+					}
+					try{
+						familyLogic.setRelation(user, relatedUser, type);
+					}catch(RemoteException e){
+						report += iwrb.getLocalizedString("failed_adding_relation_with", "Failed adding relation with")
+								+ relatedUser.getName();
+						continue;
+					}
+				}
 			}
 		} catch (IBOLookupException e) {
 			this.getLogger().log(Level.WARNING, "failed getting family Logic", e);
@@ -180,7 +189,10 @@ public class CitizenServices extends DefaultSpringBean implements
 			this.getLogger().log(Level.WARNING, "Failed saving family relations data", e);
 			return  iwrb.getLocalizedString("failed_saving_family_relations_data", "Failed saving family relations data");
 		}
-		return CoreConstants.EMPTY;
+		if(failure != null){
+			report += CoreConstants.NEWLINE + failure;
+		}
+		return report;
 	}
 	private String saveAddress(Map <String,ArrayList<String>> parameters,IWResourceBundle iwrb, String userId){
 		String report = CoreConstants.EMPTY;
@@ -288,59 +300,75 @@ public class CitizenServices extends DefaultSpringBean implements
 		return familyLogic;
 	}
 	@SuppressWarnings("unchecked")
-	public Map <String,Collection<User>> getFamilyMembers(IWContext iwc, User user){
+	public Map <String,Collection<User>> getFamilyMembers(IWContext iwc, User user, Collection<String> relationTypes){
 		Map<String,Collection<User>> members = new HashMap<String,Collection<User>>();
 		FamilyLogic familyLogic = null;
 		try {
 			familyLogic = getFamilyLogic(iwc);
-			Collection<User> related = null;
-			try{
-				related = familyLogic.getChildrenFor(user);
-			}catch (FinderException e) {
-				related = Collections.emptyList();
+			for(String type : relationTypes){
+				Collection<User> related = null;
+				try {
+					related = familyLogic.getRelatedUsers(user, type);
+					members.put(type, related);
+				} catch (Exception e) {
+					related = Collections.emptyList();
+					members.put(type, related);
+					continue;
+				} 
 			}
-			members.put(familyLogic.getChildRelationType(), related);
-			try{
-				related = familyLogic.getParentsFor(user);
-			}catch (FinderException e) {
-				related = Collections.emptyList();
-			}
-			members.put(familyLogic.getParentRelationType(), related);
-			try{
-				related = familyLogic.getCustodiansFor(user);
-			}catch (FinderException e) {
-				related = Collections.emptyList();
-			}
-			members.put(familyLogic.getCustodianRelationType(), related);
-			try{
-				related = familyLogic.getSiblingsFor(user);
-			}catch (FinderException e) {
-				related = Collections.emptyList();
-			}
-			members.put(familyLogic.getSiblingRelationType(), related);
-			try{
-				User relatedUser = familyLogic.getSpouseFor(user);
-				related = new ArrayList<User>(1);
-				related.add(relatedUser);
-			}catch (FinderException e) {
-				related = Collections.emptyList();
-			}
-			members.put(familyLogic.getSpouseRelationType(), related);
-			try{
-				User relatedUser = familyLogic.getCohabitantFor(user);
-				related = new ArrayList(1);
-				related.add(relatedUser);
-			}catch (FinderException e) {
-				related = Collections.emptyList();
-			}
-			members.put(familyLogic.getCohabitantRelationType(), related);
-			
 		} catch (IBOLookupException e) {
-			Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Failed getting family data" , e);
-		} catch (RemoteException e) {
 			Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Failed getting family data" , e);
 		}
 		return members;
+//		try {
+//			Collection<User> related = null;
+//			try{
+//				related = familyLogic.getChildrenFor(user);
+//			}catch (FinderException e) {
+//				related = Collections.emptyList();
+//			}
+//			members.put(familyLogic.getChildRelationType(), related);
+//			try{
+//				related = familyLogic.getParentsFor(user);
+//			}catch (FinderException e) {
+//				related = Collections.emptyList();
+//			}
+//			members.put(familyLogic.getParentRelationType(), related);
+//			try{
+//				related = familyLogic.getCustodiansFor(user);
+//			}catch (FinderException e) {
+//				related = Collections.emptyList();
+//			}
+//			members.put(familyLogic.getCustodianRelationType(), related);
+//			try{
+//				related = familyLogic.getSiblingsFor(user);
+//			}catch (FinderException e) {
+//				related = Collections.emptyList();
+//			}
+//			members.put(familyLogic.getSiblingRelationType(), related);
+//			try{
+//				User relatedUser = familyLogic.getSpouseFor(user);
+//				related = new ArrayList<User>(1);
+//				related.add(relatedUser);
+//			}catch (FinderException e) {
+//				related = Collections.emptyList();
+//			}
+//			members.put(familyLogic.getSpouseRelationType(), related);
+//			try{
+//				User relatedUser = familyLogic.getCohabitantFor(user);
+//				related = new ArrayList(1);
+//				related.add(relatedUser);
+//			}catch (FinderException e) {
+//				related = Collections.emptyList();
+//			}
+//			members.put(familyLogic.getCohabitantRelationType(), related);
+//			
+//		} catch (IBOLookupException e) {
+//			Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Failed getting family data" , e);
+//		} catch (RemoteException e) {
+//			Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Failed getting family data" , e);
+//		}
+//		return members;
 	}
 	public List<String> getFamilyRelationTypes(IWContext iwc) throws Exception{
 		ArrayList<String> familyRelationTypes = new ArrayList<String>();
@@ -376,7 +404,7 @@ public class CitizenServices extends DefaultSpringBean implements
 		
 		for(User user : requestedUsers){
 			UserDataBean data =  userApplicationEngine.getUserInfo(user);
-			Table2 table = SimpleUserEditForm.getUserInfoView(data,relationType,fl,iwrb,iwb);
+			Table2 table = SimpleUserEditForm.getUserInfoView(data,relationType,fl,iwrb,iwb,true);
 			String html = BuilderLogic.getInstance().getRenderedComponent(
 					table, null).getHtml();
 			tables.add(html);
@@ -393,5 +421,35 @@ public class CitizenServices extends DefaultSpringBean implements
 			}
 		}
 		return this.userHome;
+	}
+	@RemoteMethod
+	public Boolean removeRelation(String userId,String relatedId,String relationType){
+		if(userId == null || relatedId == null || relationType == null){
+			return Boolean.FALSE;
+		}
+		try{
+			IWContext iwc = CoreUtil.getIWContext();
+			FamilyLogic familyLogic = getFamilyLogic(iwc);
+			UserBusiness userBusiness = getUserBusiness();
+			User user = userBusiness.getUser(Integer.valueOf(userId));
+			User relatedUser = userBusiness.getUser(Integer.valueOf(relatedId));
+			familyLogic.removeRelation(user, relatedUser, relationType);
+		}catch (IBOLookupException e) {
+			this.getLogger().log(Level.WARNING, "failed getting FamilyLogic", e);
+			return Boolean.FALSE;
+		} catch (RemoteException e) {
+			this.getLogger().log(Level.WARNING, "failed removing " + relationType + 
+					" relation from user" + userId + "  with " + relatedId, e);
+			return Boolean.FALSE;
+		} catch (RemoveException e) {
+			this.getLogger().log(Level.WARNING, "failed removing " + relationType + 
+					" relation from user" + userId + "  with " + relatedId, e);
+			return Boolean.FALSE;
+		}catch(Exception e){
+			this.getLogger().log(Level.WARNING, "failed removing " + relationType + 
+					" relation from user" + userId + "  with " + relatedId, e);
+			return Boolean.FALSE;
+		}
+		return Boolean.TRUE;
 	}
 }

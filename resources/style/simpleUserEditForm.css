@@ -1,0 +1,16 @@
+@CHARSET "UTF-8";
+.relation-list{
+	padding-left:0px; 
+	list-style : none;
+}
+.relation-list td.relation-type{
+	width : 8em;	
+}
+
+.relation-list * img{
+	width:30px;
+	height:40px;	
+}
+.relation-user-info-name{
+	width : 10em;	
+}

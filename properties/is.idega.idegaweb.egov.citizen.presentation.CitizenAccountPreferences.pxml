@@ -15,7 +15,7 @@
       <name>iw_component_methods</name>
       <value>
         <map>
-            <key>
+          <key>
             <name>:method:1:implied:void:setToShowGenderChooser:boolean:</name>
             <value>
               <map>
@@ -237,3 +237,4 @@
     </key>
   </map>
 </pxml>
+

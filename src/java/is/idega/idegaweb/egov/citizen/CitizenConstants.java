@@ -15,4 +15,5 @@ public class CitizenConstants {
 	public static final String USER_EDIT_FAMILY_PARAMETER = "user-edit-family-parameter";
 	public static final String USER_EDIT_RESUME_PARAMETER = "user-edit-resume-parameter";
 	public static final String USER_EDIT_USER_ID_PARAMETER = "user-edit-id-parameter";
+	public static final String USER_EDIT_PERSONAL_ID_PARAMETER = "user-edit-personal-id-parameter";
 }

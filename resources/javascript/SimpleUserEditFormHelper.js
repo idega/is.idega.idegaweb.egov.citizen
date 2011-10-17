@@ -8,11 +8,43 @@ jQuery(document).ready(function(){
 	SimpleUserEditFormHelper.createUserAutocomplete(SimpleUserEditFormHelper.RELATION_INPUT_SELECTOR,
 			SimpleUserEditFormHelper.RELATION_SELECT_SELECTOR,
 			SimpleUserEditFormHelper.RELATION_LIST_SELECTOR);
+	SimpleUserEditFormHelper.addRemoveActions(SimpleUserEditFormHelper.REMOVE_ITEM_CLASS,
+			SimpleUserEditFormHelper.RELATED_ITEM_CLASS,
+			SimpleUserEditFormHelper.ID_CONTANER_CLASS,
+			SimpleUserEditFormHelper.RELATION_TYPE_CONTAINER_CLASS,
+			SimpleUserEditFormHelper.FORM_SELECTOR,
+			SimpleUserEditFormHelper.USER_EDIT_USER_ID_PARAMETER);
+	SimpleUserEditFormHelper.createAutoresizing(SimpleUserEditFormHelper.RESUME_INPUT_SELECTOR,
+			SimpleUserEditFormHelper.FORM_SELECTOR);
 	jQuery(".tagedit-list").css({
 		width : "100%",
 		padding : "0"
 	});
 });
+
+SimpleUserEditFormHelper.createAutoresizing = function(Areaselector,formSelector){
+	var textArea = jQuery(Areaselector);
+	textArea.width("auto");
+	textArea.attr("cols",50);
+	var areaWidth = textArea.width();
+	var formWidth = jQuery(formSelector).width();
+	var columns = formWidth / areaWidth;
+	textArea.attr("cols",columns * 50);
+	var areaWidth = textArea.width() + 30;
+	columns = textArea.attr("cols");
+	if(formWidth > areaWidth){
+		for(var cols = textArea.attr("cols");formWidth > areaWidth;cols++){
+			textArea.attr("cols",cols);
+			areaWidth = textArea.width() + 30;
+		}
+	}
+	for(var cols = textArea.attr("cols");formWidth < areaWidth;cols--){
+		textArea.attr("cols",cols);
+		areaWidth = textArea.width() + 30;
+	}
+	textArea.autoResize({extraSpace : 20, animate : false,limit: 9999 });
+	textArea.trigger("keyup");
+}
 SimpleUserEditFormHelper.saveUser = function(selector){
 	showLoadingMessage("");
 	var form = jQuery(selector);
@@ -35,9 +67,32 @@ SimpleUserEditFormHelper.saveUser = function(selector){
 	});
 	
 }
-
-SimpleUserEditFormHelper.addFamilyMember = function(formSelector){
+SimpleUserEditFormHelper.addRemoveActions = function(removeItemClass,relatedItemClass,idContainerClass,
+		relationTypeContainerClass,formSelector,userIdInputName){
+	jQuery("." + removeItemClass).each(function(){
+		var removeItem = jQuery(this);
+		removeItem.click(function(){
+			var li = removeItem.parents("li." + relatedItemClass).filter(":first");
+		
+			var relatedId = li.find("." + idContainerClass).val();
+			var relationType = li.find("." + relationTypeContainerClass).val();
+			var userId = jQuery(formSelector).find("[name='"+ userIdInputName +"']").val();
+			
+			CitizenServices.removeRelation(userId,relatedId,relationType, {
+				callback: function(isRemoved) {
+					if(isRemoved){
+						li.remove();
+						humanMsg.displayMsg(SimpleUserEditFormHelper.REMOVED_MSG);
+					}else{
+						humanMsg.displayMsg(SimpleUserEditFormHelper.FAILED_MSG);
+					}
+				}
+			});
+		});
+		
+	});
 }
+
 SimpleUserEditFormHelper.createUserAutocomplete = function(inputSelector,relationSelectSelector,relationList){
 	input = jQuery(inputSelector);
 	input.tagedit({
@@ -64,7 +119,7 @@ SimpleUserEditFormHelper.createUserAutocomplete = function(inputSelector,relatio
 		allowAdd: true,
 		delay: 100,
 		autocompleteOptions: {
-			minLength : 1,
+			minLength : 3,
 			html: true,
 			select: function( event, ui ) {
 				jQuery(inputSelector).val(ui.item.value).trigger('transformToTag', [ui.item.id, ui.item.label]);
@@ -108,7 +163,9 @@ SimpleUserEditFormHelper.createUserAutocomplete = function(inputSelector,relatio
 					html += "<input type='hidden' name = 'tag[]' disabled='disabled'" + " value=\"" + label.toString() +"\" />";
 					html += '<a class="tagedit-close" title="'+obj.options.texts.removeLinkTitle+'">x</a>';
 					html += '</li>';
-					var element = jQuery(html).find("table");
+//					var element = jQuery(html).find("table");
+					var element = jQuery('<li/>');
+					element.append(jQuery(html).find("table"));
 					jQuery(relationList).append(element);
 					var removeItem = element.find("." + SimpleUserEditFormHelper.REMOVE_ITEM_CLASS);
 					removeItem.removeClass(SimpleUserEditFormHelper.REMOVE_ITEM_CLASS);
@@ -128,3 +185,4 @@ SimpleUserEditFormHelper.createUserAutocomplete = function(inputSelector,relatio
 	});
 	input.inputsToList = function(){};
 }
+

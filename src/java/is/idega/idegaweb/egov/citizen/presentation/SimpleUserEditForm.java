@@ -6,6 +6,7 @@ import is.idega.idegaweb.egov.citizen.CitizenConstants;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -36,6 +37,7 @@ import com.idega.presentation.TableCell2;
 import com.idega.presentation.TableRow;
 import com.idega.presentation.text.ListItem;
 import com.idega.presentation.text.Lists;
+import com.idega.presentation.text.Strong;
 import com.idega.presentation.ui.DropdownMenu;
 import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.GenericButton;
@@ -57,13 +59,19 @@ import com.idega.webface.WFUtil;
 
 public class SimpleUserEditForm extends IWBaseComponent{
 	private static final String REMOVE_ITEM_CLASS = "remove-item-class";
+	private static final String RELATED_ITEM_CLASS = "simple-user-edit-related-item-class";
 	private static final String RELATION_SELECTION_NAME = "relation_selection_name";
+	private static final String ID_CONTANER_CLASS = "id-container-class";
+	private static final String RELATION_TYPE_CONTAINER_CLASS = "relation-type-container";
 	
 	private String formId = null;
 	private String relationInputId = null;
 	private String relationSelectId = null;
 	private String relationListsId = null;
 	
+	private String userId = null;
+	
+
 	@Autowired
 	private CitizenServices citizenServices;
 	
@@ -81,8 +89,15 @@ public class SimpleUserEditForm extends IWBaseComponent{
 	
 	@Override
 	protected void initializeComponent(FacesContext context) {
-
-		this.add(this.getUserEditForm(getUserData()));
+		super.initializeComponent(context);
+		User user = getUser();
+		if(user == null){
+			Layer layer = new Layer();
+			this.add(layer);
+			layer.addText(iwrb.getLocalizedString("no_user_specified", "No user specified"));
+			return;
+		}
+		this.add(this.getUserEditForm(user));
 		Layer scriptLayer = new Layer();
 		this.add(scriptLayer);
 		addactions(scriptLayer);
@@ -100,17 +115,19 @@ public class SimpleUserEditForm extends IWBaseComponent{
 	public void setNeedFiles(Boolean needFiles) {
 		this.needFiles = needFiles;
 	}
-	private User getUserData(){
+	private User getUser(){
+		if(userId == null){
+			userId = iwc.getParameter(CitizenConstants.USER_EDIT_USER_ID_PARAMETER);
+		}
 		User user = null;
-		String id = iwc.getParameter(CitizenConstants.USER_EDIT_USER_ID_PARAMETER);
 		try{
-			if(id != null){
-				user = citizenServices.getUserBusiness().getUser(Integer.valueOf(id));
+			if(userId != null){
+				user = citizenServices.getUserBusiness().getUser(Integer.valueOf(userId));
 			}else if(iwc.isLoggedOn()){
 				user =iwc.getCurrentUser();
 			}
 		}catch(RemoteException e){
-			Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Failed getting user " + id , e);
+			Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Failed getting user with id " + userId , e);
 		}
 		return user;
 	}
@@ -130,17 +147,10 @@ public class SimpleUserEditForm extends IWBaseComponent{
 				isData = true;
 			}
 			id = user.getId();
-			resumeString = user.getDescription();
+			resumeString = user.getResume();
 			if(resumeString == null){
 				resumeString = CoreConstants.EMPTY;
 			}
-//			FamilyLogic familyLogic = null;
-//			try {
-//				familyLogic = IBOLookup.getServiceInstance(iwc, FamilyLogic.class);
-//				familyLogic.getf
-//			} catch (IBOLookupException e) {
-//				Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Failed getting family data" , e);
-//			}
 		}
 		if(born == null){
 			born = 	new Date();
@@ -150,10 +160,15 @@ public class SimpleUserEditForm extends IWBaseComponent{
 		String city = CoreConstants.EMPTY;
 		String postalCode = CoreConstants.EMPTY;
 		String country = null;
+		String personalId = CoreConstants.EMPTY;
 		if(isData){
 			name = userData.getName();
 			if(name == null){
 				name = CoreConstants.EMPTY;
+			}
+			personalId = userData.getPersonalId();
+			if(personalId == null){
+				personalId = CoreConstants.EMPTY;
 			}
 			streetNameAndNumber = userData.getStreetNameAndNumber();
 			if(name == null){
@@ -171,6 +186,7 @@ public class SimpleUserEditForm extends IWBaseComponent{
 		}
 		
 		Form form = new Form();
+		form.setStyleClass("dwr-form");
 		Table2 table = new Table2();
 		form.add(table);
 		formId = form.getId();
@@ -182,15 +198,25 @@ public class SimpleUserEditForm extends IWBaseComponent{
 		cell.add(idInput);
 		
 		// Name
-		Label cellInfo = new Label();
-		cellInfo.addText(iwrb.getLocalizedString("name", "Name"));
+		Strong cellInfo = new Strong();
 		cell.add(cellInfo);
+		cellInfo.addText(iwrb.getLocalizedString("name", "Name"));
 		TextInput input = new TextInput(CitizenConstants.USER_EDIT_NAME_PARAMETER,name);
+		cell = row.createCell();
+		cell.add(input);
+		cell.setStyleClass("input-container");
+		
+		// Personal ID
+		row = table.createRow();
+		cellInfo = new Strong();
+		row.createCell().add(cellInfo);
+		cellInfo.addText(iwrb.getLocalizedString("personal_id", "Personal id"));
+		input = new TextInput(CitizenConstants.USER_EDIT_PERSONAL_ID_PARAMETER,personalId);
 		row.createCell().add(input);
 		
 		// Born
 		row = table.createRow();
-		cellInfo = new Label();
+		cellInfo = new Strong();
 		cellInfo.addText(iwrb.getLocalizedString("birth_date", "Birth date"));
 		row.createCell().add(cellInfo);
 		IWDatePicker bornDate = new IWDatePicker(CitizenConstants.USER_EDIT_BORN_PARAMETER);
@@ -199,31 +225,37 @@ public class SimpleUserEditForm extends IWBaseComponent{
 		
 		// Street and number
 		row = table.createRow();
-		cellInfo = new Label();
+		cellInfo = new Strong();
 		cellInfo.addText(iwrb.getLocalizedString("street_and_number", "Street and number"));
 		row.createCell().add(cellInfo);
 		input = new TextInput(CitizenConstants.USER_EDIT_STREET_AND_NUMBER_PARAMETER,streetNameAndNumber);
-		row.createCell().add(input);
+		cell = row.createCell();
+		cell.add(input);
+		cell.setStyleClass("input-container");
 		
 		// City
 		row = table.createRow();
-		cellInfo = new Label();
+		cellInfo = new Strong();
 		cellInfo.addText(iwrb.getLocalizedString("city", "City"));
 		row.createCell().add(cellInfo);
 		input = new TextInput(CitizenConstants.USER_EDIT_CITY_PARAMETER,city);
-		row.createCell().add(input);
+		cell = row.createCell();
+		cell.add(input);
+		cell.setStyleClass("input-container");
 		
 		// Postal code
 		row = table.createRow();
-		cellInfo = new Label();
+		cellInfo = new Strong();
 		cellInfo.addText(iwrb.getLocalizedString("postal_code", "Postal code"));
 		row.createCell().add(cellInfo);
 		input = new TextInput(CitizenConstants.USER_EDIT_POSTAL_CODE_PARAMETER,postalCode);
-		row.createCell().add(input);
+		cell = row.createCell();
+		cell.add(input);
+		cell.setStyleClass("input-container");
 		
 		// Country
 		row = table.createRow();
-		cellInfo = new Label();
+		cellInfo = new Strong();
 		cellInfo.addText(iwrb.getLocalizedString("country", "Country"));
 		row.createCell().add(cellInfo);
 		DropdownMenu dropdown = new DropdownMenu(CitizenConstants.USER_EDIT_COUNTRY_PARAMETER);
@@ -253,45 +285,40 @@ public class SimpleUserEditForm extends IWBaseComponent{
 		//TODO: search for types
 		
 		// Family
-		cellInfo = new Label();
+		cellInfo = new Strong();
 		cellInfo.addText(iwrb.getLocalizedString("family", "Family"));
 		table.createRow().createCell().add(cellInfo);
 		row = table.createRow();
+		cell = row.createCell();
 		input = new TextInput("tag[]");
+		cell.add(input);
 		relationInputId = input.getId();
-		row.createCell().add(input);
-		dropdown = getFamilyRelationSelection(RELATION_SELECTION_NAME);
+		List<String> relations = null;
+		try {
+			relations = citizenServices.getFamilyRelationTypes(iwc);
+		} catch (Exception e) {
+			Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Failed getting user " + id + " family relations", e);
+			relations = Collections.emptyList();
+		}
+		dropdown = getFamilyRelationSelection(RELATION_SELECTION_NAME,relations);
 		row.createCell().add(dropdown);
 		relationSelectId = dropdown.getId();
-//		FamilyRelationConnector con = new FamilyRelationConnector();
-//		try {
-//			row.createCell().add(con.getRelationMenu(iwc));
-//		} catch (RemoteException e) {
-//			Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Failed adding relation menu"	 , e);
-//		}
-//		GenericButton button = new GenericButton("buttonAdd", iwrb.getLocalizedString("add", "Add"));
-//		row.createCell().add(button);
-//		StringBuilder action = new StringBuilder("SimpleUserEditFormHelper.addFamilyMember('#")
-//				.append(form.getId())
-//				.append(CoreConstants.JS_STR_PARAM_SEPARATOR).append(RELATION_SELECTION_NAME)
-//				.append(CoreConstants.JS_STR_PARAM_SEPARATOR).append(RELATION_VALUE_NAME)
-//				.append(CoreConstants.JS_STR_PARAM_SEPARATOR).append(CitizenConstants.USER_EDIT_USER_ID_PARAMETER)
-//				.append(CoreConstants.JS_STR_PARAM_END);
-//		button.setOnClick(action.toString());
-		row = table.createRow();
-		Lists relationList = getfamilyMemberList(user);
+
+		table = new Table2();
+		form.add(table);
+		Lists relationList = getfamilyMemberList(user,relations);
+		table.createRow().createCell().add(relationList);
 		relationListsId = relationList.getId();
-		row.createCell().add(relationList);
 		
 		
 		
 		// Resume
-		row = table.createRow();
-		cellInfo = new Label();
+		cellInfo = new Strong();
 		cellInfo.addText(iwrb.getLocalizedString("resume", "Resume"));
-		row.createCell().add(cellInfo);
+		table.createRow().createCell().add(cellInfo);
 		TextArea resume = new TextArea(CitizenConstants.USER_EDIT_RESUME_PARAMETER,resumeString);
-		row.createCell().add(resume);
+		table.createRow().createCell().add(resume);
+		resume.setColumns(50);
 		
 		// Submit
 		GenericButton buttonSubmit = new GenericButton("buttonSubmit", iwrb.getLocalizedString("save", "Save"));
@@ -301,8 +328,9 @@ public class SimpleUserEditForm extends IWBaseComponent{
 		return form;
 	}
 	
-	private Lists getfamilyMemberList(User theUser){
+	private Lists getfamilyMemberList(User theUser,Collection <String> relations){
 		Lists list = new Lists();
+		list.setStyleClass("relation-list");
 		FamilyLogic fl = null;
 		try {
 			fl = citizenServices.getFamilyLogic(iwc);
@@ -310,7 +338,7 @@ public class SimpleUserEditForm extends IWBaseComponent{
 			Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "failed getting family logic", e);
 			return list;
 		}
-		Map <String,Collection<User>> members = citizenServices.getFamilyMembers(iwc, theUser);
+		Map <String,Collection<User>> members = citizenServices.getFamilyMembers(iwc, theUser,relations);
 		Set <String> keys = members.keySet();
 		UserApplicationEngine userApplicationEngine = citizenServices.getUserApplicationEngine();
 		IWMainApplication iwma = iwc.getApplicationContext().getIWMainApplication();
@@ -320,7 +348,8 @@ public class SimpleUserEditForm extends IWBaseComponent{
 			for(User user : users){
 				ListItem li = new ListItem();
 				list.add(li);
-				Table2 table =  getUserInfoView(userApplicationEngine.getUserInfo(user),key,fl,iwrb,iwb);;
+				li.setStyleClass(RELATED_ITEM_CLASS);
+				Table2 table =  getUserInfoView(userApplicationEngine.getUserInfo(user),key,fl,iwrb,iwb,false);;
 				li.add(table);
 			}
 		}
@@ -328,19 +357,32 @@ public class SimpleUserEditForm extends IWBaseComponent{
 	}
 	
 	public static Table2 getUserInfoView(UserDataBean userData,String relation,
-			FamilyLogic familyLogic,IWResourceBundle iwrb,IWBundle iwb ){
+			FamilyLogic familyLogic,IWResourceBundle iwrb,IWBundle iwb,boolean addRelationNameToInput ){
 		Table2 table = new Table2();
 		TableRow row = table.createRow();
+		table.setStyleClass("user-info-table");
 		
 		// User to add
-		HiddenInput input = new HiddenInput(relation, String.valueOf(userData.getUserId()));
 		TableCell2 cell = row.createCell();
+		HiddenInput input = new HiddenInput();
+		if(addRelationNameToInput){
+			input.setName(relation);
+		}
+		input.setValue(String.valueOf(userData.getUserId()));
 		cell.add(input);
+		input.setStyleClass(ID_CONTANER_CLASS);
+		
 		
 		// Relation type
 		Label label = new Label();
 		label.addText(familyLogic.getRelationName(iwrb, relation));
 		cell.add(label);
+		cell.setStyleClass("relation-type");
+		
+		input = new HiddenInput();
+		cell.add(input);
+		input.setValue(relation);
+		input.setStyleClass(RELATION_TYPE_CONTAINER_CLASS);
 		
 		
 		// Picture
@@ -348,9 +390,11 @@ public class SimpleUserEditForm extends IWBaseComponent{
 		row.createCell().add(image);
 		
 		// Name
+		cell = row.createCell();
+		cell.setStyleClass("relation-user-info-name");
 		label = new Label();
+		cell.add(label);
 		label.addText(userData.getName());
-		row.createCell().add(label);
 		
 		// Remove
 		cell = row.createCell();
@@ -364,10 +408,9 @@ public class SimpleUserEditForm extends IWBaseComponent{
 		return table;
 	}
 	
-	private DropdownMenu getFamilyRelationSelection(String name){
+	private DropdownMenu getFamilyRelationSelection(String name,Collection<String> relations){
 		DropdownMenu dropdown = new DropdownMenu(name);
 		try {
-			List<String> relations = citizenServices.getFamilyRelationTypes(iwc);
 			FamilyLogic fl = citizenServices.getFamilyLogic(iwc);
 			for(String relation : relations){
 				dropdown.addMenuElement(relation, fl.getRelationName(iwrb, relation));
@@ -389,9 +432,24 @@ public class SimpleUserEditForm extends IWBaseComponent{
 		.append("SimpleUserEditFormHelper.RELATION_LIST_SELECTOR= '#")
 		.append(relationListsId).append(CoreConstants.JS_STR_INITIALIZATION_END)
 		.append("SimpleUserEditFormHelper.NON_TRIVIAL_USER_PHRASE= '")
-		.append(iwrb.getLocalizedString("user_not_found", "User not found")).append(CoreConstants.JS_STR_INITIALIZATION_END)
+		.append(iwrb.getLocalizedString("entered_search_request_does_not_trivially_identifies_the_person",
+				"Entered request does not trivially identifies the person")).append(CoreConstants.JS_STR_INITIALIZATION_END)
+		.append("SimpleUserEditFormHelper.RELATED_ITEM_CLASS= '")
+		.append(RELATED_ITEM_CLASS).append(CoreConstants.JS_STR_INITIALIZATION_END)
 		.append("SimpleUserEditFormHelper.REMOVE_ITEM_CLASS= '")
 		.append(REMOVE_ITEM_CLASS).append(CoreConstants.JS_STR_INITIALIZATION_END)
+		.append("SimpleUserEditFormHelper.ID_CONTANER_CLASS= '")
+		.append(ID_CONTANER_CLASS).append(CoreConstants.JS_STR_INITIALIZATION_END)
+		.append("SimpleUserEditFormHelper.RESUME_INPUT_SELECTOR = '[name =")
+		.append(CitizenConstants.USER_EDIT_RESUME_PARAMETER).append("]';")
+		.append("SimpleUserEditFormHelper.RELATION_TYPE_CONTAINER_CLASS= '")
+		.append(RELATION_TYPE_CONTAINER_CLASS).append(CoreConstants.JS_STR_INITIALIZATION_END)
+		.append("SimpleUserEditFormHelper.USER_EDIT_USER_ID_PARAMETER= '")
+		.append(CitizenConstants.USER_EDIT_USER_ID_PARAMETER).append(CoreConstants.JS_STR_INITIALIZATION_END)
+		.append("SimpleUserEditFormHelper.FAILED_MSG= '")
+		.append(iwrb.getLocalizedString("failed", "Failed")).append(CoreConstants.JS_STR_INITIALIZATION_END)
+		.append("SimpleUserEditFormHelper.REMOVED_MSG = '")
+		.append(iwrb.getLocalizedString("removed", "Removed")).append(CoreConstants.JS_STR_INITIALIZATION_END)
 		.append("\n}");
 		
 		String actionString = PresentationUtil.getJavaScriptAction(actions.toString());
@@ -430,6 +488,8 @@ public class SimpleUserEditForm extends IWBaseComponent{
 				scripts.add(web2.getBundleURIWithinScriptsFolder(new StringBuilder(Web2BusinessBean.JQUERY_PLUGINS_FOLDER_NAME_PREFIX)
 						.append(CoreConstants.SLASH)
 						.append(Web2BusinessBean.TAGEDIT_SCRIPT_FILE_AUTOGROW).toString()));
+				scripts.add(web2.getBundleURIWithinScriptsFolder(new StringBuilder(Web2BusinessBean.JQUERY_PLUGINS_FOLDER_NAME_PREFIX)
+				.append("/jquery.autoresizev-textarea.js").toString()));
 			}catch(RemoteException e){
 				Logger.getLogger("SimpleUserEditForm").log(Level.WARNING,CoreConstants.EMPTY,e);
 			}
@@ -473,7 +533,16 @@ public class SimpleUserEditForm extends IWBaseComponent{
 		}
 		IWMainApplication iwma = iwc.getApplicationContext().getIWMainApplication();
 		IWBundle iwb = iwma.getBundle(CitizenConstants.IW_BUNDLE_IDENTIFIER);
-//		styles.add(iwb.getVirtualPathWithFileNameString("style/simpleUserEditForm.css"));
+		styles.add(iwb.getVirtualPathWithFileNameString("style/citizen.css"));
+		styles.add(iwb.getVirtualPathWithFileNameString("style/simpleUserEditForm.css"));
 		return styles;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
 	}
 }
