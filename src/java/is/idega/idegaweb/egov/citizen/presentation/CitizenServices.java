@@ -56,6 +56,7 @@ import com.idega.user.data.User;
 import com.idega.user.data.UserHome;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
+import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
 import com.idega.util.expression.ELUtil;
 
@@ -79,12 +80,12 @@ public class CitizenServices extends DefaultSpringBean implements
 	private UserHome userHome = null;
 	
 	@RemoteMethod
-	public String saveUser(Map <String,ArrayList<String>> parameters){
-		IWContext iwc  =  CoreUtil.getIWContext();
+	public String saveUser(Map <String, List<String>> parameters){
+		IWContext iwc = CoreUtil.getIWContext();
 		IWBundle bundle = iwc.getIWMainApplication().getBundle(CitizenConstants.IW_BUNDLE_IDENTIFIER);
 		IWResourceBundle iwrb = bundle.getResourceBundle(iwc);
-		String successMsg = iwrb.getLocalizedString("saved", "saved");
-		String failureMsg = iwrb.getLocalizedString("failed_saving", "Failed_saving") + "!!!";
+		String successMsg = iwrb.getLocalizedString("user_profile_saved", "User profile successfully saved");
+		String failureMsg = iwrb.getLocalizedString("failed_saving_user_profile", "Failed to save user profile") + "!";
 		User user = null;
 		int id = -1;
 		UserBusiness userBusiness = getUserBusiness();
@@ -104,7 +105,7 @@ public class CitizenServices extends DefaultSpringBean implements
 		}
 		// Setting user data
 		String name = null;
-		ArrayList<String> params = parameters.get(CitizenConstants.USER_EDIT_NAME_PARAMETER);
+		List<String> params = parameters.get(CitizenConstants.USER_EDIT_NAME_PARAMETER);
 		if(params != null){
 			name = params.get(0);
 			user.setName(name);
@@ -140,27 +141,28 @@ public class CitizenServices extends DefaultSpringBean implements
 			successMsg += CoreConstants.NEWLINE + report;
 		}
 		// Setting user family relations data
-		report = saveFamilyRelations(parameters, iwrb,iwc,user);
+		report = saveFamilyRelations(parameters, iwrb, iwc, user);
 		if(!StringUtil.isEmpty(report)){
 			successMsg += CoreConstants.NEWLINE + report;
 		}
 		
-		
 		return successMsg;
 	}
+	
 	@RemoteMethod
-	public String saveUserAccessSetings(Map <String,ArrayList<String>> parameters){
-		IWContext iwc  =  CoreUtil.getIWContext();
+	public String saveUserAccessSetings(Map<String, List<String>> parameters) {
+		IWContext iwc = CoreUtil.getIWContext();
 		IWBundle bundle = iwc.getIWMainApplication().getBundle(CitizenConstants.IW_BUNDLE_IDENTIFIER);
 		IWResourceBundle iwrb = bundle.getResourceBundle(iwc);
-		String successMsg = iwrb.getLocalizedString("saved", "saved");
-		String failureMsg = iwrb.getLocalizedString("failed_saving", "Failed_saving") + "!!!";
+		String successMsg = iwrb.getLocalizedString("access_settings_saved", "Access settings successfully saved");
+		String failureMsg = iwrb.getLocalizedString("failed_saving_access_setting", "Failed saving access settings") + "!";
 		if(!iwc.isLoggedOn()){
 			return failureMsg + CoreConstants.NEWLINE + iwrb.getLocalizedString("not_logged_in", "Not logged in");
 		}
+		
 		LoginTable loginTable = LoginDBHandler.getUserLogin(iwc.getCurrentUserId());
 		String login = null;
-		ArrayList<String> params = parameters.get(CitizenConstants.USER_EDIT_USERNAME_PARAMETER);
+		List<String> params = parameters.get(CitizenConstants.USER_EDIT_USERNAME_PARAMETER);
 		if(params != null){
 			login = params.get(0);
 			loginTable.setUserLogin(login);
@@ -177,17 +179,18 @@ public class CitizenServices extends DefaultSpringBean implements
 		}
 		return successMsg;
 	}
-	private String saveFamilyRelations(Map <String,ArrayList<String>> parameters,IWResourceBundle iwrb,IWContext iwc,User user){
+	
+	private String saveFamilyRelations(Map <String, List<String>> parameters,IWResourceBundle iwrb,IWContext iwc,User user){
 		String report = CoreConstants.EMPTY;
 		String failure = null;
 		try {
 			FamilyLogic familyLogic = getFamilyLogic(iwc);
 			UserBusiness userBusiness = getUserBusiness();
-			ArrayList<String> params = parameters.get(CitizenConstants.USER_EDIT_MARITAL_STATUS_PARAMETER);
-			String maritalStatus = null;
-			if(params != null){
-				maritalStatus = params.get(0);
-			}
+			List<String> params = parameters.get(CitizenConstants.USER_EDIT_MARITAL_STATUS_PARAMETER);
+//			String maritalStatus = null;
+//			if(params != null){
+//				maritalStatus = params.get(0);
+//			}
 			Collection<String> relations = getFamilyRelationTypes(iwc);
 			String userId = user.getId();
 			for(String type : relations){
@@ -227,10 +230,11 @@ public class CitizenServices extends DefaultSpringBean implements
 		}
 		return report;
 	}
-	private String saveAddress(Map <String,ArrayList<String>> parameters,IWResourceBundle iwrb, String userId){
+	
+	private String saveAddress(Map<String, List<String>> parameters, IWResourceBundle iwrb, String userId){
 		String report = CoreConstants.EMPTY;
 		String streetNameAndNumber = null;
-		ArrayList<String> params = parameters.get(CitizenConstants.USER_EDIT_STREET_AND_NUMBER_PARAMETER);
+		List<String> params = parameters.get(CitizenConstants.USER_EDIT_STREET_AND_NUMBER_PARAMETER);
 		if(params != null){
 			streetNameAndNumber = params.get(0);
 		}
@@ -244,7 +248,7 @@ public class CitizenServices extends DefaultSpringBean implements
 		if(params != null){
 			country = params.get(0);
 			Locale locale = ICLocaleBusiness.getLocaleFromLocaleString(country);
-			country = locale.getDisplayCountry();
+			country = locale.getDisplayCountry(Locale.ENGLISH);
 		}
 		Integer postalCodeId = null;
 		params = parameters.get(CitizenConstants.USER_EDIT_POSTAL_CODE_PARAMETER);
@@ -257,9 +261,12 @@ public class CitizenServices extends DefaultSpringBean implements
 				postalCodeId = (Integer)postalCode.getPrimaryKey();
 			}
 		}
+		String postalBox = null;
+		params = parameters.get(CitizenConstants.USER_EDIT_POSTAL_BOX_PARAMETER);
+		if (!ListUtil.isEmpty(params))
+			postalBox = params.get(0);
 		try {
-			userBusiness.updateUsersMainAddressOrCreateIfDoesNotExist(Integer.valueOf(userId), 
-					streetNameAndNumber,postalCodeId, country, city, null, null);
+			userBusiness.updateUsersMainAddressOrCreateIfDoesNotExist(Integer.valueOf(userId), streetNameAndNumber, postalCodeId, country, city, null, postalBox);
 		} catch (NumberFormatException e) {
 			this.getLogger().log(Level.WARNING, "failed getting user id " + userId, e);
 			return  iwrb.getLocalizedString("failed_saving_address_data", "Failed saving address data");
@@ -273,7 +280,7 @@ public class CitizenServices extends DefaultSpringBean implements
 		return report;
 	}
 	
-	private PostalCode getPostalCode(String postalCode,String countryName){
+	private PostalCode getPostalCode(String postalCode, String countryName){
 		try{
 			PostalCodeHome postalcCodeHome = getPostalCodeHome();
 			PostalCode code = null;
@@ -332,8 +339,8 @@ public class CitizenServices extends DefaultSpringBean implements
 		}
 		return familyLogic;
 	}
-	@SuppressWarnings("unchecked")
-	public Map <String,Collection<User>> getFamilyMembers(IWContext iwc, User user, Collection<String> relationTypes){
+	
+	public Map <String ,Collection<User>> getFamilyMembers(IWContext iwc, User user, Collection<String> relationTypes) {
 		Map<String,Collection<User>> members = new HashMap<String,Collection<User>>();
 		FamilyLogic familyLogic = null;
 		try {
@@ -353,9 +360,59 @@ public class CitizenServices extends DefaultSpringBean implements
 			Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Failed getting family data" , e);
 		}
 		return members;
+//		try {
+//			Collection<User> related = null;
+//			try{
+//				related = familyLogic.getChildrenFor(user);
+//			}catch (FinderException e) {
+//				related = Collections.emptyList();
+//			}
+//			members.put(familyLogic.getChildRelationType(), related);
+//			try{
+//				related = familyLogic.getParentsFor(user);
+//			}catch (FinderException e) {
+//				related = Collections.emptyList();
+//			}
+//			members.put(familyLogic.getParentRelationType(), related);
+//			try{
+//				related = familyLogic.getCustodiansFor(user);
+//			}catch (FinderException e) {
+//				related = Collections.emptyList();
+//			}
+//			members.put(familyLogic.getCustodianRelationType(), related);
+//			try{
+//				related = familyLogic.getSiblingsFor(user);
+//			}catch (FinderException e) {
+//				related = Collections.emptyList();
+//			}
+//			members.put(familyLogic.getSiblingRelationType(), related);
+//			try{
+//				User relatedUser = familyLogic.getSpouseFor(user);
+//				related = new ArrayList<User>(1);
+//				related.add(relatedUser);
+//			}catch (FinderException e) {
+//				related = Collections.emptyList();
+//			}
+//			members.put(familyLogic.getSpouseRelationType(), related);
+//			try{
+//				User relatedUser = familyLogic.getCohabitantFor(user);
+//				related = new ArrayList(1);
+//				related.add(relatedUser);
+//			}catch (FinderException e) {
+//				related = Collections.emptyList();
+//			}
+//			members.put(familyLogic.getCohabitantRelationType(), related);
+//			
+//		} catch (IBOLookupException e) {
+//			Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Failed getting family data" , e);
+//		} catch (RemoteException e) {
+//			Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Failed getting family data" , e);
+//		}
+//		return members;
 	}
+	
 	public List<String> getFamilyRelationTypes(IWContext iwc) throws Exception{
-		ArrayList<String> familyRelationTypes = new ArrayList<String>();
+		List<String> familyRelationTypes = new ArrayList<String>();
 		FamilyLogic familyLogic = getFamilyLogic(iwc);
 		familyRelationTypes.add(familyLogic.getChildRelationType());
 		familyRelationTypes.add(familyLogic.getParentRelationType());
@@ -367,7 +424,7 @@ public class CitizenServices extends DefaultSpringBean implements
 	}
 	
 	@RemoteMethod
-	public Collection <String> getAutocompletedUsers(String request,int maxAmount,String relationType){
+	public Collection<String> getAutocompletedUsers(String request,int maxAmount,String relationType){
 		request = request.toLowerCase();
 		Collection <User> requestedUsers = (this.getUserHome().ejbAutocompleteRequest(request, -1, maxAmount, 0));
 		UserApplicationEngine userApplicationEngine = this.getUserApplicationEngine();
@@ -388,7 +445,7 @@ public class CitizenServices extends DefaultSpringBean implements
 		
 		for(User user : requestedUsers){
 			UserDataBean data =  userApplicationEngine.getUserInfo(user);
-			Table2 table = SimpleUserEditForm.getUserInfoView(data,relationType,fl,iwrb,iwb,true);
+			Table2 table = CitizenProfile.getUserInfoView(data,relationType,fl,iwrb,iwb,true);
 			String html = BuilderLogic.getInstance().getRenderedComponent(
 					table, null).getHtml();
 			tables.add(html);
@@ -396,6 +453,7 @@ public class CitizenServices extends DefaultSpringBean implements
 		}
 		return tables;
 	}
+	
 	public UserHome getUserHome() {
 		if (this.userHome  == null) {
 			try {
@@ -406,6 +464,7 @@ public class CitizenServices extends DefaultSpringBean implements
 		}
 		return this.userHome;
 	}
+	
 	@RemoteMethod
 	public Boolean removeRelation(String userId,String relatedId,String relationType){
 		if(userId == null || relatedId == null || relationType == null){

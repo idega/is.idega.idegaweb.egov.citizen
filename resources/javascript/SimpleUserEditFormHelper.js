@@ -1,7 +1,3 @@
-/**
- * 
- */
-
 var SimpleUserEditFormHelper = {};
 jQuery(document).ready(function(){
 	SimpleUserEditFormHelper.initialize();
@@ -45,6 +41,7 @@ SimpleUserEditFormHelper.createAutoresizing = function(Areaselector,formSelector
 	textArea.autoResize({extraSpace : 20, animate : false,limit: 9999 });
 	textArea.trigger("keyup");
 }
+
 SimpleUserEditFormHelper.saveUser = function(selector){
 	showLoadingMessage("");
 	var form = jQuery(selector);
@@ -59,7 +56,7 @@ SimpleUserEditFormHelper.saveUser = function(selector){
 		map[element.name].push(element.value);
 	}
 	humanMsg.displayMsg(map);
-	CitizenServices.saveUser(map,{
+	CitizenServices.saveUser(map, {
 		callback: function(reply){
 			closeAllLoadingMessages();
 			humanMsg.displayMsg(reply);
@@ -67,8 +64,7 @@ SimpleUserEditFormHelper.saveUser = function(selector){
 	});
 	
 }
-SimpleUserEditFormHelper.addRemoveActions = function(removeItemClass,relatedItemClass,idContainerClass,
-		relationTypeContainerClass,formSelector,userIdInputName){
+SimpleUserEditFormHelper.addRemoveActions = function(removeItemClass,relatedItemClass,idContainerClass,relationTypeContainerClass,formSelector,userIdInputName){
 	jQuery("." + removeItemClass).each(function(){
 		var removeItem = jQuery(this);
 		removeItem.click(function(){
@@ -94,7 +90,7 @@ SimpleUserEditFormHelper.addRemoveActions = function(removeItemClass,relatedItem
 }
 
 SimpleUserEditFormHelper.createUserAutocomplete = function(inputSelector,relationSelectSelector,relationList){
-	input = jQuery(inputSelector);
+	/*input = jQuery(inputSelector);
 	input.tagedit({
 		autocompleteURL: function(request, response) {
 			var relationName = jQuery(relationSelectSelector).val();
@@ -163,7 +159,6 @@ SimpleUserEditFormHelper.createUserAutocomplete = function(inputSelector,relatio
 					html += "<input type='hidden' name = 'tag[]' disabled='disabled'" + " value=\"" + label.toString() +"\" />";
 					html += '<a class="tagedit-close" title="'+obj.options.texts.removeLinkTitle+'">x</a>';
 					html += '</li>';
-//					var element = jQuery(html).find("table");
 					var element = jQuery('<li/>');
 					element.append(jQuery(html).find("table"));
 					jQuery(relationList).append(element);
@@ -183,6 +178,6 @@ SimpleUserEditFormHelper.createUserAutocomplete = function(inputSelector,relatio
 
 		}
 	});
-	input.inputsToList = function(){};
+	input.inputsToList = function(){};*/
 }
 

@@ -9,7 +9,8 @@ public class CitizenConstants {
 	public static final String USER_EDIT_BORN_PARAMETER = "user-edit-born-parameter";
 	public static final String USER_EDIT_STREET_AND_NUMBER_PARAMETER = "user-edit-street-and-number-parameter";
 	public static final String USER_EDIT_CITY_PARAMETER = "user-edit-city-parameter";
-	public static final String USER_EDIT_POSTAL_CODE_PARAMETER = "user-edit-postal-code-parameter";
+	public static final String USER_EDIT_POSTAL_CODE_PARAMETER = "user-edit-postal-code-parameter",
+			USER_EDIT_POSTAL_BOX_PARAMETER = "user-edit-postal-box-parameter";
 	public static final String USER_EDIT_COUNTRY_PARAMETER = "user-edit-country-parameter";
 	public static final String USER_EDIT_MARITAL_STATUS_PARAMETER = "user-edit-marital-status-parameter";
 	public static final String USER_EDIT_FAMILY_PARAMETER = "user-edit-family-parameter";

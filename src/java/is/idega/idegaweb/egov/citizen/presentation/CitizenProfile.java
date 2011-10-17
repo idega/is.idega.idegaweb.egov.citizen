@@ -16,8 +16,6 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.faces.context.FacesContext;
-
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.idega.block.web2.business.JQuery;
@@ -28,7 +26,7 @@ import com.idega.core.localisation.business.ICLocaleBusiness;
 import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.IWResourceBundle;
-import com.idega.presentation.IWBaseComponent;
+import com.idega.presentation.Block;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Image;
 import com.idega.presentation.Layer;
@@ -51,13 +49,13 @@ import com.idega.user.bean.UserDataBean;
 import com.idega.user.business.UserApplicationEngine;
 import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
-import com.idega.util.CoreUtil;
 import com.idega.util.PresentationUtil;
 import com.idega.util.StringUtil;
 import com.idega.util.expression.ELUtil;
 import com.idega.webface.WFUtil;
 
-public class SimpleUserEditForm extends IWBaseComponent{
+public class CitizenProfile extends Block {
+	
 	private static final String REMOVE_ITEM_CLASS = "remove-item-class";
 	private static final String RELATED_ITEM_CLASS = "simple-user-edit-related-item-class";
 	private static final String RELATION_SELECTION_NAME = "relation_selection_name";
@@ -70,34 +68,39 @@ public class SimpleUserEditForm extends IWBaseComponent{
 	private String relationListsId = null;
 	
 	private String userId = null;
-	
 
 	@Autowired
 	private CitizenServices citizenServices;
 	
-	
 	private Boolean needFiles = Boolean.TRUE;
 	
-	IWContext iwc = null;
 	IWResourceBundle iwrb = null;
-	public SimpleUserEditForm(){
-		iwc = CoreUtil.getIWContext();
-		IWBundle bundle = iwc.getIWMainApplication().getBundle(CitizenConstants.IW_BUNDLE_IDENTIFIER);
-		iwrb = bundle.getResourceBundle(iwc);
+	
+	public CitizenProfile(){
 		ELUtil.getInstance().autowire(this);
 	}
 	
 	@Override
-	protected void initializeComponent(FacesContext context) {
-		super.initializeComponent(context);
-		User user = getUser();
+	public String getBundleIdentifier() {
+		return CitizenConstants.IW_BUNDLE_IDENTIFIER;
+	}
+	
+	@Override
+	public void main(IWContext context) throws Exception {
+		IWContext iwc = IWContext.getIWContext(context);
+		
+		IWBundle bundle = getBundle(iwc);
+		iwrb = bundle.getResourceBundle(iwc);
+		
+		User user = getUser(iwc);
 		if(user == null){
 			Layer layer = new Layer();
 			this.add(layer);
 			layer.addText(iwrb.getLocalizedString("no_user_specified", "No user specified"));
 			return;
 		}
-		this.add(this.getUserEditForm(user));
+		
+		this.add(this.getUserEditForm(user, iwc));
 		Layer scriptLayer = new Layer();
 		this.add(scriptLayer);
 		addactions(scriptLayer);
@@ -109,13 +112,13 @@ public class SimpleUserEditForm extends IWBaseComponent{
 			PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, getNeededScripts(iwc));
 			PresentationUtil.addStyleSheetsToHeader(iwc, getNeededStyles(iwc));
 		}
-
-//		this.addActions();
 	}
+	
 	public void setNeedFiles(Boolean needFiles) {
 		this.needFiles = needFiles;
 	}
-	private User getUser(){
+	
+	private User getUser(IWContext iwc){
 		if(userId == null){
 			userId = iwc.getParameter(CitizenConstants.USER_EDIT_USER_ID_PARAMETER);
 		}
@@ -132,14 +135,13 @@ public class SimpleUserEditForm extends IWBaseComponent{
 		return user;
 	}
 	
-	private Form getUserEditForm(User user){
+	private Form getUserEditForm(User user, IWContext iwc){
 		UserDataBean userData = null;
 		boolean isData = false;
 		
 		Date born = null;
-		String id = "-1";
+		String id = String.valueOf(-1);
 		String resumeString = CoreConstants.EMPTY;
-//		List
 		if(user != null){
 			born = user.getDateOfBirth();
 			userData = citizenServices.getUserApplicationEngine().getUserInfo(user);
@@ -152,13 +154,11 @@ public class SimpleUserEditForm extends IWBaseComponent{
 				resumeString = CoreConstants.EMPTY;
 			}
 		}
-		if(born == null){
-			born = 	new Date();
-		}
 		String name = CoreConstants.EMPTY;
 		String streetNameAndNumber = CoreConstants.EMPTY;
 		String city = CoreConstants.EMPTY;
 		String postalCode = CoreConstants.EMPTY;
+		String postalBox = CoreConstants.EMPTY;
 		String country = null;
 		String personalId = CoreConstants.EMPTY;
 		if(isData){
@@ -182,7 +182,12 @@ public class SimpleUserEditForm extends IWBaseComponent{
 			if(postalCode == null){
 				postalCode = CoreConstants.EMPTY;
 			}
+			postalBox = userData.getPostalBox();
+			if (StringUtil.isEmpty(postalBox))
+				postalBox = CoreConstants.EMPTY;
 			country = userData.getCountryName();
+			if (StringUtil.isEmpty(country))
+				country = CoreConstants.EMPTY;
 		}
 		
 		Form form = new Form();
@@ -220,8 +225,11 @@ public class SimpleUserEditForm extends IWBaseComponent{
 		cellInfo.addText(iwrb.getLocalizedString("birth_date", "Birth date"));
 		row.createCell().add(cellInfo);
 		IWDatePicker bornDate = new IWDatePicker(CitizenConstants.USER_EDIT_BORN_PARAMETER);
-		row.createCell().add(bornDate);
+		bornDate.setUseCurrentDateIfNotSet(false);
+		bornDate.keepStatusOnAction(true);
+		bornDate.setShowYearChange(true);
 		bornDate.setDate(born);
+		row.createCell().add(bornDate);
 		
 		// Street and number
 		row = table.createRow();
@@ -253,6 +261,16 @@ public class SimpleUserEditForm extends IWBaseComponent{
 		cell.add(input);
 		cell.setStyleClass("input-container");
 		
+		//	Postal box
+		row = table.createRow();
+		cellInfo = new Strong();
+		cellInfo.addText(iwrb.getLocalizedString("postal_box", "Postal box"));
+		row.createCell().add(cellInfo);
+		input = new TextInput(CitizenConstants.USER_EDIT_POSTAL_BOX_PARAMETER, postalBox);
+		cell = row.createCell();
+		cell.add(input);
+		cell.setStyleClass("input-container");
+		
 		// Country
 		row = table.createRow();
 		cellInfo = new Strong();
@@ -262,9 +280,10 @@ public class SimpleUserEditForm extends IWBaseComponent{
 		row.createCell().add(dropdown);
 		@SuppressWarnings("unchecked")
 		Collection<Locale> locales = ICLocaleBusiness.getListOfAllLocalesJAVA();
-		TreeMap <String, Locale> localeMap = new TreeMap<String, Locale> ();
+		TreeMap<String, Locale> localeMap = new TreeMap<String, Locale>();
+		Locale currentLocale = iwc.getCurrentLocale();
 		for (Locale locale : locales){
-			String countryName = locale.getDisplayCountry();
+			String countryName = locale.getDisplayCountry(currentLocale);
 			if(!StringUtil.isEmpty(countryName)){
 				localeMap.put(countryName, locale);
 			}
@@ -300,17 +319,15 @@ public class SimpleUserEditForm extends IWBaseComponent{
 			Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Failed getting user " + id + " family relations", e);
 			relations = Collections.emptyList();
 		}
-		dropdown = getFamilyRelationSelection(RELATION_SELECTION_NAME,relations);
+		dropdown = getFamilyRelationSelection(iwc, RELATION_SELECTION_NAME, relations);
 		row.createCell().add(dropdown);
 		relationSelectId = dropdown.getId();
 
 		table = new Table2();
 		form.add(table);
-		Lists relationList = getfamilyMemberList(user,relations);
+		Lists relationList = getfamilyMemberList(iwc, user, relations);
 		table.createRow().createCell().add(relationList);
 		relationListsId = relationList.getId();
-		
-		
 		
 		// Resume
 		cellInfo = new Strong();
@@ -328,7 +345,7 @@ public class SimpleUserEditForm extends IWBaseComponent{
 		return form;
 	}
 	
-	private Lists getfamilyMemberList(User theUser,Collection <String> relations){
+	private Lists getfamilyMemberList(IWContext iwc, User theUser, Collection <String> relations){
 		Lists list = new Lists();
 		list.setStyleClass("relation-list");
 		FamilyLogic fl = null;
@@ -408,7 +425,7 @@ public class SimpleUserEditForm extends IWBaseComponent{
 		return table;
 	}
 	
-	private DropdownMenu getFamilyRelationSelection(String name,Collection<String> relations){
+	private DropdownMenu getFamilyRelationSelection(IWContext iwc, String name,Collection<String> relations){
 		DropdownMenu dropdown = new DropdownMenu(name);
 		try {
 			FamilyLogic fl = citizenServices.getFamilyLogic(iwc);
@@ -456,14 +473,7 @@ public class SimpleUserEditForm extends IWBaseComponent{
 		layer.add(actionString);
 	}
 	
-	/**
-	 * Gets the scripts that is need for this element to work
-	 * if this element is loaded dynamically (ajax) and not
-	 * in frame, than containing element have to add theese
-	 * scriptFiles.
-	 * @return script files uris
-	 */
-	public static List<String> getNeededScripts(IWContext iwc){
+	private List<String> getNeededScripts(IWContext iwc){
 		List<String> scripts = new ArrayList<String>();
 
 		scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
@@ -474,27 +484,25 @@ public class SimpleUserEditForm extends IWBaseComponent{
 			JQuery  jQuery = web2.getJQuery();
 			scripts.add(jQuery.getBundleURIToJQueryLib());
 
-			scripts.add(jQuery.getBundleURIToJQueryUILib("1.8.14","js/jquery-ui-1.8.14.custom.min.js"));
-			scripts.add(jQuery.getBundleURIToJQueryUILib("1.8.14","development-bundle/ui/jquery.ui.autocomplete.js"));
-			scripts.add(jQuery.getBundleURIToJQueryUILib("1.8.14","development-bundle/ui/jquery-ui-autocomplete-html.js"));
-
+//			scripts.add(jQuery.getBundleURIToJQueryUILib("1.8.14","js/jquery-ui-1.8.14.custom.min.js"));
+//			scripts.add(jQuery.getBundleURIToJQueryUILib("1.8.14","development-bundle/ui/jquery.ui.autocomplete.js"));
+//			scripts.add(jQuery.getBundleURIToJQueryUILib("1.8.14","development-bundle/ui/jquery-ui-autocomplete-html.js"));
 
 			scripts.add(web2.getBundleUriToHumanizedMessagesScript());
 
 			try{
-				StringBuilder path = new StringBuilder(Web2BusinessBean.JQUERY_PLUGINS_FOLDER_NAME_PREFIX)
-				.append("/jquery-tagedit-remake.js");
-				scripts.add(web2.getBundleURIWithinScriptsFolder(path.toString()));
+//				StringBuilder path = new StringBuilder(Web2BusinessBean.JQUERY_PLUGINS_FOLDER_NAME_PREFIX).append("/jquery-tagedit-remake.js");
+//				scripts.add(web2.getBundleURIWithinScriptsFolder(path.toString()));
 				scripts.add(web2.getBundleURIWithinScriptsFolder(new StringBuilder(Web2BusinessBean.JQUERY_PLUGINS_FOLDER_NAME_PREFIX)
 						.append(CoreConstants.SLASH)
 						.append(Web2BusinessBean.TAGEDIT_SCRIPT_FILE_AUTOGROW).toString()));
 				scripts.add(web2.getBundleURIWithinScriptsFolder(new StringBuilder(Web2BusinessBean.JQUERY_PLUGINS_FOLDER_NAME_PREFIX)
 				.append("/jquery.autoresizev-textarea.js").toString()));
 			}catch(RemoteException e){
-				Logger.getLogger("SimpleUserEditForm").log(Level.WARNING,CoreConstants.EMPTY,e);
+				Logger.getLogger(getClass().getName()).log(Level.WARNING,CoreConstants.EMPTY,e);
 			}
 		}else{
-			Logger.getLogger("SimpleUserEditForm").log(Level.WARNING, "Failed getting Web2Business no jQuery and it's plugins files were added");
+			Logger.getLogger(getClass().getName()).log(Level.WARNING, "Failed getting Web2Business no jQuery and it's plugins files were added");
 		}
 
 		IWMainApplication iwma = iwc.getApplicationContext().getIWMainApplication();
@@ -505,14 +513,7 @@ public class SimpleUserEditForm extends IWBaseComponent{
 		return scripts;
 	}
 
-	/**
-	 * Gets the stylesheets that is need for this element to work
-	 * if this element is loaded dynamically (ajax) and not
-	 * in frame, than containing element have to add theese
-	 * files.
-	 * @return style files uris
-	 */
-	public static List<String> getNeededStyles(IWContext iwc){
+	private List<String> getNeededStyles(IWContext iwc){
 		List<String> styles = new ArrayList<String>();
 
 		Web2Business web2 = WFUtil.getBeanInstance(iwc, Web2Business.SPRING_BEAN_IDENTIFIER);
@@ -521,15 +522,15 @@ public class SimpleUserEditForm extends IWBaseComponent{
 
 			styles.add(web2.getBundleURIToFancyBoxStyleFile());
 
-			styles.add(jQuery.getBundleURIToJQueryUILib("1.8.14","css/ui-lightness/jquery-ui-1.8.14.custom.css"));
+//			styles.add(jQuery.getBundleURIToJQueryUILib("1.8.14","css/ui-lightness/jquery-ui-1.8.14.custom.css"));
 
 			styles.add(web2.getBundleUriToHumanizedMessagesStyleSheet());
 
-			styles.addAll(web2.getBundleURIsToTageditStyleFiles());
+//			styles.addAll(web2.getBundleURIsToTageditStyleFiles());
 
 
 		}else{
-			Logger.getLogger("ContentShareComponent").log(Level.WARNING, "Failed getting Web2Business no jQuery and it's plugins files were added");
+			Logger.getLogger(getClass().getName()).warning("Failed getting Web2Business no jQuery and it's plugins files were added");
 		}
 		IWMainApplication iwma = iwc.getApplicationContext().getIWMainApplication();
 		IWBundle iwb = iwma.getBundle(CitizenConstants.IW_BUNDLE_IDENTIFIER);
