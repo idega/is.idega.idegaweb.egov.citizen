@@ -31,6 +31,9 @@ import org.springframework.stereotype.Service;
 import com.idega.builder.business.BuilderLogic;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
+import com.idega.core.accesscontrol.business.LoginBusinessBean;
+import com.idega.core.accesscontrol.business.LoginDBHandler;
+import com.idega.core.accesscontrol.data.LoginTable;
 import com.idega.core.business.DefaultSpringBean;
 import com.idega.core.localisation.business.ICLocaleBusiness;
 import com.idega.core.location.data.Country;
@@ -142,6 +145,36 @@ public class CitizenServices extends DefaultSpringBean implements
 			successMsg += CoreConstants.NEWLINE + report;
 		}
 		
+		
+		return successMsg;
+	}
+	@RemoteMethod
+	public String saveUserAccessSetings(Map <String,ArrayList<String>> parameters){
+		IWContext iwc  =  CoreUtil.getIWContext();
+		IWBundle bundle = iwc.getIWMainApplication().getBundle(CitizenConstants.IW_BUNDLE_IDENTIFIER);
+		IWResourceBundle iwrb = bundle.getResourceBundle(iwc);
+		String successMsg = iwrb.getLocalizedString("saved", "saved");
+		String failureMsg = iwrb.getLocalizedString("failed_saving", "Failed_saving") + "!!!";
+		if(!iwc.isLoggedOn()){
+			return failureMsg + CoreConstants.NEWLINE + iwrb.getLocalizedString("not_logged_in", "Not logged in");
+		}
+		LoginTable loginTable = LoginDBHandler.getUserLogin(iwc.getCurrentUserId());
+		String login = null;
+		ArrayList<String> params = parameters.get(CitizenConstants.USER_EDIT_USERNAME_PARAMETER);
+		if(params != null){
+			login = params.get(0);
+			loginTable.setUserLogin(login);
+		}
+		String password = null;
+		params = parameters.get(CitizenConstants.USER_EDIT_PASSWORD_PARAMETER);
+		if(params != null){
+			password = params.get(0);
+			try {
+				LoginBusinessBean.getLoginBusinessBean(iwc).changeUserPassword(iwc.getCurrentUser(), password);
+			} catch (Exception e) {
+				successMsg += CoreConstants.NEWLINE + iwrb.getLocalizedString("failed_saving_password", "Failed saving password");
+			}
+		}
 		return successMsg;
 	}
 	private String saveFamilyRelations(Map <String,ArrayList<String>> parameters,IWResourceBundle iwrb,IWContext iwc,User user){
@@ -320,55 +353,6 @@ public class CitizenServices extends DefaultSpringBean implements
 			Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Failed getting family data" , e);
 		}
 		return members;
-//		try {
-//			Collection<User> related = null;
-//			try{
-//				related = familyLogic.getChildrenFor(user);
-//			}catch (FinderException e) {
-//				related = Collections.emptyList();
-//			}
-//			members.put(familyLogic.getChildRelationType(), related);
-//			try{
-//				related = familyLogic.getParentsFor(user);
-//			}catch (FinderException e) {
-//				related = Collections.emptyList();
-//			}
-//			members.put(familyLogic.getParentRelationType(), related);
-//			try{
-//				related = familyLogic.getCustodiansFor(user);
-//			}catch (FinderException e) {
-//				related = Collections.emptyList();
-//			}
-//			members.put(familyLogic.getCustodianRelationType(), related);
-//			try{
-//				related = familyLogic.getSiblingsFor(user);
-//			}catch (FinderException e) {
-//				related = Collections.emptyList();
-//			}
-//			members.put(familyLogic.getSiblingRelationType(), related);
-//			try{
-//				User relatedUser = familyLogic.getSpouseFor(user);
-//				related = new ArrayList<User>(1);
-//				related.add(relatedUser);
-//			}catch (FinderException e) {
-//				related = Collections.emptyList();
-//			}
-//			members.put(familyLogic.getSpouseRelationType(), related);
-//			try{
-//				User relatedUser = familyLogic.getCohabitantFor(user);
-//				related = new ArrayList(1);
-//				related.add(relatedUser);
-//			}catch (FinderException e) {
-//				related = Collections.emptyList();
-//			}
-//			members.put(familyLogic.getCohabitantRelationType(), related);
-//			
-//		} catch (IBOLookupException e) {
-//			Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Failed getting family data" , e);
-//		} catch (RemoteException e) {
-//			Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Failed getting family data" , e);
-//		}
-//		return members;
 	}
 	public List<String> getFamilyRelationTypes(IWContext iwc) throws Exception{
 		ArrayList<String> familyRelationTypes = new ArrayList<String>();
