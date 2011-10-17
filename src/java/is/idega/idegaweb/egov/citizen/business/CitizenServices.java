@@ -1,7 +1,8 @@
-package is.idega.idegaweb.egov.citizen.presentation;
+package is.idega.idegaweb.egov.citizen.business;
 
 import is.idega.block.family.business.FamilyLogic;
 import is.idega.idegaweb.egov.citizen.CitizenConstants;
+import is.idega.idegaweb.egov.citizen.presentation.CitizenProfile;
 
 import java.rmi.RemoteException;
 import java.text.DateFormat;

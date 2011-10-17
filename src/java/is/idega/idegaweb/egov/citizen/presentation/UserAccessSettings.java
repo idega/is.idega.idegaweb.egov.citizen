@@ -1,6 +1,7 @@
 package is.idega.idegaweb.egov.citizen.presentation;
 
 import is.idega.idegaweb.egov.citizen.CitizenConstants;
+import is.idega.idegaweb.egov.citizen.business.CitizenServices;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;

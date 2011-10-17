@@ -2,6 +2,7 @@ package is.idega.idegaweb.egov.citizen.presentation;
 
 import is.idega.block.family.business.FamilyLogic;
 import is.idega.idegaweb.egov.citizen.CitizenConstants;
+import is.idega.idegaweb.egov.citizen.business.CitizenServices;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -518,7 +519,7 @@ public class CitizenProfile extends Block {
 
 		Web2Business web2 = WFUtil.getBeanInstance(iwc, Web2Business.SPRING_BEAN_IDENTIFIER);
 		if (web2 != null) {
-			JQuery  jQuery = web2.getJQuery();
+//			JQuery  jQuery = web2.getJQuery();
 
 			styles.add(web2.getBundleURIToFancyBoxStyleFile());
 
