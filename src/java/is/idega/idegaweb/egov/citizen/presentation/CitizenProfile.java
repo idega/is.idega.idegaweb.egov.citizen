@@ -293,12 +293,11 @@ public class CitizenProfile extends Block {
 		for(String countryName : keys){
 			dropdown.addMenuElement(localeMap.get(countryName).toString(), countryName);
 		}
+		SelectOption option = new SelectOption(iwrb.getLocalizedString("select_country", "Select country"),-1);
+		dropdown.addFirstOption(option);
 		
-		if(country != null){
+		if (!StringUtil.isEmpty(country)) {
 			dropdown.setSelectedElement(country);
-		}else{
-			SelectOption option = new SelectOption(iwrb.getLocalizedString("select_country", "Select country"),-1);
-			dropdown.addFirstOption(option);
 		}
 		
 		// Marital status

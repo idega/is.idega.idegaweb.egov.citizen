@@ -107,26 +107,27 @@ public class CitizenServices extends DefaultSpringBean implements
 		// Setting user data
 		String name = null;
 		List<String> params = parameters.get(CitizenConstants.USER_EDIT_NAME_PARAMETER);
-		if(params != null){
+		if(!ListUtil.isEmpty(params)){
 			name = params.get(0);
 			user.setName(name);
 		}
 		String born = null;
 		params = parameters.get(CitizenConstants.USER_EDIT_BORN_PARAMETER);
-		if(params != null){
+		if (!ListUtil.isEmpty(params)){
 			born = params.get(0);
 			Date bornDate = IWDatePickerHandler.getParsedDate(born, iwc.getCurrentLocale());
-			user.setDateOfBirth(new java.sql.Date(bornDate.getTime()));
+			if (bornDate != null)
+				user.setDateOfBirth(new java.sql.Date(bornDate.getTime()));
 		}
 		String resume = null;
 		params = parameters.get(CitizenConstants.USER_EDIT_RESUME_PARAMETER);
-		if(params != null){
+		if(!ListUtil.isEmpty(params)){
 			resume = params.get(0);
 			user.setResume(resume);
 		}
 		String personalId = null;
 		params = parameters.get(CitizenConstants.USER_EDIT_PERSONAL_ID_PARAMETER);
-		if(params != null){
+		if(!ListUtil.isEmpty(params)){
 			personalId = params.get(0);
 			user.setPersonalID(personalId);
 		}
@@ -164,13 +165,13 @@ public class CitizenServices extends DefaultSpringBean implements
 		LoginTable loginTable = LoginDBHandler.getUserLogin(iwc.getCurrentUserId());
 		String login = null;
 		List<String> params = parameters.get(CitizenConstants.USER_EDIT_USERNAME_PARAMETER);
-		if(params != null){
+		if(!ListUtil.isEmpty(params)){
 			login = params.get(0);
 			loginTable.setUserLogin(login);
 		}
 		String password = null;
 		params = parameters.get(CitizenConstants.USER_EDIT_PASSWORD_PARAMETER);
-		if(params != null){
+		if(!ListUtil.isEmpty(params)){
 			password = params.get(0);
 			try {
 				LoginBusinessBean.getLoginBusinessBean(iwc).changeUserPassword(iwc.getCurrentUser(), password);
@@ -189,7 +190,7 @@ public class CitizenServices extends DefaultSpringBean implements
 			UserBusiness userBusiness = getUserBusiness();
 			List<String> params = parameters.get(CitizenConstants.USER_EDIT_MARITAL_STATUS_PARAMETER);
 //			String maritalStatus = null;
-//			if(params != null){
+//			if(!ListUtil.isEmpty(params)){
 //				maritalStatus = params.get(0);
 //			}
 			Collection<String> relations = getFamilyRelationTypes(iwc);
@@ -236,24 +237,24 @@ public class CitizenServices extends DefaultSpringBean implements
 		String report = CoreConstants.EMPTY;
 		String streetNameAndNumber = null;
 		List<String> params = parameters.get(CitizenConstants.USER_EDIT_STREET_AND_NUMBER_PARAMETER);
-		if(params != null){
+		if(!ListUtil.isEmpty(params)){
 			streetNameAndNumber = params.get(0);
 		}
 		String city = null;
 		params = parameters.get(CitizenConstants.USER_EDIT_CITY_PARAMETER);
-		if(params != null){
+		if(!ListUtil.isEmpty(params)){
 			city = params.get(0);
 		}
 		String country = null;
 		params = parameters.get(CitizenConstants.USER_EDIT_COUNTRY_PARAMETER);
-		if(params != null){
+		if(!ListUtil.isEmpty(params)){
 			country = params.get(0);
 			Locale locale = ICLocaleBusiness.getLocaleFromLocaleString(country);
 			country = locale.getDisplayCountry(Locale.ENGLISH);
 		}
 		Integer postalCodeId = null;
 		params = parameters.get(CitizenConstants.USER_EDIT_POSTAL_CODE_PARAMETER);
-		if(params != null){
+		if(!ListUtil.isEmpty(params)){
 			String code = params.get(0);
 			PostalCode postalCode = getPostalCode(code, country);
 			if(postalCode == null){
