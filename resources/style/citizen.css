@@ -51,3 +51,24 @@ div#messagesViaEmail input {
 div#mobilePhone input {
 	margin-bottom: 20px;
 }
+
+.dwr-form input[type = text], .dwr-form * textarea{
+	font-size: 18;
+	background: none repeat scroll 0 0 #FFFFFF;
+	border: 1px solid #C6C6C6;
+	width : 100%;
+}
+.dwr-form input:focus,
+.dwr-form textarea:focus{
+	border: 1px solid #4D90FE;
+	backgroundColor: white;
+}
+
+ul.ui-autocomplete * .remove-item-class{
+	display:none;
+}
+ul.ui-autocomplete * img{
+	width:30px;
+	height:40px;	
+}
+	
