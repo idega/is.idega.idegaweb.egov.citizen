@@ -362,55 +362,6 @@ public class CitizenServices extends DefaultSpringBean implements
 			Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Failed getting family data" , e);
 		}
 		return members;
-//		try {
-//			Collection<User> related = null;
-//			try{
-//				related = familyLogic.getChildrenFor(user);
-//			}catch (FinderException e) {
-//				related = Collections.emptyList();
-//			}
-//			members.put(familyLogic.getChildRelationType(), related);
-//			try{
-//				related = familyLogic.getParentsFor(user);
-//			}catch (FinderException e) {
-//				related = Collections.emptyList();
-//			}
-//			members.put(familyLogic.getParentRelationType(), related);
-//			try{
-//				related = familyLogic.getCustodiansFor(user);
-//			}catch (FinderException e) {
-//				related = Collections.emptyList();
-//			}
-//			members.put(familyLogic.getCustodianRelationType(), related);
-//			try{
-//				related = familyLogic.getSiblingsFor(user);
-//			}catch (FinderException e) {
-//				related = Collections.emptyList();
-//			}
-//			members.put(familyLogic.getSiblingRelationType(), related);
-//			try{
-//				User relatedUser = familyLogic.getSpouseFor(user);
-//				related = new ArrayList<User>(1);
-//				related.add(relatedUser);
-//			}catch (FinderException e) {
-//				related = Collections.emptyList();
-//			}
-//			members.put(familyLogic.getSpouseRelationType(), related);
-//			try{
-//				User relatedUser = familyLogic.getCohabitantFor(user);
-//				related = new ArrayList(1);
-//				related.add(relatedUser);
-//			}catch (FinderException e) {
-//				related = Collections.emptyList();
-//			}
-//			members.put(familyLogic.getCohabitantRelationType(), related);
-//			
-//		} catch (IBOLookupException e) {
-//			Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Failed getting family data" , e);
-//		} catch (RemoteException e) {
-//			Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Failed getting family data" , e);
-//		}
-//		return members;
 	}
 	
 	public List<String> getFamilyRelationTypes(IWContext iwc) throws Exception{

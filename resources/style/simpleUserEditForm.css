@@ -14,3 +14,7 @@
 .relation-user-info-name{
 	width : 10em;	
 }
+.dwr-form * img.delete-img, .dwr-form * img.delete-img{
+	width:20;
+	height:20;
+}
