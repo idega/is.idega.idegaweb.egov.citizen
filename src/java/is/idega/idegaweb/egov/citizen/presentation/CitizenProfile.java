@@ -294,7 +294,7 @@ public class CitizenProfile extends Block {
 		for(String countryName : keys){
 			dropdown.addMenuElement(localeMap.get(countryName).toString(), countryName);
 		}
-		SelectOption option = new SelectOption(iwrb.getLocalizedString("select_country", "Select country"),-1);
+		SelectOption option = new SelectOption(iwrb.getLocalizedString("choose_country", "Choose country"),-1);
 		dropdown.addFirstOption(option);
 		
 		if (!StringUtil.isEmpty(country)) {
@@ -427,7 +427,7 @@ public class CitizenProfile extends Block {
 		return table;
 	}
 	
-	private DropdownMenu getFamilyRelationSelection(IWContext iwc, String name,Collection<String> relations){
+	private DropdownMenu getFamilyRelationSelection(IWContext iwc, String name, Collection<String> relations){
 		DropdownMenu dropdown = new DropdownMenu(name);
 		try {
 			FamilyLogic fl = citizenServices.getFamilyLogic(iwc);
@@ -437,6 +437,7 @@ public class CitizenProfile extends Block {
 		} catch (Exception e) {
 			Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Failed getting family relations ", e);
 		}
+		dropdown.addFirstOption(new SelectOption(iwrb.getLocalizedString("choose_relationship", "Choose relationship"), String.valueOf(-1)));
 		return dropdown;
 	}
 	
