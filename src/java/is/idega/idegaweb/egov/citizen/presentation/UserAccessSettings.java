@@ -5,9 +5,13 @@ import is.idega.idegaweb.egov.citizen.business.CitizenServices;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.ejb.FinderException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -16,6 +20,10 @@ import com.idega.block.web2.business.Web2Business;
 import com.idega.block.web2.business.Web2BusinessBean;
 import com.idega.core.accesscontrol.business.LoginBusinessBean;
 import com.idega.core.accesscontrol.business.LoginContext;
+import com.idega.core.localisation.data.ICLanguage;
+import com.idega.core.localisation.data.ICLanguageHome;
+import com.idega.data.IDOLookupException;
+import com.idega.data.IDORelationshipException;
 import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.IWResourceBundle;
@@ -23,13 +31,13 @@ import com.idega.presentation.Block;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
 import com.idega.presentation.Table2;
-import com.idega.presentation.TableCell2;
-import com.idega.presentation.TableRow;
 import com.idega.presentation.text.Strong;
+import com.idega.presentation.ui.FieldSet;
 import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.GenericButton;
 import com.idega.presentation.ui.HiddenInput;
 import com.idega.presentation.ui.PasswordInput;
+import com.idega.presentation.ui.SelectionBox;
 import com.idega.presentation.ui.TextInput;
 import com.idega.user.bean.UserDataBean;
 import com.idega.user.data.User;
@@ -40,24 +48,18 @@ import com.idega.webface.WFUtil;
 
 public class UserAccessSettings extends Block {
 	
-	private static final String REMOVE_ITEM_CLASS = "remove-item-class";
-	private static final String RELATED_ITEM_CLASS = "simple-user-edit-related-item-class";
-	private static final String ID_CONTANER_CLASS = "id-container-class";
-	private static final String RELATION_TYPE_CONTAINER_CLASS = "relation-type-container";
+	private static final String LANGUAGE_CONTAINER_CLASS = "language-container-class";
+	private static final String LANGUAGE_SELECT_CLASS = "language-select-class";
 	
 	private String formId = null;
-	private String relationInputId = null;
-	private String relationSelectId = null;
-	private String relationListsId = null;
 	
 	private String userId = null;
+	
 	
 	@Autowired
 	private CitizenServices citizenServices;
 	
 	private Boolean needFiles = Boolean.TRUE;
-	
-	IWResourceBundle iwrb = null;
 	
 	public UserAccessSettings(){
 		ELUtil.getInstance().autowire(this);
@@ -71,7 +73,7 @@ public class UserAccessSettings extends Block {
 	@Override
 	public void main(IWContext iwc) throws Exception {
 		IWBundle bundle = getBundle(iwc);
-		iwrb = bundle.getResourceBundle(iwc);
+		IWResourceBundle iwrb = bundle.getResourceBundle(iwc);
 		
 		User user = getUser(iwc);
 		if(user == null){
@@ -80,10 +82,10 @@ public class UserAccessSettings extends Block {
 			layer.addText(iwrb.getLocalizedString("no_user_specified", "No user specified"));
 			return;
 		}
-		this.add(this.getUserEditForm(user));
+		this.add(this.getUserEditForm(user,iwrb,iwc));
 		Layer scriptLayer = new Layer();
 		this.add(scriptLayer);
-		addactions(scriptLayer);
+		addactions(scriptLayer,iwrb);
 		String filesNeeded = iwc.getParameter(CitizenConstants.NEEDED_SCRIPT_AND_STYLE_FILES);
 		if((needFiles == null ) && (filesNeeded != null) && (filesNeeded.equalsIgnoreCase(CitizenConstants.False))){
 			needFiles = Boolean.FALSE;
@@ -116,11 +118,14 @@ public class UserAccessSettings extends Block {
 		return user;
 	}
 	
-	private Form getUserEditForm(User user){
+	private Form getUserEditForm(User user,IWResourceBundle iwrb,IWContext iwc){
+		IWMainApplication iwma = iwc.getApplicationContext().getIWMainApplication();
+		IWBundle iwb = iwma.getBundle(CitizenConstants.IW_BUNDLE_IDENTIFIER);
 		UserDataBean userData = null;
 		boolean isData = false;
 		String id = String.valueOf(-1);
 		String username = CoreConstants.EMPTY;
+		Collection<ICLanguage> userLanguages = Collections.emptyList();
 		if(user != null){
 			userData = citizenServices.getUserApplicationEngine().getUserInfo(user);
 			if(userData != null){
@@ -131,6 +136,11 @@ public class UserAccessSettings extends Block {
 			username = loginContext.getUserName();
 			if(username == null){
 				username = CoreConstants.EMPTY;
+			}
+			try {
+				userLanguages = user.getLanguages();
+			} catch (IDORelationshipException e) {
+				Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Failed getting user with id " + userId + " languages", e);
 			}
 		}
 		String name = CoreConstants.EMPTY;
@@ -143,40 +153,45 @@ public class UserAccessSettings extends Block {
 		
 		Form form = new Form();
 		form.setStyleClass("dwr-form");
-		Table2 table = new Table2();
-		form.add(table);
+		FieldSet fieldset = new FieldSet(iwrb.getLocalizedString("login_settings","Login settings"));
 		formId = form.getId();
 		
 		// Id
-		TableRow row = table.createRow();
+		Layer layer = new Layer();
+		form.add(layer);
 		HiddenInput idInput = new HiddenInput(CitizenConstants.USER_EDIT_USER_ID_PARAMETER,id);
-		TableCell2 cell = row.createCell();
-		cell.add(idInput);
+		layer.add(idInput);
 		
 		// Name
+		layer = new Layer();
+		form.add(layer);
 		Strong cellInfo = new Strong();
-		cell.add(cellInfo);
+		layer.add(cellInfo);
 		cellInfo.addText(iwrb.getLocalizedString("name", "Name"));
 		cellInfo = new Strong();
-		cell = row.createCell();
-		cell.add(cellInfo);
+		layer.add(cellInfo);
 		cellInfo.add(name);
 		
 		// Username
-		row = table.createRow();
+		layer = new Layer();
+		form.add(layer);
 		cellInfo = new Strong();
-		row.createCell().add(cellInfo);
+		layer.add(cellInfo);
 		cellInfo.addText(iwrb.getLocalizedString("login", "Login"));
 		TextInput input = new TextInput(CitizenConstants.USER_EDIT_USERNAME_PARAMETER,username);
-		row.createCell().add(input);
+		layer.add(input);
 		
 		// Password
-		row = table.createRow();
+		layer = new Layer();
+		form.add(layer);
 		cellInfo = new Strong();
-		row.createCell().add(cellInfo);
+		layer.add(cellInfo);
 		cellInfo.addText(iwrb.getLocalizedString("password", "Password"));
 		PasswordInput passwordInput = new PasswordInput(CitizenConstants.USER_EDIT_PASSWORD_PARAMETER);
-		row.createCell().add(passwordInput);
+		layer.add(passwordInput);
+		
+		// Languages
+		form.add(getLanguageSelectLayer(userLanguages, iwb, iwrb,user));
 		
 		// Submit
 		GenericButton buttonSubmit = new GenericButton("buttonSubmit", iwrb.getLocalizedString("save", "Save"));
@@ -186,9 +201,78 @@ public class UserAccessSettings extends Block {
 		return form;
 	}
 	
-	private void addactions(Layer layer){
+	private Layer getLanguageSelectLayer(Collection<ICLanguage> userLanguages,IWBundle iwb,IWResourceBundle iwrb,User user){
+		Layer layer = new Layer();
+		layer.setStyleClass("language-layer");
+		try{
+			ICLanguageHome icLanguageHome= citizenServices.getICLanguageHome();
+			@SuppressWarnings("unchecked")
+			Collection<ICLanguage> languages = icLanguageHome.findAll();
+			SelectionBox languageSelection =  new SelectionBox();
+			layer.add(languageSelection);
+			languageSelection.setStyleClass(LANGUAGE_SELECT_CLASS);
+			for(ICLanguage language : languages){
+				languageSelection.addMenuElement(language.getPrimaryKey().toString(), language.getName());
+			}
+			Layer addLayerr = new Layer();
+			layer.add(addLayerr);
+			Layer container = new Layer();
+			layer.add(container);
+			container.setStyleClass("language-table-container");
+			Table2 languageContainer = new Table2();
+			container.add(languageContainer);
+			languageContainer.setStyleClass(LANGUAGE_CONTAINER_CLASS);
+			GenericButton addButton = new GenericButton("addButton", iwrb.getLocalizedString("add", "ADD"));
+			addLayerr.add(addButton);
+			addLayerr.setStyleClass("button-add-layer");
+			String imgSrc = iwb.getVirtualPathWithFileNameString("delete.png");
+			StringBuilder onclickAction = new StringBuilder("UserAccessSettingsHelper.addLanguage('#").append(formId)
+				.append(CoreConstants.JS_STR_PARAM_SEPARATOR).append(CoreConstants.DOT).append(LANGUAGE_SELECT_CLASS)
+				.append(CoreConstants.JS_STR_PARAM_SEPARATOR).append(CoreConstants.DOT).append(LANGUAGE_CONTAINER_CLASS)
+				.append(CoreConstants.JS_STR_PARAM_SEPARATOR).append(CitizenConstants.USER_EDIT_LANGUAGE_PARAMETER)
+				.append(CoreConstants.JS_STR_PARAM_SEPARATOR).append(imgSrc)
+				.append(CoreConstants.JS_STR_PARAM_END);
+			addButton.setOnClick(onclickAction.toString());
+			
+			StringBuilder addLanguagesAction = 
+				new StringBuilder("jQuery(document).ready(function(){\nUserAccessSettingsHelper.languages = [];");
+			int i = 0;
+			for(ICLanguage language : userLanguages){
+//				addLanguagesAction.append("jQuery('#").append(selectionId).append("').find([value = '")
+//				.append(language.getPrimaryKey()).append("']).select();");
+				addLanguagesAction.append("UserAccessSettingsHelper.languages[").append(i++).append("] = '")
+				.append(language.getPrimaryKey()).append(CoreConstants.JS_STR_INITIALIZATION_END);
+			}
+//			addLanguagesAction.append("jQuery('#").append(addButton.getId()).append("').click()");
+			addLanguagesAction.append("UserAccessSettingsHelper.initLanguages('#").append(languageSelection.getId())
+				.append(CoreConstants.JS_STR_PARAM_SEPARATOR).append("#").append(languageContainer.getId())
+				.append(CoreConstants.JS_STR_PARAM_SEPARATOR).append(user.getId())
+				.append("',UserAccessSettingsHelper.languages,'")
+				.append(imgSrc)
+				.append(CoreConstants.JS_STR_PARAM_END);
+			addLanguagesAction.append("});");
+			String actionString = PresentationUtil.getJavaScriptAction(addLanguagesAction.toString());
+			layer.add(actionString);
+		}catch(IDOLookupException e){
+			Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Failed getting ICLanguageHome", e);
+			layer.addText(getLanguageFailerror(iwrb));
+		} catch (FinderException e) {
+			Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Failed getting languages", e);
+			layer.addText(getLanguageFailerror(iwrb));
+		}
+		return layer;
+	}
+	
+	private String getLanguageFailerror(IWResourceBundle iwrb){
+		return iwrb.getLocalizedString("failed_getting_languages", "Failed getting languages");
+	}
+	private void addactions(Layer layer,IWResourceBundle iwrb){
 		StringBuilder actions = new StringBuilder("UserAccessSettingsHelper.initialize = function(){")
-		.append("\n}");
+			.append("UserAccessSettingsHelper.REMOVE_MSG = '").append(iwrb.getLocalizedString("removed", "Removed"))
+			.append(CoreConstants.JS_STR_INITIALIZATION_END)
+			.append("UserAccessSettingsHelper.FAILED_MSG = '").append(iwrb.getLocalizedString("failed", "Failed"))
+			.append(CoreConstants.JS_STR_INITIALIZATION_END)
+			.append("\n}");
 		
 		String actionString = PresentationUtil.getJavaScriptAction(actions.toString());
 		layer.add(actionString);
@@ -206,7 +290,6 @@ public class UserAccessSettings extends Block {
 			scripts.add(jQuery.getBundleURIToJQueryLib());
 
 			scripts.add(jQuery.getBundleURIToJQueryUILib("1.8.14","js/jquery-ui-1.8.14.custom.min.js"));
-			scripts.add(jQuery.getBundleURIToJQueryUILib("1.8.14","development-bundle/ui/jquery.ui.autocomplete.js"));
 			scripts.add(jQuery.getBundleURIToJQueryUILib("1.8.14","development-bundle/ui/jquery-ui-autocomplete-html.js"));
 
 
@@ -258,7 +341,7 @@ public class UserAccessSettings extends Block {
 		IWMainApplication iwma = iwc.getApplicationContext().getIWMainApplication();
 		IWBundle iwb = iwma.getBundle(CitizenConstants.IW_BUNDLE_IDENTIFIER);
 		styles.add(iwb.getVirtualPathWithFileNameString("style/citizen.css"));
-		styles.add(iwb.getVirtualPathWithFileNameString("style/simpleUserEditForm.css"));
+		styles.add(iwb.getVirtualPathWithFileNameString("style/UserAccessSettings.css"));
 		return styles;
 	}
 

@@ -37,12 +37,16 @@ import com.idega.core.accesscontrol.business.LoginDBHandler;
 import com.idega.core.accesscontrol.data.LoginTable;
 import com.idega.core.business.DefaultSpringBean;
 import com.idega.core.localisation.business.ICLocaleBusiness;
+import com.idega.core.localisation.data.ICLanguage;
+import com.idega.core.localisation.data.ICLanguageHome;
 import com.idega.core.location.data.Country;
 import com.idega.core.location.data.CountryHome;
 import com.idega.core.location.data.PostalCode;
 import com.idega.core.location.data.PostalCodeHome;
+import com.idega.data.IDOAddRelationshipException;
 import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
+import com.idega.data.IDORelationshipException;
 import com.idega.dwr.business.DWRAnnotationPersistance;
 import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWMainApplication;
@@ -79,6 +83,7 @@ public class CitizenServices extends DefaultSpringBean implements
 	private FamilyLogic familyLogic = null;
 
 	private UserHome userHome = null;
+	private ICLanguageHome iCLanguageHome = null;
 	
 	@RemoteMethod
 	public String saveUser(Map <String, List<String>> parameters){
@@ -169,14 +174,41 @@ public class CitizenServices extends DefaultSpringBean implements
 			login = params.get(0);
 			loginTable.setUserLogin(login);
 		}
+		User user = iwc.getCurrentUser();
 		String password = null;
 		params = parameters.get(CitizenConstants.USER_EDIT_PASSWORD_PARAMETER);
 		if(!ListUtil.isEmpty(params)){
 			password = params.get(0);
 			try {
-				LoginBusinessBean.getLoginBusinessBean(iwc).changeUserPassword(iwc.getCurrentUser(), password);
+				LoginBusinessBean.getLoginBusinessBean(iwc).changeUserPassword(user, password);
 			} catch (Exception e) {
 				successMsg += CoreConstants.NEWLINE + iwrb.getLocalizedString("failed_saving_password", "Failed saving password");
+			}
+		}
+		params = parameters.get(CitizenConstants.USER_EDIT_LANGUAGE_PARAMETER);
+		if(!ListUtil.isEmpty(params)){
+			try {
+				ICLanguageHome iCLanguageHome = this.getICLanguageHome();
+				Collection<Integer> ids = new ArrayList(params.size());
+				for(String languageId : params){
+					ids.add(Integer.valueOf(languageId));
+				}
+				Collection <ICLanguage>languages = iCLanguageHome.getEntityCollectionForPrimaryKeys(ids);
+				for(ICLanguage language : languages){
+					user.addLanguage(language);
+				}
+			} catch (IDOLookupException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (FinderException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IDOAddRelationshipException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 		return successMsg;
@@ -417,6 +449,12 @@ public class CitizenServices extends DefaultSpringBean implements
 		}
 		return this.userHome;
 	}
+	public ICLanguageHome getICLanguageHome() throws IDOLookupException {
+		if (this.iCLanguageHome  == null) {
+			this.iCLanguageHome = (ICLanguageHome) IDOLookup.getHome(ICLanguage.class);
+		}
+		return this.iCLanguageHome;
+	}
 	
 	@RemoteMethod
 	public Boolean removeRelation(String userId,String relatedId,String relationType){
@@ -435,17 +473,66 @@ public class CitizenServices extends DefaultSpringBean implements
 			return Boolean.FALSE;
 		} catch (RemoteException e) {
 			this.getLogger().log(Level.WARNING, "failed removing " + relationType + 
-					" relation from user" + userId + "  with " + relatedId, e);
+					" relation from user " + userId + "  with " + relatedId, e);
 			return Boolean.FALSE;
 		} catch (RemoveException e) {
 			this.getLogger().log(Level.WARNING, "failed removing " + relationType + 
-					" relation from user" + userId + "  with " + relatedId, e);
+					" relation from user " + userId + "  with " + relatedId, e);
 			return Boolean.FALSE;
 		}catch(Exception e){
 			this.getLogger().log(Level.WARNING, "failed removing " + relationType + 
-					" relation from user" + userId + "  with " + relatedId, e);
+					" relation from user " + userId + "  with " + relatedId, e);
 			return Boolean.FALSE;
 		}
 		return Boolean.TRUE;
+	}
+	
+	@RemoteMethod
+	public Boolean removeLanguage(String userId,String languageId){
+		if(userId == null || languageId == null){
+			return Boolean.FALSE;
+		}
+		try{
+			UserBusiness userBusiness = getUserBusiness();
+			User user = userBusiness.getUser(Integer.valueOf(userId));
+			ICLanguageHome icLanguageHome = getICLanguageHome();
+			ICLanguage language = icLanguageHome.findByPrimaryKey(Integer.valueOf(languageId));
+			user.removeLanguage(language);
+		}catch(Exception e){
+			this.getLogger().log(Level.WARNING, "failed removing " + languageId + 
+					" language from user " + userId, e);
+			return Boolean.FALSE;
+		}
+		return Boolean.TRUE;
+	}
+	
+	@RemoteMethod
+	public Map <String,String> getUserLanguages(Integer userId){
+		if(userId == null || userId.equals(-1)){
+			return Collections.emptyMap();
+		}
+		UserBusiness userBusiness = getUserBusiness();
+		try {
+			User user = userBusiness.getUser(userId);
+			if(user == null){
+				return Collections.emptyMap();
+			}
+			Collection<ICLanguage> userLanguages = user.getLanguages();
+			if(ListUtil.isEmpty(userLanguages)){
+				return Collections.emptyMap();
+			}
+			Map <String,String> languages = new HashMap<String,String>();
+			for(ICLanguage language : userLanguages){
+				languages.put(language.getPrimaryKey().toString(), language.getName());
+			}
+			return languages;
+		} catch (IDORelationshipException e) {
+			this.getLogger().log(Level.WARNING, "Failed getting languages from user", e);
+		} catch (RemoteException e) {
+			this.getLogger().log(Level.WARNING, "Failed getting user with id" + userId, e);
+		}catch (Exception e) {
+			this.getLogger().log(Level.WARNING, "Something went wrong on getting user languages", e);
+		}
+		return Collections.emptyMap();
 	}
 }
