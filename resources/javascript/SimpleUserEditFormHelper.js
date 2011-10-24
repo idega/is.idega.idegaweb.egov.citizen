@@ -12,6 +12,8 @@ jQuery(document).ready(function(){
 			SimpleUserEditFormHelper.USER_EDIT_USER_ID_PARAMETER);
 	SimpleUserEditFormHelper.createAutoresizing(SimpleUserEditFormHelper.RESUME_INPUT_SELECTOR,
 			SimpleUserEditFormHelper.FORM_SELECTOR);
+	SimpleUserEditFormHelper.addDatePicker(SimpleUserEditFormHelper.FORM_SELECTOR,
+			SimpleUserEditFormHelper.USER_EDIT_DATE_SELECTOR);
 	jQuery(".tagedit-list").css({
 		width : "100%",
 		padding : "0"
@@ -90,7 +92,7 @@ SimpleUserEditFormHelper.addRemoveActions = function(removeItemClass,relatedItem
 }
 
 SimpleUserEditFormHelper.createUserAutocomplete = function(inputSelector,relationSelectSelector,relationList){
-	/*input = jQuery(inputSelector);
+	input = jQuery(inputSelector);
 	input.tagedit({
 		autocompleteURL: function(request, response) {
 			var relationName = jQuery(relationSelectSelector).val();
@@ -178,6 +180,15 @@ SimpleUserEditFormHelper.createUserAutocomplete = function(inputSelector,relatio
 
 		}
 	});
-	input.inputsToList = function(){};*/
+	input.inputsToList = function(){};
 }
+SimpleUserEditFormHelper.addDatePicker = function(formSelector,dateSelector){
+	nana = jQuery(formSelector);
+	nana = jQuery(formSelector).find(dateSelector);
+	jQuery(formSelector).find(dateSelector).datepicker({
+		changeMonth: true,
+		changeYear: true
+	});
+}
+
 

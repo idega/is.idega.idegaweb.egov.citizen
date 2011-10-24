@@ -41,7 +41,6 @@ import com.idega.presentation.ui.DropdownMenu;
 import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.GenericButton;
 import com.idega.presentation.ui.HiddenInput;
-import com.idega.presentation.ui.IWDatePicker;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.SelectOption;
 import com.idega.presentation.ui.TextArea;
@@ -62,6 +61,8 @@ public class CitizenProfile extends Block {
 	private static final String RELATION_SELECTION_NAME = "relation_selection_name";
 	private static final String ID_CONTANER_CLASS = "id-container-class";
 	private static final String RELATION_TYPE_CONTAINER_CLASS = "relation-type-container";
+	private static final String DELETE_IMG_CLASS = "delete-img";
+	private static final String BORN_DATE_CLASS = "born-date-class";
 	
 	private String formId = null;
 	private String relationInputId = null;
@@ -225,12 +226,12 @@ public class CitizenProfile extends Block {
 		cellInfo = new Strong();
 		cellInfo.addText(iwrb.getLocalizedString("birth_date", "Birth date"));
 		row.createCell().add(cellInfo);
-		IWDatePicker bornDate = new IWDatePicker(CitizenConstants.USER_EDIT_BORN_PARAMETER);
-		bornDate.setUseCurrentDateIfNotSet(false);
-		bornDate.keepStatusOnAction(true);
-		bornDate.setShowYearChange(true);
-		bornDate.setDate(born);
-		row.createCell().add(bornDate);
+		input = new TextInput(CitizenConstants.USER_EDIT_BORN_PARAMETER);
+		row.createCell().add(input);
+		if(born != null){
+			input.setValue(born.toString());
+		}
+		input.setStyleClass(BORN_DATE_CLASS);
 		
 		// Street and number
 		row = table.createRow();
@@ -293,7 +294,7 @@ public class CitizenProfile extends Block {
 		for(String countryName : keys){
 			dropdown.addMenuElement(localeMap.get(countryName).toString(), countryName);
 		}
-		SelectOption option = new SelectOption(iwrb.getLocalizedString("select_country", "Select country"),-1);
+		SelectOption option = new SelectOption(iwrb.getLocalizedString("choose_country", "Choose country"),-1);
 		dropdown.addFirstOption(option);
 		
 		if (!StringUtil.isEmpty(country)) {
@@ -392,7 +393,7 @@ public class CitizenProfile extends Block {
 		
 		// Relation type
 		Label label = new Label();
-		label.addText(familyLogic.getRelationName(iwrb, relation));
+		label.addText(familyLogic.getRelationName(iwrb, relation) + CoreConstants.COLON);
 		cell.add(label);
 		cell.setStyleClass("relation-type");
 		
@@ -421,11 +422,12 @@ public class CitizenProfile extends Block {
 		removeImage.setURL(url);
 		cell.setStyleClass(REMOVE_ITEM_CLASS);
 		removeImage.setTitle(iwrb.getLocalizedString("remove", "Remove"));
+		removeImage.setStyleClass(DELETE_IMG_CLASS);
 		
 		return table;
 	}
 	
-	private DropdownMenu getFamilyRelationSelection(IWContext iwc, String name,Collection<String> relations){
+	private DropdownMenu getFamilyRelationSelection(IWContext iwc, String name, Collection<String> relations){
 		DropdownMenu dropdown = new DropdownMenu(name);
 		try {
 			FamilyLogic fl = citizenServices.getFamilyLogic(iwc);
@@ -435,6 +437,7 @@ public class CitizenProfile extends Block {
 		} catch (Exception e) {
 			Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Failed getting family relations ", e);
 		}
+		dropdown.addFirstOption(new SelectOption(iwrb.getLocalizedString("choose_relationship", "Choose relationship"), String.valueOf(-1)));
 		return dropdown;
 	}
 	
@@ -463,6 +466,8 @@ public class CitizenProfile extends Block {
 		.append(RELATION_TYPE_CONTAINER_CLASS).append(CoreConstants.JS_STR_INITIALIZATION_END)
 		.append("SimpleUserEditFormHelper.USER_EDIT_USER_ID_PARAMETER= '")
 		.append(CitizenConstants.USER_EDIT_USER_ID_PARAMETER).append(CoreConstants.JS_STR_INITIALIZATION_END)
+		.append("SimpleUserEditFormHelper.USER_EDIT_DATE_SELECTOR= '.")
+		.append(BORN_DATE_CLASS).append(CoreConstants.JS_STR_INITIALIZATION_END)
 		.append("SimpleUserEditFormHelper.FAILED_MSG= '")
 		.append(iwrb.getLocalizedString("failed", "Failed")).append(CoreConstants.JS_STR_INITIALIZATION_END)
 		.append("SimpleUserEditFormHelper.REMOVED_MSG = '")
@@ -484,15 +489,19 @@ public class CitizenProfile extends Block {
 			JQuery  jQuery = web2.getJQuery();
 			scripts.add(jQuery.getBundleURIToJQueryLib());
 
-//			scripts.add(jQuery.getBundleURIToJQueryUILib("1.8.14","js/jquery-ui-1.8.14.custom.min.js"));
+			scripts.add(jQuery.getBundleURIToJQueryUILib("1.8.14","js/jquery-ui-1.8.14.custom.min.js"));
 //			scripts.add(jQuery.getBundleURIToJQueryUILib("1.8.14","development-bundle/ui/jquery.ui.autocomplete.js"));
-//			scripts.add(jQuery.getBundleURIToJQueryUILib("1.8.14","development-bundle/ui/jquery-ui-autocomplete-html.js"));
+			scripts.add(jQuery.getBundleURIToJQueryUILib("1.8.14","development-bundle/ui/jquery-ui-autocomplete-html.js"));
+			Locale locale = iwc.getLocale();
+			scripts.add(jQuery.getBundleURIToJQueryUILib("1.8.14","development-bundle/ui/i18n") + "/jquery.ui.datepicker-" 
+					+ locale.getLanguage() + ".js");
+			
 
 			scripts.add(web2.getBundleUriToHumanizedMessagesScript());
 
 			try{
-//				StringBuilder path = new StringBuilder(Web2BusinessBean.JQUERY_PLUGINS_FOLDER_NAME_PREFIX).append("/jquery-tagedit-remake.js");
-//				scripts.add(web2.getBundleURIWithinScriptsFolder(path.toString()));
+				StringBuilder path = new StringBuilder(Web2BusinessBean.JQUERY_PLUGINS_FOLDER_NAME_PREFIX).append("/jquery-tagedit-remake.js");
+				scripts.add(web2.getBundleURIWithinScriptsFolder(path.toString()));
 				scripts.add(web2.getBundleURIWithinScriptsFolder(new StringBuilder(Web2BusinessBean.JQUERY_PLUGINS_FOLDER_NAME_PREFIX)
 						.append(CoreConstants.SLASH)
 						.append(Web2BusinessBean.TAGEDIT_SCRIPT_FILE_AUTOGROW).toString()));
@@ -518,15 +527,15 @@ public class CitizenProfile extends Block {
 
 		Web2Business web2 = WFUtil.getBeanInstance(iwc, Web2Business.SPRING_BEAN_IDENTIFIER);
 		if (web2 != null) {
-//			JQuery  jQuery = web2.getJQuery();
+			JQuery  jQuery = web2.getJQuery();
 
 			styles.add(web2.getBundleURIToFancyBoxStyleFile());
 
-//			styles.add(jQuery.getBundleURIToJQueryUILib("1.8.14","css/ui-lightness/jquery-ui-1.8.14.custom.css"));
+			styles.add(jQuery.getBundleURIToJQueryUILib("1.8.14","css/ui-lightness/jquery-ui-1.8.14.custom.css"));
 
 			styles.add(web2.getBundleUriToHumanizedMessagesStyleSheet());
 
-//			styles.addAll(web2.getBundleURIsToTageditStyleFiles());
+			styles.addAll(web2.getBundleURIsToTageditStyleFiles());
 
 
 		}else{
