@@ -2,7 +2,11 @@ package is.idega.idegaweb.egov.citizen.business;
 
 import is.idega.block.family.business.FamilyLogic;
 import is.idega.idegaweb.egov.citizen.CitizenConstants;
+import is.idega.idegaweb.egov.citizen.bean.LoginDataBean;
+import is.idega.idegaweb.egov.citizen.data.LoginData;
+import is.idega.idegaweb.egov.citizen.data.LoginDataHome;
 import is.idega.idegaweb.egov.citizen.presentation.CitizenProfile;
+import is.idega.idegaweb.egov.citizen.presentation.UserAccessSettings;
 
 import java.rmi.RemoteException;
 import java.text.DateFormat;
@@ -18,6 +22,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ejb.CreateException;
+import javax.ejb.EJBException;
 import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
 
@@ -47,11 +52,14 @@ import com.idega.data.IDOAddRelationshipException;
 import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
 import com.idega.data.IDORelationshipException;
+import com.idega.data.IDORemoveRelationshipException;
 import com.idega.dwr.business.DWRAnnotationPersistance;
 import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.IWResourceBundle;
+import com.idega.presentation.Block;
 import com.idega.presentation.IWContext;
+import com.idega.presentation.Layer;
 import com.idega.presentation.Table2;
 import com.idega.presentation.ui.handlers.IWDatePickerHandler;
 import com.idega.user.bean.UserDataBean;
@@ -80,6 +88,7 @@ public class CitizenServices extends DefaultSpringBean implements
 	private UserApplicationEngine userApplicationEngine = null;
 	private PostalCodeHome postalCodeHome = null;
 	private CountryHome countryHome = null;
+	private LoginDataHome loginDataHome = null;
 	private FamilyLogic familyLogic = null;
 
 	private UserHome userHome = null;
@@ -157,7 +166,41 @@ public class CitizenServices extends DefaultSpringBean implements
 	}
 	
 	@RemoteMethod
-	public String saveUserAccessSetings(Map<String, List<String>> parameters) {
+	public String getSingleSingOnLayer(){
+		Block layer = UserAccessSettings.getSingleSingOnLayer();
+		String html = BuilderLogic.getInstance().getRenderedComponent(
+				layer, null).getHtml();
+		return html;
+	}
+	
+	@RemoteMethod
+	public String getSingleSingOnLayers(Integer userId){
+		if(userId == null){
+			return CoreConstants.EMPTY;
+		}
+		UserBusiness userBusiness = getUserBusiness();
+		Collection<Block> layers = null;
+		try{
+			User user = userBusiness.getUser(userId);
+			layers = UserAccessSettings.getSingleSingOnLayers(user, getLoginDataHome());
+		}catch(Exception e){
+			getLogger().log(Level.WARNING, "Failed getting single sing on layers", e);
+			return CoreConstants.EMPTY;
+		}
+		if(ListUtil.isEmpty(layers)){
+			return CoreConstants.EMPTY;
+		}
+		Layer layer = new Layer();
+		for(Block login : layers){
+			layer.add(login);
+		}
+		String html = BuilderLogic.getInstance().getRenderedComponent(
+				layer, null).getHtml();
+		return html;
+	}
+	
+	@RemoteMethod
+	public String saveUserAccessSetings(Map<String, List<String>> parameters, ArrayList<LoginDataBean> singleSingOn) {
 		IWContext iwc = CoreUtil.getIWContext();
 		IWBundle bundle = iwc.getIWMainApplication().getBundle(CitizenConstants.IW_BUNDLE_IDENTIFIER);
 		IWResourceBundle iwrb = bundle.getResourceBundle(iwc);
@@ -172,17 +215,21 @@ public class CitizenServices extends DefaultSpringBean implements
 		List<String> params = parameters.get(CitizenConstants.USER_EDIT_USERNAME_PARAMETER);
 		if(!ListUtil.isEmpty(params)){
 			login = params.get(0);
-			loginTable.setUserLogin(login);
+			if(!StringUtil.isEmpty(login)){
+				loginTable.setUserLogin(login);
+			}
 		}
 		User user = iwc.getCurrentUser();
 		String password = null;
 		params = parameters.get(CitizenConstants.USER_EDIT_PASSWORD_PARAMETER);
 		if(!ListUtil.isEmpty(params)){
 			password = params.get(0);
-			try {
-				LoginBusinessBean.getLoginBusinessBean(iwc).changeUserPassword(user, password);
-			} catch (Exception e) {
-				successMsg += CoreConstants.NEWLINE + iwrb.getLocalizedString("failed_saving_password", "Failed saving password");
+			if(!StringUtil.isEmpty(password)){
+				try {
+					LoginBusinessBean.getLoginBusinessBean(iwc).changeUserPassword(user, password);
+				} catch (Exception e) {
+					successMsg += CoreConstants.NEWLINE + iwrb.getLocalizedString("failed_saving_password", "Failed saving password");
+				}
 			}
 		}
 		params = parameters.get(CitizenConstants.USER_EDIT_LANGUAGE_PARAMETER);
@@ -198,20 +245,113 @@ public class CitizenServices extends DefaultSpringBean implements
 					user.addLanguage(language);
 				}
 			} catch (IDOLookupException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				getLogger().log(Level.WARNING, "", e);
 			} catch (FinderException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				getLogger().log(Level.WARNING, "", e);
 			} catch (IDOAddRelationshipException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				getLogger().log(Level.WARNING, "", e);
 			}catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				getLogger().log(Level.WARNING, "", e);
 			}
 		}
+		try {
+			storeSingleSingOn(singleSingOn, user);
+		} catch (Exception e) {
+			getLogger().log(Level.WARNING, "Failed saving single sing on", e);
+			successMsg += CoreConstants.NEWLINE + iwrb.getLocalizedString("failed_saving_single_sing_on", "Failed saving single sing on");
+		}	
 		return successMsg;
+	}
+	
+
+	private void storeSingleSingOn(ArrayList<LoginDataBean> singleSingOn,User user) throws IDOLookupException{
+		LoginDataHome loginDataHome = getLoginDataHome();
+		for(LoginDataBean data : singleSingOn){
+			LoginData login = null;
+			String id = data.getLoginId();
+			if(StringUtil.isEmpty(id) || id.equals("-1")){
+				try {
+					login = (LoginData)loginDataHome.createIDO();
+				} catch (CreateException e) {
+					this.getLogger().log(Level.WARNING, "Failed creating LoginData", e);
+					continue;
+				}
+			}else{
+				Collection <Integer> ids = new ArrayList<Integer>(1);
+				try{
+					ids.add(Integer.valueOf(id));
+					Collection <LoginData> logins = loginDataHome.getEntityCollectionForPrimaryKeys(ids);
+					if(ListUtil.isEmpty(logins)){
+						continue;
+					}
+					login = logins.iterator().next();
+				}catch(Exception e){
+					this.getLogger().log(Level.WARNING, "Failed getting LoginData by id " , e);
+					continue;
+				}
+			}
+			String input = data.getPassword();
+			if(!StringUtil.isEmpty(input)){
+				login.setPassword(input);
+			}
+			input = data.getAddress();
+			if(StringUtil.isEmpty(input)){
+				continue;
+			}
+			Integer serviceId = null;
+			try{
+				serviceId = Integer.valueOf(input);
+			}catch(NumberFormatException e){
+				getLogger().log(Level.WARNING, "Not an integer id of remote service");
+				continue;
+			}
+			login.setService(serviceId);
+			
+			input = user.getPersonalID();
+			if(StringUtil.isEmpty(input)){
+				continue;
+			}
+			login.setPersonalId(input);
+			input = data.getUserName();
+			if(StringUtil.isEmpty(input)){
+				continue;
+			}
+			login.setUserName(input);
+			login.store();
+		}
+	}
+	
+	@RemoteMethod
+	public Boolean removeSingleSingOn(Integer loginId){
+		LoginDataHome loginDataHome = null;
+		try {
+			loginDataHome = getLoginDataHome();
+		} catch (IDOLookupException e) {
+			getLogger().log(Level.WARNING, "failed getting LoginDataHome", e);
+			return Boolean.FALSE;
+		}
+		Collection<Integer> ids = new ArrayList<Integer>(1);
+		ids.add(loginId);
+		Collection<LoginData> dataList = null;
+		try {
+			dataList = loginDataHome.getEntityCollectionForPrimaryKeys(ids);
+		} catch (FinderException e) {
+			return Boolean.FALSE;
+		}
+		if(ListUtil.isEmpty(ids)){
+			return Boolean.FALSE;
+		}
+		LoginData loginData = dataList.iterator().next();
+		try {
+			loginData.remove();
+		} catch (EJBException e) {
+			getLogger().log(Level.WARNING, "Failed removing LoginData " + loginId, e);
+			return Boolean.FALSE;
+		} catch (RemoveException e) {
+			getLogger().log(Level.WARNING, "Failed removing LoginData " + loginId);
+			return Boolean.TRUE;
+		}
+		return Boolean.TRUE;
 	}
 	
 	private String saveFamilyRelations(Map <String, List<String>> parameters,IWResourceBundle iwrb,IWContext iwc,User user){
@@ -455,6 +595,12 @@ public class CitizenServices extends DefaultSpringBean implements
 		}
 		return this.iCLanguageHome;
 	}
+	public LoginDataHome getLoginDataHome() throws IDOLookupException {
+		if (this.loginDataHome  == null) {
+			this.loginDataHome = (LoginDataHome) IDOLookup.getHome(LoginData.class);
+		}
+		return this.loginDataHome;
+	}
 	
 	@RemoteMethod
 	public Boolean removeRelation(String userId,String relatedId,String relationType){
@@ -497,7 +643,11 @@ public class CitizenServices extends DefaultSpringBean implements
 			User user = userBusiness.getUser(Integer.valueOf(userId));
 			ICLanguageHome icLanguageHome = getICLanguageHome();
 			ICLanguage language = icLanguageHome.findByPrimaryKey(Integer.valueOf(languageId));
-			user.removeLanguage(language);
+			try{
+				user.removeLanguage(language);
+			}catch(IDORemoveRelationshipException e){
+				
+			}
 		}catch(Exception e){
 			this.getLogger().log(Level.WARNING, "failed removing " + languageId + 
 					" language from user " + userId, e);

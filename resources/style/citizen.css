@@ -52,7 +52,7 @@ div#mobilePhone input {
 	margin-bottom: 20px;
 }
 
-.dwr-form input[type = text], .dwr-form * textarea{
+.dwr-form input[type = text], .dwr-form * textarea, .dwr-form input[type = password]{
 	font-size: 18;
 	background: none repeat scroll 0 0 #FFFFFF;
 	border: 1px solid #C6C6C6;
