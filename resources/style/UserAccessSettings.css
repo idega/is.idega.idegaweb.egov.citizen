@@ -3,6 +3,16 @@
 .dwr-form div{
 	position:relative;	
 }
+.dwr-form input[type = text], .dwr-form * textarea, .dwr-form input[type = password]{
+	width : 50%;
+}
+
+div.add-more-layer{
+	text-align:center;	
+}
+div.add-more-layer input{
+	display:inline;	
+}
 
 /* Language select style*/
 .dwr-form .language-select-class{
@@ -29,10 +39,17 @@
 	width:4em;
 	height:1.5em;
 }
+
+.dwr-form .button-add-layer input{
+	width:3em;
+}
 .dwr-form .language-layer{
+	float:left;	
 	font-size:15;
 	height:10em;
-	position:relative;
+	/*position:relative;*/
 	width:25em;
+	padding-bottom:1em;
 }
+
 	

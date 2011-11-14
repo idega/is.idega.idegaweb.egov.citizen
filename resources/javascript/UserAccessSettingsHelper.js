@@ -7,7 +7,7 @@ jQuery(document).ready(function(){
 	UserAccessSettingsHelper.initialize();
 });
 
-UserAccessSettingsHelper.saveAccessSettings = function(selector){
+UserAccessSettingsHelper.saveAccessSettings = function(selector,loginsLayerSelector,userId){
 	showLoadingMessage("");
 	var form = jQuery(selector);
 	var parameters = form.serializeArray();
@@ -20,11 +20,25 @@ UserAccessSettingsHelper.saveAccessSettings = function(selector){
 		}
 		map[element.name].push(element.value);
 	}
-	humanMsg.displayMsg(map);
-	CitizenServices.saveUserAccessSetings(map,{
+	
+	var singleSingOnLayer = jQuery(loginsLayerSelector);
+	var logins = [];
+	var loginlayers = singleSingOnLayer.children();
+	for(var i = 0;i<loginlayers.length;i++){
+		var layer = jQuery(loginlayers[i]);
+		var data = {};
+		data.loginId = layer.find(UserAccessSettingsHelper.SINGLE_SING_ON_ID_SELECTOR).val();
+		data.address = layer.find(UserAccessSettingsHelper.SINGLE_SING_ON_SERVER_SELECTOR).val();
+		data.userName = layer.find(UserAccessSettingsHelper.SINGLE_SING_ON_NAME_SELECTOR).val();
+		data.password = layer.find(UserAccessSettingsHelper.SINGLE_SING_ON_PASSWORD_SELECTOR).val();
+		logins.push(data);
+	}
+	
+	CitizenServices.saveUserAccessSetings(map,logins,{
 		callback: function(reply){
 			closeAllLoadingMessages();
 			humanMsg.displayMsg(reply);
+			reloadPage();
 		}
 	});
 }
@@ -126,12 +140,38 @@ UserAccessSettingsHelper.initLanguages = function(selectSelector,containerSelect
 	}
 }
 
-//jQuery(document).ready(function(){
-//	var UserAccessSettingsHelper.languages = [];
-//	UserAccessSettingsHelper.languages[0] = '1';
-//	UserAccessSettingsHelper.initLanguages('#iwidb9bdf26da68c',
-//			'#iwid5151ad4fa4f4',
-//			'2',
-//			UserAccessSettingsHelper.languages,
-//			'/idegaweb/bundles/is.idega.idegaweb.egov.citizen/resources/delete.png');
-//});
+
+UserAccessSettingsHelper.addSingleSingOn = function(layerSelector){
+	if(UserAccessSettingsHelper.SINGLE_SING_ON_NEW_LAYER != undefined){
+		jQuery(layerSelector).append(UserAccessSettingsHelper.SINGLE_SING_ON_NEW_LAYER);
+		return;
+	}
+	showLoadingMessage("");
+	CitizenServices.getSingleSingOnLayer({
+		callback: function(layer){
+			UserAccessSettingsHelper.SINGLE_SING_ON_NEW_LAYER = layer;
+			jQuery(layerSelector).append(layer);
+			closeAllLoadingMessages();
+		}
+	});
+}
+UserAccessSettingsHelper.removeSingleSingOn = function(layerSelector,loginId){
+	showLoadingMessage("");
+	if(loginId == '-1'){
+		jQuery(layerSelector).remove();
+		closeAllLoadingMessages();
+		return;
+	}
+	CitizenServices.removeSingleSingOn(loginId,{
+		callback: function(removed){
+			if(removed){
+				jQuery(layerSelector).remove();
+				closeAllLoadingMessages();
+				humanMsg.displayMsg(UserAccessSettingsHelper.REMOVE_MSG);
+				return;
+			}
+			humanMsg.displayMsg(UserAccessSettingsHelper.FAILED_MSG);
+			closeAllLoadingMessages();
+		}
+	});
+}
