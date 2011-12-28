@@ -17,8 +17,6 @@ import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.ejb.CreateException;
-
 import com.idega.builder.bean.AdvancedProperty;
 import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
@@ -49,6 +47,7 @@ public class IWBundleStarter implements IWBundleStartable {
 		defaultRemoteServices.add(service);
 		return defaultRemoteServices;
 	}
+	
 	private void addDefaultRemoteServices(IWBundle starterBundle){
 		CitizenRemoteServicesHome citizenRemoteServicesHome = null;
 		try {
@@ -61,17 +60,18 @@ public class IWBundleStarter implements IWBundleStartable {
 		if(!ListUtil.isEmpty(services)){
 			return;
 		}
+		
 		Collection<AdvancedProperty> defaultServices = getDefaultRemoteServices();
 		for(AdvancedProperty service : defaultServices){
 			CitizenRemoteServices citizenRemoteServices =  null;
 			try {
 				citizenRemoteServices = (CitizenRemoteServices) citizenRemoteServicesHome.createIDO();
-			} catch (CreateException e) {
+				citizenRemoteServices.setAddress(service.getId());
+				citizenRemoteServices.setServerName(service.getValue());
+				citizenRemoteServices.store();
+			} catch (Exception e) {
 				Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "failed adding default remote service" + service, e);
 			}
-			citizenRemoteServices.setAddress(service.getId());
-			citizenRemoteServices.setServerName(service.getValue());
-			citizenRemoteServices.store();
 		}
 	}
 }
