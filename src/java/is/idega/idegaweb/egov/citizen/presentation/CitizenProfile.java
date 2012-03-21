@@ -489,12 +489,19 @@ public class CitizenProfile extends Block {
 			JQuery  jQuery = web2.getJQuery();
 			scripts.add(jQuery.getBundleURIToJQueryLib());
 
-			scripts.add(jQuery.getBundleURIToJQueryUILib("1.8.14","js/jquery-ui-1.8.14.custom.min.js"));
-//			scripts.add(jQuery.getBundleURIToJQueryUILib("1.8.14","development-bundle/ui/jquery.ui.autocomplete.js"));
-			scripts.add(jQuery.getBundleURIToJQueryUILib("1.8.14","development-bundle/ui/jquery-ui-autocomplete-html.js"));
+			scripts.add(jQuery.getBundleURIToJQueryUILib(
+						Web2BusinessBean.JQUERY_UI_LATEST_VERSION,
+						"js/jquery-ui-" + Web2BusinessBean.JQUERY_UI_LATEST_VERSION 
+						+ ".custom.min.js"));
+			scripts.add(jQuery.getBundleURIToJQueryUILib(
+						Web2BusinessBean.JQUERY_UI_LATEST_VERSION,
+						"ui.autocomplete.html.js"));
+			
 			Locale locale = iwc.getLocale();
-			scripts.add(jQuery.getBundleURIToJQueryUILib("1.8.14","development-bundle/ui/i18n") + "/jquery.ui.datepicker-" 
-					+ locale.getLanguage() + ".js");
+			scripts.add(jQuery.getBundleURIToJQueryUILib(
+						Web2BusinessBean.JQUERY_UI_LATEST_VERSION,
+						"i18n") + "/ui.datepicker-" 
+						+ locale.getLanguage() + ".js");
 			
 
 			scripts.add(web2.getBundleUriToHumanizedMessagesScript());
@@ -517,7 +524,7 @@ public class CitizenProfile extends Block {
 		IWMainApplication iwma = iwc.getApplicationContext().getIWMainApplication();
 		IWBundle iwb = iwma.getBundle(CitizenConstants.IW_BUNDLE_IDENTIFIER);
 		scripts.add(iwb.getVirtualPathWithFileNameString("javascript/SimpleUserEditFormHelper.js"));
-		scripts.add("/dwr/interface/CitizenServices.js");
+		scripts.add("/dwr/interface/CitizenServices.js"); 
 
 		return scripts;
 	}
@@ -531,7 +538,10 @@ public class CitizenProfile extends Block {
 
 			styles.add(web2.getBundleURIToFancyBoxStyleFile());
 
-			styles.add(jQuery.getBundleURIToJQueryUILib("1.8.14","css/ui-lightness/jquery-ui-1.8.14.custom.css"));
+			styles.add(jQuery.getBundleURIToJQueryUILib(
+					Web2BusinessBean.JQUERY_UI_LATEST_VERSION, 
+					"css/ui-lightness/jquery-ui-" +
+							Web2BusinessBean.JQUERY_UI_LATEST_VERSION + ".custom.css"));
 
 			styles.add(web2.getBundleUriToHumanizedMessagesStyleSheet());
 
