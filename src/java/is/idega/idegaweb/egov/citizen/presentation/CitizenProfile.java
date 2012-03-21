@@ -55,7 +55,7 @@ import com.idega.util.expression.ELUtil;
 import com.idega.webface.WFUtil;
 
 public class CitizenProfile extends Block {
-	
+
 	private static final String REMOVE_ITEM_CLASS = "remove-item-class";
 	private static final String RELATED_ITEM_CLASS = "simple-user-edit-related-item-class";
 	private static final String RELATION_SELECTION_NAME = "relation_selection_name";
@@ -63,37 +63,40 @@ public class CitizenProfile extends Block {
 	private static final String RELATION_TYPE_CONTAINER_CLASS = "relation-type-container";
 	private static final String DELETE_IMG_CLASS = "delete-img";
 	private static final String BORN_DATE_CLASS = "born-date-class";
-	
+
 	private String formId = null;
 	private String relationInputId = null;
 	private String relationSelectId = null;
 	private String relationListsId = null;
-	
+
 	private String userId = null;
 
 	@Autowired
 	private CitizenServices citizenServices;
-	
+
 	private Boolean needFiles = Boolean.TRUE;
-	
-	IWResourceBundle iwrb = null;
-	
-	public CitizenProfile(){
-		ELUtil.getInstance().autowire(this);
+
+	private IWResourceBundle iwrb = null;
+
+	private CitizenServices getCitizenServices() {
+		if (citizenServices == null)
+			ELUtil.getInstance().autowire(this);
+
+		return citizenServices;
 	}
-	
+
 	@Override
 	public String getBundleIdentifier() {
 		return CitizenConstants.IW_BUNDLE_IDENTIFIER;
 	}
-	
+
 	@Override
 	public void main(IWContext context) throws Exception {
 		IWContext iwc = IWContext.getIWContext(context);
-		
+
 		IWBundle bundle = getBundle(iwc);
 		iwrb = bundle.getResourceBundle(iwc);
-		
+
 		User user = getUser(iwc);
 		if(user == null){
 			Layer layer = new Layer();
@@ -101,7 +104,7 @@ public class CitizenProfile extends Block {
 			layer.addText(iwrb.getLocalizedString("no_user_specified", "No user specified"));
 			return;
 		}
-		
+
 		this.add(this.getUserEditForm(user, iwc));
 		Layer scriptLayer = new Layer();
 		this.add(scriptLayer);
@@ -115,11 +118,11 @@ public class CitizenProfile extends Block {
 			PresentationUtil.addStyleSheetsToHeader(iwc, getNeededStyles(iwc));
 		}
 	}
-	
+
 	public void setNeedFiles(Boolean needFiles) {
 		this.needFiles = needFiles;
 	}
-	
+
 	private User getUser(IWContext iwc){
 		if(userId == null){
 			userId = iwc.getParameter(CitizenConstants.USER_EDIT_USER_ID_PARAMETER);
@@ -127,7 +130,7 @@ public class CitizenProfile extends Block {
 		User user = null;
 		try{
 			if(userId != null){
-				user = citizenServices.getUserBusiness().getUser(Integer.valueOf(userId));
+				user = getCitizenServices().getUserBusiness().getUser(Integer.valueOf(userId));
 			}else if(iwc.isLoggedOn()){
 				user =iwc.getCurrentUser();
 			}
@@ -136,17 +139,17 @@ public class CitizenProfile extends Block {
 		}
 		return user;
 	}
-	
+
 	private Form getUserEditForm(User user, IWContext iwc){
 		UserDataBean userData = null;
 		boolean isData = false;
-		
+
 		Date born = null;
 		String id = String.valueOf(-1);
 		String resumeString = CoreConstants.EMPTY;
 		if(user != null){
 			born = user.getDateOfBirth();
-			userData = citizenServices.getUserApplicationEngine().getUserInfo(user);
+			userData = getCitizenServices().getUserApplicationEngine().getUserInfo(user);
 			if(userData != null){
 				isData = true;
 			}
@@ -191,19 +194,19 @@ public class CitizenProfile extends Block {
 			if (StringUtil.isEmpty(country))
 				country = CoreConstants.EMPTY;
 		}
-		
+
 		Form form = new Form();
 		form.setStyleClass("dwr-form");
 		Table2 table = new Table2();
 		form.add(table);
 		formId = form.getId();
-		
+
 		// Id
 		TableRow row = table.createRow();
 		HiddenInput idInput = new HiddenInput(CitizenConstants.USER_EDIT_USER_ID_PARAMETER,id);
 		TableCell2 cell = row.createCell();
 		cell.add(idInput);
-		
+
 		// Name
 		Strong cellInfo = new Strong();
 		cell.add(cellInfo);
@@ -212,7 +215,7 @@ public class CitizenProfile extends Block {
 		cell = row.createCell();
 		cell.add(input);
 		cell.setStyleClass("input-container");
-		
+
 		// Personal ID
 		row = table.createRow();
 		cellInfo = new Strong();
@@ -220,7 +223,7 @@ public class CitizenProfile extends Block {
 		cellInfo.addText(iwrb.getLocalizedString("personal_id", "Personal id"));
 		input = new TextInput(CitizenConstants.USER_EDIT_PERSONAL_ID_PARAMETER,personalId);
 		row.createCell().add(input);
-		
+
 		// Born
 		row = table.createRow();
 		cellInfo = new Strong();
@@ -232,7 +235,7 @@ public class CitizenProfile extends Block {
 			input.setValue(born.toString());
 		}
 		input.setStyleClass(BORN_DATE_CLASS);
-		
+
 		// Street and number
 		row = table.createRow();
 		cellInfo = new Strong();
@@ -242,7 +245,7 @@ public class CitizenProfile extends Block {
 		cell = row.createCell();
 		cell.add(input);
 		cell.setStyleClass("input-container");
-		
+
 		// City
 		row = table.createRow();
 		cellInfo = new Strong();
@@ -252,7 +255,7 @@ public class CitizenProfile extends Block {
 		cell = row.createCell();
 		cell.add(input);
 		cell.setStyleClass("input-container");
-		
+
 		// Postal code
 		row = table.createRow();
 		cellInfo = new Strong();
@@ -262,7 +265,7 @@ public class CitizenProfile extends Block {
 		cell = row.createCell();
 		cell.add(input);
 		cell.setStyleClass("input-container");
-		
+
 		//	Postal box
 		row = table.createRow();
 		cellInfo = new Strong();
@@ -272,7 +275,7 @@ public class CitizenProfile extends Block {
 		cell = row.createCell();
 		cell.add(input);
 		cell.setStyleClass("input-container");
-		
+
 		// Country
 		row = table.createRow();
 		cellInfo = new Strong();
@@ -296,14 +299,14 @@ public class CitizenProfile extends Block {
 		}
 		SelectOption option = new SelectOption(iwrb.getLocalizedString("choose_country", "Choose country"),-1);
 		dropdown.addFirstOption(option);
-		
+
 		if (!StringUtil.isEmpty(country)) {
 			dropdown.setSelectedElement(country);
 		}
-		
+
 		// Marital status
 		//TODO: search for types
-		
+
 		// Family
 		cellInfo = new Strong();
 		cellInfo.addText(iwrb.getLocalizedString("family", "Family"));
@@ -315,7 +318,7 @@ public class CitizenProfile extends Block {
 		relationInputId = input.getId();
 		List<String> relations = null;
 		try {
-			relations = citizenServices.getFamilyRelationTypes(iwc);
+			relations = getCitizenServices().getFamilyRelationTypes(iwc);
 		} catch (Exception e) {
 			Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Failed getting user " + id + " family relations", e);
 			relations = Collections.emptyList();
@@ -329,7 +332,7 @@ public class CitizenProfile extends Block {
 		Lists relationList = getfamilyMemberList(iwc, user, relations);
 		table.createRow().createCell().add(relationList);
 		relationListsId = relationList.getId();
-		
+
 		// Resume
 		cellInfo = new Strong();
 		cellInfo.addText(iwrb.getLocalizedString("resume", "Resume"));
@@ -337,28 +340,28 @@ public class CitizenProfile extends Block {
 		TextArea resume = new TextArea(CitizenConstants.USER_EDIT_RESUME_PARAMETER,resumeString);
 		table.createRow().createCell().add(resume);
 		resume.setColumns(50);
-		
+
 		// Submit
 		GenericButton buttonSubmit = new GenericButton("buttonSubmit", iwrb.getLocalizedString("save", "Save"));
 		form.add(buttonSubmit);
 		buttonSubmit.setOnClick("SimpleUserEditFormHelper.saveUser('#" + formId + CoreConstants.JS_STR_PARAM_END);
-		
+
 		return form;
 	}
-	
+
 	private Lists getfamilyMemberList(IWContext iwc, User theUser, Collection <String> relations){
 		Lists list = new Lists();
 		list.setStyleClass("relation-list");
 		FamilyLogic fl = null;
 		try {
-			fl = citizenServices.getFamilyLogic(iwc);
+			fl = getCitizenServices().getFamilyLogic(iwc);
 		} catch (IBOLookupException e) {
 			Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "failed getting family logic", e);
 			return list;
 		}
-		Map <String,Collection<User>> members = citizenServices.getFamilyMembers(iwc, theUser,relations);
+		Map <String,Collection<User>> members = getCitizenServices().getFamilyMembers(iwc, theUser,relations);
 		Set <String> keys = members.keySet();
-		UserApplicationEngine userApplicationEngine = citizenServices.getUserApplicationEngine();
+		UserApplicationEngine userApplicationEngine = getCitizenServices().getUserApplicationEngine();
 		IWMainApplication iwma = iwc.getApplicationContext().getIWMainApplication();
 		IWBundle iwb = iwma.getBundle(CitizenConstants.IW_BUNDLE_IDENTIFIER);
 		for(String key : keys){
@@ -373,13 +376,13 @@ public class CitizenProfile extends Block {
 		}
 		return list;
 	}
-	
+
 	public static Table2 getUserInfoView(UserDataBean userData,String relation,
 			FamilyLogic familyLogic,IWResourceBundle iwrb,IWBundle iwb,boolean addRelationNameToInput ){
 		Table2 table = new Table2();
 		TableRow row = table.createRow();
 		table.setStyleClass("user-info-table");
-		
+
 		// User to add
 		TableCell2 cell = row.createCell();
 		HiddenInput input = new HiddenInput();
@@ -389,31 +392,31 @@ public class CitizenProfile extends Block {
 		input.setValue(String.valueOf(userData.getUserId()));
 		cell.add(input);
 		input.setStyleClass(ID_CONTANER_CLASS);
-		
-		
+
+
 		// Relation type
 		Label label = new Label();
 		label.addText(familyLogic.getRelationName(iwrb, relation) + CoreConstants.COLON);
 		cell.add(label);
 		cell.setStyleClass("relation-type");
-		
+
 		input = new HiddenInput();
 		cell.add(input);
 		input.setValue(relation);
 		input.setStyleClass(RELATION_TYPE_CONTAINER_CLASS);
-		
-		
+
+
 		// Picture
 		Image image = new Image(userData.getPictureUri());
 		row.createCell().add(image);
-		
+
 		// Name
 		cell = row.createCell();
 		cell.setStyleClass("relation-user-info-name");
 		label = new Label();
 		cell.add(label);
 		label.addText(userData.getName());
-		
+
 		// Remove
 		cell = row.createCell();
 		Image removeImage = new Image();
@@ -423,14 +426,14 @@ public class CitizenProfile extends Block {
 		cell.setStyleClass(REMOVE_ITEM_CLASS);
 		removeImage.setTitle(iwrb.getLocalizedString("remove", "Remove"));
 		removeImage.setStyleClass(DELETE_IMG_CLASS);
-		
+
 		return table;
 	}
-	
+
 	private DropdownMenu getFamilyRelationSelection(IWContext iwc, String name, Collection<String> relations){
 		DropdownMenu dropdown = new DropdownMenu(name);
 		try {
-			FamilyLogic fl = citizenServices.getFamilyLogic(iwc);
+			FamilyLogic fl = getCitizenServices().getFamilyLogic(iwc);
 			for(String relation : relations){
 				dropdown.addMenuElement(relation, fl.getRelationName(iwrb, relation));
 			}
@@ -440,7 +443,7 @@ public class CitizenProfile extends Block {
 		dropdown.addFirstOption(new SelectOption(iwrb.getLocalizedString("choose_relationship", "Choose relationship"), String.valueOf(-1)));
 		return dropdown;
 	}
-	
+
 	private void addactions(Layer layer){
 		StringBuilder actions = new StringBuilder("SimpleUserEditFormHelper.initialize = function(){")
 		.append("SimpleUserEditFormHelper.FORM_SELECTOR = '#")
@@ -473,11 +476,11 @@ public class CitizenProfile extends Block {
 		.append("SimpleUserEditFormHelper.REMOVED_MSG = '")
 		.append(iwrb.getLocalizedString("removed", "Removed")).append(CoreConstants.JS_STR_INITIALIZATION_END)
 		.append("\n}");
-		
+
 		String actionString = PresentationUtil.getJavaScriptAction(actions.toString());
 		layer.add(actionString);
 	}
-	
+
 	private List<String> getNeededScripts(IWContext iwc){
 		List<String> scripts = new ArrayList<String>();
 
@@ -489,13 +492,20 @@ public class CitizenProfile extends Block {
 			JQuery  jQuery = web2.getJQuery();
 			scripts.add(jQuery.getBundleURIToJQueryLib());
 
-			scripts.add(jQuery.getBundleURIToJQueryUILib("1.8.14","js/jquery-ui-1.8.14.custom.min.js"));
-//			scripts.add(jQuery.getBundleURIToJQueryUILib("1.8.14","development-bundle/ui/jquery.ui.autocomplete.js"));
-			scripts.add(jQuery.getBundleURIToJQueryUILib("1.8.14","development-bundle/ui/jquery-ui-autocomplete-html.js"));
+			scripts.add(jQuery.getBundleURIToJQueryUILib(
+						Web2BusinessBean.JQUERY_UI_LATEST_VERSION,
+						"js/jquery-ui-" + Web2BusinessBean.JQUERY_UI_LATEST_VERSION
+						+ ".custom.min.js"));
+			scripts.add(jQuery.getBundleURIToJQueryUILib(
+						Web2BusinessBean.JQUERY_UI_LATEST_VERSION,
+						"ui.autocomplete.html.js"));
+
 			Locale locale = iwc.getLocale();
-			scripts.add(jQuery.getBundleURIToJQueryUILib("1.8.14","development-bundle/ui/i18n") + "/jquery.ui.datepicker-" 
-					+ locale.getLanguage() + ".js");
-			
+			scripts.add(jQuery.getBundleURIToJQueryUILib(
+						Web2BusinessBean.JQUERY_UI_LATEST_VERSION,
+						"i18n") + "/ui.datepicker-"
+						+ locale.getLanguage() + ".js");
+
 
 			scripts.add(web2.getBundleUriToHumanizedMessagesScript());
 
@@ -531,7 +541,10 @@ public class CitizenProfile extends Block {
 
 			styles.add(web2.getBundleURIToFancyBoxStyleFile());
 
-			styles.add(jQuery.getBundleURIToJQueryUILib("1.8.14","css/ui-lightness/jquery-ui-1.8.14.custom.css"));
+			styles.add(jQuery.getBundleURIToJQueryUILib(
+					Web2BusinessBean.JQUERY_UI_LATEST_VERSION,
+					"css/ui-lightness/jquery-ui-" +
+							Web2BusinessBean.JQUERY_UI_LATEST_VERSION + ".custom.css"));
 
 			styles.add(web2.getBundleUriToHumanizedMessagesStyleSheet());
 
