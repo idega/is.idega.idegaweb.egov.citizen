@@ -9,6 +9,7 @@ import javax.ejb.FinderException;
 
 import com.idega.data.IDOEntity;
 import com.idega.data.IDOFactory;
+import com.idega.data.IDORelationshipException;
 
 public class CitizenRemoteServicesHomeImpl extends IDOFactory implements CitizenRemoteServicesHome{
 
@@ -41,6 +42,20 @@ public class CitizenRemoteServicesHomeImpl extends IDOFactory implements Citizen
 		com.idega.data.IDOEntity entity = this.idoCheckOutPooledEntity();
 		try {
 			Collection<Integer> ids = ((CitizenRemoteServicesBMPBean)entity).ejbFindByServices(maxAmount);
+			this.idoCheckInPooledEntity(entity);
+			return findByPrimaryKeyCollection(ids);
+		} catch (FinderException e) {
+			Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "failed finding any remote services");
+			return Collections.emptyList();
+		}
+	}
+
+	@Override
+	public Collection<CitizenRemoteServices> getRemoteServicesByUserId(
+			String userId) throws IDORelationshipException {
+		com.idega.data.IDOEntity entity = this.idoCheckOutPooledEntity();
+		try {
+			Collection<Integer> ids = ((CitizenRemoteServicesBMPBean)entity).getServicesByUserId(userId);
 			this.idoCheckInPooledEntity(entity);
 			return findByPrimaryKeyCollection(ids);
 		} catch (FinderException e) {

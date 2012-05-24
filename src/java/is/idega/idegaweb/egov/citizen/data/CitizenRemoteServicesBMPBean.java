@@ -8,6 +8,13 @@ import java.util.logging.Level;
 import javax.ejb.FinderException;
 
 import com.idega.data.GenericEntity;
+import com.idega.data.IDORelationshipException;
+import com.idega.data.query.Column;
+import com.idega.data.query.MatchCriteria;
+import com.idega.data.query.SelectQuery;
+import com.idega.data.query.Table;
+import com.idega.user.data.User;
+import com.idega.user.data.UserBMPBean;
 import com.idega.util.CoreConstants;
 import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
@@ -24,10 +31,13 @@ public class CitizenRemoteServicesBMPBean extends GenericEntity implements Citiz
 	
 	private static final String COLUMN_NAME= "NAME";
 	private static final String COLUMN_ADDRESS = "ADDRESS";
+	
+	private static final String COLUMN_USERS = "comm_services_users";
 	@Override
 	public void initializeAttributes() {
 		addAttribute(getIDColumnName());
 		
+		addManyToManyRelationShip(User.class, COLUMN_USERS);
 		addAttribute(COLUMN_NAME, "Name",String.class);
 		addAttribute(COLUMN_ADDRESS, "address", String.class);
 	}
@@ -52,6 +62,7 @@ public class CitizenRemoteServicesBMPBean extends GenericEntity implements Citiz
 	public void setServerName(String name) {
 		setColumn(COLUMN_NAME, name);
 	}
+	
 
 	@SuppressWarnings("unchecked")
 	public Collection<Integer> ejbFindByServiceNames(Collection<String> names) {
@@ -89,5 +100,34 @@ public class CitizenRemoteServicesBMPBean extends GenericEntity implements Citiz
 		}else{
 			return super.idoFindPKsBySQL(query);
 		}
+	}
+	@Override
+	@SuppressWarnings("unchecked")
+	public Collection<User> getUsers()  throws IDORelationshipException {
+		return idoGetRelatedEntities(User.class);
+	}
+	@Override
+	public void AddUser(User user)  throws IDORelationshipException {
+		idoAddTo(user, COLUMN_USERS);
+	}
+	@Override
+	public void removeUser(User user) throws IDORelationshipException {
+		idoRemoveFrom(user, COLUMN_USERS);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Collection<Integer> getServicesByUserId(String userId) throws IDORelationshipException, FinderException{
+		SelectQuery query = idoSelectQuery();
+		Table services = new Table(this);
+		Table users = new Table(User.class);
+		Table servicesUsers = new Table(COLUMN_USERS);
+		
+		query.addManyToManyJoin(services, users);
+//		query.addCriteria(join);
+		Column userIdColumn = users.getColumn(UserBMPBean.getColumnNameUserID());
+		MatchCriteria userMatch = new MatchCriteria(userIdColumn, MatchCriteria.EQUALS, userId);
+		query.addCriteria(userMatch);
+		
+		return super.idoFindPKsByQuery(query);
 	}
 }
