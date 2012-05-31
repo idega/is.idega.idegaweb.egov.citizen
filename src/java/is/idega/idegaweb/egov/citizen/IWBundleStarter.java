@@ -17,7 +17,11 @@ import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.ejb.CreateException;
+
 import com.idega.builder.bean.AdvancedProperty;
+import com.idega.core.contact.data.ContactPurpose;
+import com.idega.core.contact.data.ContactPurposeHome;
 import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
 import com.idega.idegaweb.IWBundle;
@@ -31,11 +35,31 @@ public class IWBundleStarter implements IWBundleStartable {
 	@Override
 	public void start(IWBundle starterBundle) {
 		addDefaultRemoteServices(starterBundle);
+		try{
+			addDefaultContactPurposes();
+		}catch(Exception e){
+			Logger.getLogger(IWBundleStarter.class.getName()).log(Level.WARNING, "failed adding default contact purposes for ehub", e);
+		}
 	}
 
 	@Override
 	public void stop(IWBundle starterBundle) {
 	}
+	
+	private void addDefaultContactPurposes() throws CreateException, IDOLookupException{
+		ContactPurposeHome contactPurposeHome = (ContactPurposeHome) IDOLookup.getHome(ContactPurpose.class);
+		Collection<ContactPurpose> contacts = contactPurposeHome.getContactPurposes(1);
+		if(!ListUtil.isEmpty(contacts)){
+			return;
+		}
+		ContactPurpose contactPurpose = contactPurposeHome.create();
+		contactPurpose.setDisplayName("eHUB_messages");
+		contactPurpose.store();
+		contactPurpose = contactPurposeHome.create();
+		contactPurpose.setDisplayName("eHUB_messages_SMS");
+		contactPurpose.store();
+	}
+	
 	
 	private Collection<AdvancedProperty> getDefaultRemoteServices(){
 		Collection <AdvancedProperty> defaultRemoteServices = new ArrayList<AdvancedProperty>();

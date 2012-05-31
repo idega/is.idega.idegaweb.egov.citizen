@@ -376,7 +376,7 @@ public class UserAccessSettings extends Block {
 
 		Web2Business web2 = WFUtil.getBeanInstance(iwc, Web2Business.SPRING_BEAN_IDENTIFIER);
 		if (web2 != null) {
-			JQuery  jQuery = web2.getJQuery();
+//			JQuery  jQuery = web2.getJQuery();
 
 			styles.add(web2.getBundleUriToHumanizedMessagesStyleSheet());
 

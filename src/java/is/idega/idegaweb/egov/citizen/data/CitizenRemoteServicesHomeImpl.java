@@ -37,6 +37,7 @@ public class CitizenRemoteServicesHomeImpl extends IDOFactory implements Citizen
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Collection<CitizenRemoteServices> getRemoteServices(int maxAmount) {
 		com.idega.data.IDOEntity entity = this.idoCheckOutPooledEntity();
@@ -50,6 +51,7 @@ public class CitizenRemoteServicesHomeImpl extends IDOFactory implements Citizen
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Collection<CitizenRemoteServices> getRemoteServicesByUserId(
 			String userId) throws IDORelationshipException {

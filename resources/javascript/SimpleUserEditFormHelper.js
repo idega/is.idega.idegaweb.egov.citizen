@@ -97,7 +97,12 @@ SimpleUserEditFormHelper.createUserAutocomplete = function(inputSelector,relatio
 		autocompleteURL: function(request, response) {
 			var relationName = jQuery(relationSelectSelector).val();
 			CitizenServices.getAutocompletedUsers(request.term,5,relationName,  {
-				callback: function(userDataCollection) {
+				callback: function(serverResponse) {
+					if(serverResponse.status[0] != "OK"){
+						humanMsg.displayMsg(serverResponse.message[0]);
+						return;
+					}
+					var userDataCollection = serverResponse.content;
 					var arrayOfData = [];
 					var i = 0;
 					var end = userDataCollection.length - 1;
@@ -132,7 +137,12 @@ SimpleUserEditFormHelper.createUserAutocomplete = function(inputSelector,relatio
 				var request  = jQuery(inputSelector).val();
 				var relationName = jQuery(relationSelectSelector).val();
 				CitizenServices.getAutocompletedUsers(request,2,relationName, {
-					callback: function(userDataCollection) {
+					callback: function(response) {
+						if(response.status[0] != "OK"){
+							humanMsg.displayMsg(response.message[0]);
+							return;
+						}
+						var userDataCollection = response.content;
 						if(userDataCollection.length == 2){
 							jQuery(inputSelector).trigger('transformToTag', [undefined, userDataCollection[0]]);
 						}
@@ -191,4 +201,12 @@ SimpleUserEditFormHelper.addDatePicker = function(formSelector,dateSelector){
 	});
 }
 
+SimpleUserEditFormHelper.showUserInput = function(input,containerId){
+	var value = jQuery(input).val();
+	if(value == "-1"){
+		jQuery("#"+ containerId).css("visibility","hidden");
+		return;
+	}
+	jQuery("#"+ containerId).css("visibility","visible");
+}
 

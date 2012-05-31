@@ -313,6 +313,7 @@ public class CitizenProfile extends Block {
 		table.createRow().createCell().add(cellInfo);
 		row = table.createRow();
 		cell = row.createCell();
+		cell.setStyleAttribute("visibility", "hidden");
 		input = new TextInput("tag[]");
 		cell.add(input);
 		relationInputId = input.getId();
@@ -325,7 +326,10 @@ public class CitizenProfile extends Block {
 		}
 		dropdown = getFamilyRelationSelection(iwc, RELATION_SELECTION_NAME, relations);
 		row.createCell().add(dropdown);
+		dropdown.setOnChange("SimpleUserEditFormHelper.showUserInput(this, '" + cell.getId() + CoreConstants.JS_STR_PARAM_END);
 		relationSelectId = dropdown.getId();
+		
+		
 
 		table = new Table2();
 		form.add(table);

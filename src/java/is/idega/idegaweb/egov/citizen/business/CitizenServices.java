@@ -11,6 +11,7 @@ import is.idega.idegaweb.egov.citizen.presentation.UserAccessSettings;
 import java.rmi.RemoteException;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -236,7 +237,7 @@ public class CitizenServices extends DefaultSpringBean implements
 		if(!ListUtil.isEmpty(params)){
 			try {
 				ICLanguageHome iCLanguageHome = this.getICLanguageHome();
-				Collection<Integer> ids = new ArrayList(params.size());
+				Collection<Integer> ids = new ArrayList<Integer>(params.size());
 				for(String languageId : params){
 					ids.add(Integer.valueOf(languageId));
 				}
@@ -548,8 +549,18 @@ public class CitizenServices extends DefaultSpringBean implements
 		return familyRelationTypes;
 	}
 	
+	/**
+	 * This remote method returns a map of search status and users by request.
+	 * @param request the request by which users will be searched
+	 * @param maxAmount the max amount of users to return
+	 * @param relationType the relationship type which will be specified in user table
+	 * @return returns a Map that contains <br/>
+	 * "status"`:		status of request (OK if ok, other if errors)
+	 * "message":		message about search (For example error).
+	 * "content":		collection of user search label (for showing data) followed by value.
+	 */
 	@RemoteMethod
-	public Collection<String> getAutocompletedUsers(String request,int maxAmount,String relationType){
+	public Map<String,Collection<String>> getAutocompletedUsers(String request,int maxAmount,String relationType){
 		request = request.toLowerCase();
 		Collection <User> requestedUsers = (this.getUserHome().ejbAutocompleteRequest(request, -1, maxAmount, 0));
 		UserApplicationEngine userApplicationEngine = this.getUserApplicationEngine();
@@ -560,14 +571,23 @@ public class CitizenServices extends DefaultSpringBean implements
 		IWMainApplication iwma = iwc.getApplicationContext().getIWMainApplication();
 		IWBundle iwb = iwma.getBundle(CitizenConstants.IW_BUNDLE_IDENTIFIER);
 		List <String>tables = new ArrayList<String>();
+		Map<String,Collection<String>> response = new HashMap<String,Collection<String>>(); 
 		FamilyLogic fl = null;
+		if(relationType.equals("-1")){
+			response.put("status", Arrays.asList("bad_request"));
+			String message = iwrb.getLocalizedString("relationship_type_is_not_specified", "Relationship type is not specified");
+			response.put("message", Arrays.asList(message));
+			return response;
+		}
 		try {
 			fl = this.getFamilyLogic(iwc);
-		} catch (IBOLookupException e) {
+		} catch (Exception e) {
 			this.getLogger().log(Level.WARNING, "failed getting family logic", e);
-			return tables;
+			response.put("status", Arrays.asList("server_error"));
+			String message = iwrb.getLocalizedString("server_error", "Server error");
+			response.put("message", Arrays.asList(message));
+			return response;
 		}
-		
 		for(User user : requestedUsers){
 			UserDataBean data =  userApplicationEngine.getUserInfo(user);
 			Table2 table = CitizenProfile.getUserInfoView(data,relationType,fl,iwrb,iwb,true);
@@ -576,7 +596,9 @@ public class CitizenServices extends DefaultSpringBean implements
 			tables.add(html);
 			tables.add(request);
 		}
-		return tables;
+		response.put("status", Arrays.asList("OK"));
+		response.put("content", tables);
+		return response;
 	}
 	
 	public UserHome getUserHome() {

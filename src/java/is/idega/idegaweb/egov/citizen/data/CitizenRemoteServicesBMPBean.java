@@ -93,6 +93,7 @@ public class CitizenRemoteServicesBMPBean extends GenericEntity implements Citiz
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	public Collection<Integer> ejbFindByServices(int maxAmount) throws FinderException {
 		String query = "SELECT * FROM "  + TABLE_NAME;
 		if(maxAmount > 0){
@@ -101,6 +102,7 @@ public class CitizenRemoteServicesBMPBean extends GenericEntity implements Citiz
 			return super.idoFindPKsBySQL(query);
 		}
 	}
+	
 	@Override
 	@SuppressWarnings("unchecked")
 	public Collection<User> getUsers()  throws IDORelationshipException {
@@ -120,7 +122,6 @@ public class CitizenRemoteServicesBMPBean extends GenericEntity implements Citiz
 		SelectQuery query = idoSelectQuery();
 		Table services = new Table(this);
 		Table users = new Table(User.class);
-		Table servicesUsers = new Table(COLUMN_USERS);
 		
 		query.addManyToManyJoin(services, users);
 //		query.addCriteria(join);
