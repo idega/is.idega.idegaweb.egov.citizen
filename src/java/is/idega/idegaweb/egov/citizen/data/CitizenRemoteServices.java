@@ -11,7 +11,7 @@ public interface CitizenRemoteServices extends IDOEntity {
 	public void setServerName(String name);
 	public String getAddress();
 	public void setAddress(String address);
-	public Collection<User> getUsers() throws IDORelationshipException ;
-	public void AddUser(User user)  throws IDORelationshipException ;
-	public void removeUser(User user)throws IDORelationshipException ;
+	public Collection<User> getUsers() throws IDORelationshipException;
+	public void addUser(User user)  throws IDORelationshipException;
+	public void removeUser(User user)throws IDORelationshipException;
 }
