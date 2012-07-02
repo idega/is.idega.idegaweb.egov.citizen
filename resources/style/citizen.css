@@ -71,4 +71,42 @@ ul.ui-autocomplete * img{
 	width:30px;
 	height:40px;	
 }
+
+.data-row{
+	display:table-row;
+}
+
+.data-div{
+	display:table-cell;
+	padding:0.2em;
+}
+
+.button-div{
+	cursor:pointer;
+	border-radius:45%;
+	background:rgba(59,89,152,1);
+	width:1.5em;
+	height:1.5em;
+	color:#FFFFFF;
+	text-align:center;
+}
+
+.delete-button-div{
+	background:rgba(200,50,80,1);
+}
+
+.add-button-div{
+	font-size:200%;
+}
+
+.error-message{
+	color:#E04477;
+}
+
+/*labelify plugin css*/
+.labelinside{
+	color: #999999;
+}
+/*------------*/
+
 	

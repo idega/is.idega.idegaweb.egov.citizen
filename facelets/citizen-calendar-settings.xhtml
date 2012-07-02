@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<div
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+   	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:content="http://xmlns.idega.com/com.idega.content"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ic="http://xmlns.idega.com/com.idega.core"
+	xmlns:iuser="http://xmlns.idega.com/com.idega.user" >
+<form class="dwr-form">
+	<fieldset class="citizen-calendar-subscription">
+		<legend>#{localizedStrings['is.idega.idegaweb.egov.citizen']['Calendars']}</legend>
+		<div class="calendar-list">
+			<ui:repeat value="#{userSettingsRequest.availableCalendars}" var="calendar">
+				<div class="data-row">
+					<div class="data-div">
+						<h:outputText value="#{calendar.name}" style="font-weight:bold" />
+					</div>
+					<div class="data-div">
+						<input type="checkbox" value="#{calendar.path}" />
+					</div>
+				</div>
+			</ui:repeat>
+		</div>
+	</fieldset>
+	<div class="buttons-div">
+		<input type="button" value="#{localizedStrings['is.idega.idegaweb.egov.citizen']['save']}" onclick="CitizenCalendarSettingsHelper.save()"/>
+	</div>
+</form>
+</div>

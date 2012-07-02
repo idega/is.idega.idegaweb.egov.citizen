@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<div
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+   	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:content="http://xmlns.idega.com/com.idega.content"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ic="http://xmlns.idega.com/com.idega.core"
+	xmlns:iuser="http://xmlns.idega.com/com.idega.user" >
+<script type="text/javascript">
+	CitizenMessagesLocalized = {};
+	CitizenMessagesLocalized.CAN_NOT_BE_EMPTY="#{localizedStrings['is.idega.idegaweb.egov.citizen']['can_not_be_empty']}";
+	CitizenMessagesLocalized.INCORRECT_MAIL="#{localizedStrings['is.idega.idegaweb.egov.citizen']['incorrect_mail']}";
+	CitizenMessagesLocalized.PHONE_TYPE_NOT_SPECIFIED="#{localizedStrings['is.idega.idegaweb.egov.citizen']['phone_type_not_specified']}";
+	CitizenMessagesLocalized.PURPOSE_NOT_SPECIFIED="#{localizedStrings['is.idega.idegaweb.egov.citizen']['purpose_not_specified']}";
+	CitizenMessagesLocalized.SAVING_FAILED="#{localizedStrings['is.idega.idegaweb.egov.citizen']['saving_failed']}";
+</script>
+<form class="dwr-form">
+	<fieldset class="citizen-emails">
+		<legend>#{localizedStrings['is.idega.idegaweb.egov.citizen']['emails']}</legend>
+		<div class="email-list">
+			<ui:repeat value="#{userSettingsRequest.emails}" var="email">
+				<div class="data-row">
+					<div class="data-div">
+						<input type="text"  value="#{email.emailAddress}" name="value" title="#{localizedStrings['is.idega.idegaweb.egov.citizen']['email']}"/>
+					</div>
+					<div class="data-div">
+						<ic:contactPurposeSelector name="contact-purpose" value="#{email.contactPurpose}"></ic:contactPurposeSelector>
+					</div>
+					<div class="data-div">
+						<div class="delete-button-div button-div" onclick="CitizenMessagesHelper.deleteEmail(this)" title="#{localizedStrings['is.idega.idegaweb.egov.citizen']['delete']}">x</div>
+					</div>
+					<div class="data-div">
+						<input type="hidden" value="#{email.primaryKey}" name="id"/>
+					</div>
+				</div>
+			</ui:repeat>
+		</div>
+		<div>
+			<div class='email-edit-html' style="display:none;">
+				<div class="data-row">
+					<div class="data-div">
+						<input type="text" name="value" title="#{localizedStrings['is.idega.idegaweb.egov.citizen']['email']}"/>
+					</div>
+					<div class="data-div">
+						<ic:contactPurposeSelector name="contact-purpose" ></ic:contactPurposeSelector>
+					</div>
+					<div class="data-div">
+						<div class="delete-button-div button-div" onclick="CitizenMessagesHelper.deleteEmail(this)" title="#{localizedStrings['is.idega.idegaweb.egov.citizen']['delete']}">x</div>
+					</div>
+					<div class="data-div">
+						<input type="hidden" value="-1" name="id"/>
+					</div>
+				</div>
+			</div>
+			<div class="add-button-div button-div" onclick="CitizenMessagesHelper.addRow(this,'citizen-emails','email-list','email-edit-html')" title="#{localizedStrings['is.idega.idegaweb.egov.citizen']['add']}">+</div>
+		</div>
+	</fieldset>
+	<fieldset class="citizen-phones">
+		<legend>#{localizedStrings['is.idega.idegaweb.egov.citizen']['phones']}</legend>
+		<div class="phone-list">
+			<ui:repeat value="#{userSettingsRequest.phones}" var="phone">
+				<div class="data-row">
+					<div class="data-div">
+						<input type="text"  value="#{phone.number}" name="value" title="#{localizedStrings['is.idega.idegaweb.egov.citizen']['phone']}"/>
+					</div>
+					<div class="data-div">
+						<ic:phoneTypeSelector name="phone-type" value="#{phone.phoneTypeId}"  ></ic:phoneTypeSelector>
+					</div>
+					<div class="data-div">
+						<ic:contactPurposeSelector name="contact-purpose" value="#{phone.contactPurpose}"></ic:contactPurposeSelector>
+					</div>
+					<div class="data-div">
+						<div class="delete-button-div button-div" onclick="CitizenMessagesHelper.deletePhone(this)" title="#{localizedStrings['is.idega.idegaweb.egov.citizen']['delete']}">x</div>
+					</div>
+					<div class="data-div">
+						<input type="hidden" value="#{phone.primaryKey}" name="id"/>
+					</div>
+				</div>
+			</ui:repeat>
+		</div>
+		<div>
+			<div class='phone-edit-html' style="display:none;">
+				<div class="data-row">
+					<div class="data-div">
+						<input type="text" name="value" title="#{localizedStrings['is.idega.idegaweb.egov.citizen']['phone']}"/>
+					</div>
+					<div class="data-div">
+						<ic:phoneTypeSelector name="phone-type" ></ic:phoneTypeSelector>
+					</div>
+					<div class="data-div">
+						<ic:contactPurposeSelector name="contact-purpose" ></ic:contactPurposeSelector>
+					</div>
+					<div class="data-div">
+						<div class="delete-button-div button-div" onclick="CitizenMessagesHelper.deletePhone(this)" title="#{localizedStrings['is.idega.idegaweb.egov.citizen']['delete']}">x</div>
+					</div>
+					<div class="data-div">
+						<input type="hidden" value="-1" name="id"/>
+					</div>
+				</div>
+			</div>
+			<div class="add-button-div button-div" onclick="CitizenMessagesHelper.addRow(this,'citizen-phones','phone-list','phone-edit-html')" title="#{localizedStrings['is.idega.idegaweb.egov.citizen']['add']}">+</div>
+		</div>
+	</fieldset>
+	<div class="buttons-div">
+		<input type="button" value="#{localizedStrings['is.idega.idegaweb.egov.citizen']['save']}" onclick="CitizenMessagesHelper.save(this,'dwr-form','email-list','phone-list')"/>
+	</div>
+</form>
+</div>

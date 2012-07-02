@@ -21,6 +21,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.ejb.CreateException;
 import javax.ejb.EJBException;
@@ -31,10 +33,12 @@ import org.directwebremoting.annotations.Param;
 import org.directwebremoting.annotations.RemoteMethod;
 import org.directwebremoting.annotations.RemoteProxy;
 import org.directwebremoting.spring.SpringCreator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
+import com.idega.block.cal.business.CalendarManagementService;
 import com.idega.builder.business.BuilderLogic;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
@@ -42,6 +46,10 @@ import com.idega.core.accesscontrol.business.LoginBusinessBean;
 import com.idega.core.accesscontrol.business.LoginDBHandler;
 import com.idega.core.accesscontrol.data.LoginTable;
 import com.idega.core.business.DefaultSpringBean;
+import com.idega.core.contact.data.Email;
+import com.idega.core.contact.data.EmailHome;
+import com.idega.core.contact.data.Phone;
+import com.idega.core.contact.data.PhoneHome;
 import com.idega.core.localisation.business.ICLocaleBusiness;
 import com.idega.core.localisation.data.ICLanguage;
 import com.idega.core.localisation.data.ICLanguageHome;
@@ -64,6 +72,7 @@ import com.idega.presentation.Layer;
 import com.idega.presentation.Table2;
 import com.idega.presentation.ui.handlers.IWDatePickerHandler;
 import com.idega.user.bean.UserDataBean;
+import com.idega.user.business.GroupBusiness;
 import com.idega.user.business.UserApplicationEngine;
 import com.idega.user.business.UserBusiness;
 import com.idega.user.data.User;
@@ -91,9 +100,20 @@ public class CitizenServices extends DefaultSpringBean implements
 	private CountryHome countryHome = null;
 	private LoginDataHome loginDataHome = null;
 	private FamilyLogic familyLogic = null;
+	
+	@Autowired
+	private CalendarManagementService calendarManagementService;
 
 	private UserHome userHome = null;
 	private ICLanguageHome iCLanguageHome = null;
+	
+	private Pattern pattern;
+	private static final String EMAIL_PATTERN = 
+            "^[_A-Za-z0-9-]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+	
+	public CitizenServices(){
+		pattern = Pattern.compile(EMAIL_PATTERN);
+	}
 	
 	@RemoteMethod
 	public String saveUser(Map <String, List<String>> parameters){
@@ -706,5 +726,289 @@ public class CitizenServices extends DefaultSpringBean implements
 			this.getLogger().log(Level.WARNING, "Something went wrong on getting user languages", e);
 		}
 		return Collections.emptyMap();
+	}
+	
+	
+	@RemoteMethod
+	public Map <String,String> removeCurrentUserEmail(String id){
+		HashMap<String, String> response = new HashMap<String, String>();
+		if(StringUtil.isEmpty(id)){
+			response.put("status", "OK");
+			return response;
+		}
+		IWContext iwc = CoreUtil.getIWContext();
+		IWBundle bundle = iwc.getIWMainApplication().getBundle(CitizenConstants.IW_BUNDLE_IDENTIFIER);
+		IWResourceBundle iwrb = bundle.getResourceBundle(iwc);
+		if(!iwc.isLoggedOn()){
+			response.put("status","Unauthorized");
+			response.put("message", iwrb.getLocalizedString("permission_denied", "Permission denied"));
+			return response;
+		}
+		User user = iwc.getCurrentUser();
+		try {
+			removeUserEmail(user, id);
+		}catch (Exception e) {
+			getLogger().log(Level.WARNING, "Erorr on removing user email", e);
+			response.put("status","Internal Error");
+			response.put("message", iwrb.getLocalizedString("error_while_removing_email", "Error while removing email"));
+		}
+		response.put("status", "OK");
+		return response;
+	}
+
+	@RemoteMethod
+	public Map <String,String> removeCurrentUserPhone(String id){
+		HashMap<String, String> response = new HashMap<String, String>();
+		if(StringUtil.isEmpty(id)){
+			response.put("status", "OK");
+			return response;
+		}
+		IWContext iwc = CoreUtil.getIWContext();
+		IWBundle bundle = iwc.getIWMainApplication().getBundle(CitizenConstants.IW_BUNDLE_IDENTIFIER);
+		IWResourceBundle iwrb = bundle.getResourceBundle(iwc);
+		if(!iwc.isLoggedOn()){
+			response.put("status","Unauthorized");
+			response.put("message", iwrb.getLocalizedString("permission_denied", "Permission denied"));
+			return response;
+		}
+		User user = iwc.getCurrentUser();
+		try {
+			removeUserPhone(user, id);
+		}catch (Exception e) {
+			getLogger().log(Level.WARNING, "Erorr on removing user email", e);
+			response.put("status","Internal Error");
+			response.put("message", iwrb.getLocalizedString("error_while_removing_email", "Error while removing email"));
+		}
+		response.put("status", "OK");
+		return response;
+	}
+	
+	private boolean isValidEmail(String email){
+		Matcher matcher = pattern.matcher(email);
+		return matcher.matches();
+	}
+	
+	private void removeUserEmails(Collection<Email> userEmails,Collection<?> emailsToRemoveIds) throws Exception{
+		if(ListUtil.isEmpty(userEmails) || ListUtil.isEmpty(emailsToRemoveIds)){
+			return;
+		}
+		for(Object id : emailsToRemoveIds){
+			removeUserEmail(userEmails, id);
+		}
+	}
+	
+	private void removeUserEmail(User user, Object emailToRemoveId) throws Exception{
+		@SuppressWarnings("unchecked")
+		Collection<Email> emails = user.getEmails();
+		removeUserEmail(emails,emailToRemoveId);
+	}
+	
+	private void removeUserEmail(Collection<Email> userEmails,Object emailToRemoveId) throws Exception{
+		String id = String.valueOf(emailToRemoveId);
+		for(Email email : userEmails){
+			String primaryKey = String.valueOf(email.getPrimaryKey());
+			if(primaryKey.equals(id)){
+				email.remove();
+				userEmails.remove(email);
+				break;
+			}
+		}
+	}
+	
+	private void removeUserPhones(Collection<Phone> userPhones,Collection<?> phonesToRemoveIds) throws Exception{
+		if(ListUtil.isEmpty(userPhones) || ListUtil.isEmpty(phonesToRemoveIds)){
+			return;
+		}
+		for(Object id : phonesToRemoveIds){
+			removeUserPhone(userPhones, id);
+		}
+	}
+	
+	private void removeUserPhone(User user, Object phoneToRemoveId) throws Exception{
+		@SuppressWarnings("unchecked")
+		Collection<Phone> userphPhones = user.getPhones();
+		removeUserPhone(userphPhones, phoneToRemoveId);
+	}
+	private void removeUserPhone(Collection<Phone> userPhones,Object phoneToRemoveId) throws Exception{
+		String id = String.valueOf(phoneToRemoveId);
+		for(Phone phone : userPhones){
+			String primaryKey = String.valueOf(phone.getPrimaryKey());
+			if(primaryKey.equals(id)){
+				phone.remove();
+				userPhones.remove(phone);
+				break;
+			}
+		}
+	}
+	
+	private void saveEmails(Collection<Map<String,String>> emails,GroupBusiness groupBusiness,User user,Collection<Email> userEmails) throws Exception{
+		if(ListUtil.isEmpty(emails) || (user == null) || (groupBusiness == null)){
+			return;
+		}
+		EmailHome emailHome = (EmailHome) IDOLookup.getHome(Email.class);
+		for(Map<String,String> emailData : emails){
+			String id = emailData.get("id");
+			String address = emailData.get("value");
+			String purpose = emailData.get("purpose");
+			if(!isValidEmail(address)){
+				try{
+					Integer key = Integer.valueOf(id);
+					if(key > 0){
+						Email emailToChange = emailHome.findByPrimaryKey(key);
+						emailData.put("value", emailToChange.getEmailAddress());
+					}else{
+						emailData.put("id", "-1");
+					}
+				}catch (Exception e) {
+					emailData.put("id", "-1");
+				}
+				continue;
+			}
+			Email email;
+			if(StringUtil.isEmpty(id) || "-1".equals(id)){
+				email = groupBusiness.updateGroupMail(user, address);
+				if(email == null){
+					continue;
+				}
+			}else{
+				email = emailHome.findByPrimaryKey(id);
+				if(!userEmails.contains(email)){
+					continue;
+				}
+				email.setEmailAddress(address);
+			}
+			if(CoreConstants.EMPTY.equals(purpose) || "-1".equals(purpose)){
+				purpose = null;
+			}
+			email.setContactPurpose(purpose);
+			email.store();
+			emailData.put("id", String.valueOf(email.getPrimaryKey()));
+		}
+	}
+	
+	private void savePhones(Collection<Map<String,String>> phones,GroupBusiness groupBusiness,User user,Collection<Phone> userPhones) throws Exception{
+		if(ListUtil.isEmpty(phones) || (user == null) || (groupBusiness == null)){
+			return;
+		}
+		PhoneHome phoneHome = (PhoneHome) IDOLookup.getHome(Phone.class);
+		for(Map<String,String> contactData : phones){
+			String id = contactData.get("id");
+			String number = contactData.get("value");
+			String purpose = contactData.get("purpose");
+			int phoneTypeId;
+			try{
+				phoneTypeId = Integer.valueOf(contactData.get("phoneTypeId"));
+			}catch(Exception e){
+				phoneTypeId = -1;
+			}
+			if(StringUtil.isEmpty(number) || phoneTypeId < 0){
+				try{
+					Integer key = Integer.valueOf(id);
+					if(key > 0){
+						Phone phoneToDelete = phoneHome.findByPrimaryKey(key);
+						if(userPhones.contains(phoneToDelete)){
+							phoneToDelete.remove();
+						}
+					}
+				}catch (Exception e) {
+				}
+				contactData.put("id", "-1");
+				continue;
+			}
+			Phone phone;
+			if(StringUtil.isEmpty(id) || "-1".equals(id)){
+				if(phoneTypeId < 0){
+					phoneTypeId = 1;
+				}
+				phone = groupBusiness.updateGroupPhone(user, phoneTypeId, number);
+			}else{
+				phone = phoneHome.findByPrimaryKey(id);
+				if(!userPhones.contains(phone)){
+					continue;
+				}
+				phone.setNumber(number);
+				if(phoneTypeId >= 0){
+					phone.setPhoneTypeId(phoneTypeId);
+				}
+			}
+			if(CoreConstants.EMPTY.equals(purpose) || "-1".equals(purpose)){
+				purpose = null;
+			}
+			phone.setContactPurpose(purpose);
+			phone.store();
+			contactData.put("id", String.valueOf(phone.getPrimaryKey()));
+		}
+	}
+	
+	@RemoteMethod
+	public Map <String,Object> saveUserMessagesData(Map<String,Collection<Map<String,String>>> values, Map<String,Collection<String>> dataToRemove ){
+		HashMap<String, Object> response = new HashMap<String, Object>();
+		
+		IWContext iwc = CoreUtil.getIWContext();
+		IWBundle bundle = iwc.getIWMainApplication().getBundle(CitizenConstants.IW_BUNDLE_IDENTIFIER);
+		IWResourceBundle iwrb = bundle.getResourceBundle(iwc);
+		if(!iwc.isLoggedOn()){
+			response.put("status","Unauthorized");
+			response.put("message", iwrb.getLocalizedString("permission_denied", "Permission denied"));
+			return response;
+		}
+		User user = iwc.getCurrentUser();
+		try {
+			GroupBusiness groupBusiness = IBOLookup.getServiceInstance(iwc, GroupBusiness.class);
+			@SuppressWarnings("unchecked")
+			Collection<Email> userEmails = user.getEmails();
+			@SuppressWarnings("unchecked")
+			Collection<Phone> userPhones = user.getPhones();
+			
+			Collection<String> DataToRemoveIds = dataToRemove.get("emailsToRemove");
+			removeUserEmails(userEmails, DataToRemoveIds);
+			
+			DataToRemoveIds = dataToRemove.get("phonesToRemove");
+			removeUserPhones(userPhones, DataToRemoveIds);
+			
+			Collection<Map<String,String>> emails = values.get("emails");
+			saveEmails(emails, groupBusiness, user, userEmails);
+			
+			Collection<Map<String,String>> phones = values.get("phones");
+			savePhones(phones, groupBusiness, user, userPhones);
+			
+			response.put("emails", emails);
+			response.put("phones", phones);
+		}catch (Exception e) {
+			getLogger().log(Level.WARNING, "Erorr on removing user email", e);
+			response.put("status","Internal Error");
+			response.put("message", iwrb.getLocalizedString("error_while_removing_contacts", "Error while removing contacts"));
+		}
+		response.put("status", "OK");
+		response.put("message", iwrb.getLocalizedString("saved", "saved"));
+		return response;
+	}
+	
+	@RemoteMethod
+	public Map <String,Object> saveCitizenCalendarSettings(Map<String,Collection<String>> settings){
+		HashMap<String, Object> response = new HashMap<String, Object>();
+		
+		IWContext iwc = CoreUtil.getIWContext();
+		IWBundle bundle = iwc.getIWMainApplication().getBundle(CitizenConstants.IW_BUNDLE_IDENTIFIER);
+		IWResourceBundle iwrb = bundle.getResourceBundle(iwc);
+		if(!iwc.isLoggedOn()){
+			response.put("status","Unauthorized");
+			response.put("message", iwrb.getLocalizedString("permission_denied", "Permission denied"));
+			return response;
+		}
+		User user = iwc.getCurrentUser();
+		try {
+			Collection <String> paths = settings.get("subscribedCalendars");
+			calendarManagementService.subscribeCalendars(user, paths);
+			paths = settings.get("unsubscribedCalendars");
+			calendarManagementService.unsubscribeCalendars(user, paths);
+		}catch (Exception e) {
+			getLogger().log(Level.WARNING, "Erorr on removing user email", e);
+			response.put("status","Internal Error");
+			response.put("message", iwrb.getLocalizedString("error_while_removing_contacts", "Error while removing contacts"));
+		}
+		response.put("status", "OK");
+		response.put("message", iwrb.getLocalizedString("saved", "saved"));
+		return response;
 	}
 }

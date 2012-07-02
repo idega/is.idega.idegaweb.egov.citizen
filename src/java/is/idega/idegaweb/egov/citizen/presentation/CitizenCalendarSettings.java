@@ -1,14 +1,18 @@
 package is.idega.idegaweb.egov.citizen.presentation;
 
 import is.idega.idegaweb.egov.citizen.CitizenConstants;
+import is.idega.idegaweb.egov.citizen.bean.UserSettingsRequest;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.faces.context.FacesContext;
 
+import com.idega.block.cal.data.CalDAVCalendar;
 import com.idega.block.web2.business.JQuery;
 import com.idega.block.web2.business.Web2Business;
 import com.idega.facelets.ui.FaceletComponent;
@@ -19,10 +23,12 @@ import com.idega.presentation.IWBaseComponent;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
 import com.idega.util.CoreConstants;
+import com.idega.util.ListUtil;
 import com.idega.util.PresentationUtil;
+import com.idega.util.expression.ELUtil;
 import com.idega.webface.WFUtil;
 
-public class CitizenMessages extends IWBaseComponent{
+public class CitizenCalendarSettings extends IWBaseComponent{
 
 	
 	@Override
@@ -39,12 +45,44 @@ public class CitizenMessages extends IWBaseComponent{
 			layer.addText(iwrb.getLocalizedString("not_logged_on", "Not logged on"));
 			return;
 		}
+		
+		add(getInitializeScriptDiv());
+		
 		FaceletComponent facelet = (FaceletComponent)iwc.getApplication().createComponent(FaceletComponent.COMPONENT_TYPE);
-		facelet.setFaceletURI(bundle.getFaceletURI("citizen-messages.xhtml"));
+		facelet.setFaceletURI(bundle.getFaceletURI("citizen-calendar-settings.xhtml"));
 		
 		add(facelet);
 		
 		addFiles(iwc);
+	}
+	
+	private Layer getInitializeScriptDiv(){
+		Layer layer = new Layer();
+		UserSettingsRequest userSettingsRequest = ELUtil.getInstance().getBean(UserSettingsRequest.SERVICE);
+		Collection<CalDAVCalendar> subscribed = userSettingsRequest.getSubscribedCalendars();
+		StringBuilder script = new StringBuilder("jQuery(document).ready(function(){");
+		script.append("\n\tvar data = {};");
+		script.append("\n\tdata.subscriptionsFieldsetClass = 'citizen-calendar-subscription';");
+		script.append("\n\tdata.subscribedCalendors = [");
+		
+		if(!ListUtil.isEmpty(subscribed)){
+			script.append(CoreConstants.QOUTE_SINGLE_MARK);
+			for(Iterator<CalDAVCalendar> iter = subscribed.iterator();iter.hasNext();){
+				CalDAVCalendar calendar = iter.next();
+				script.append(calendar.getPath());
+				if(iter.hasNext()){
+					script.append(CoreConstants.JS_STR_PARAM_SEPARATOR);
+				}
+			}
+			script.append(CoreConstants.QOUTE_SINGLE_MARK);
+		}
+		script.append("];");
+		script.append("\n\tCitizenCalendarSettingsHelper.initialize(data);");
+		script.append("\n});");
+		
+		String action = PresentationUtil.getJavaScriptAction(script.toString());
+		layer.add(action);
+		return layer;
 	}
 	
 	private void addFiles(IWContext iwc){
@@ -62,7 +100,6 @@ public class CitizenMessages extends IWBaseComponent{
 			scripts.add(web2.getBundleUriToHumanizedMessagesScript());
 			styles.add(web2.getBundleUriToHumanizedMessagesStyleSheet());
 			
-			scripts.add(web2.getScriptURLForLabelify("1.3"));
 
 		}else{
 			Logger.getLogger(CitizenMessages.class.getName()).log(Level.WARNING, "Failed getting Web2Business no jQuery and it's plugins files were added");
@@ -70,7 +107,7 @@ public class CitizenMessages extends IWBaseComponent{
 
 		IWMainApplication iwma = iwc.getApplicationContext().getIWMainApplication();
 		IWBundle iwb = iwma.getBundle(CitizenConstants.IW_BUNDLE_IDENTIFIER);
-		scripts.add(iwb.getVirtualPathWithFileNameString("javascript/CitizenMessagesHelper.js"));
+		scripts.add(iwb.getVirtualPathWithFileNameString("javascript/CitizenCalendarSettingsHelper.js"));
 		styles.add(iwb.getVirtualPathWithFileNameString("style/citizen.css"));
 		scripts.add("/dwr/interface/CitizenServices.js");
 		
