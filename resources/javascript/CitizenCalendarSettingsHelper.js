@@ -20,7 +20,7 @@ CitizenCalendarSettingsHelper.initializeSubscriptions = function(data){
 		for(var i = 0;i < existing.length;i++){
 			if(value == existing[i]){
 				contains = true;
-				existing.uris.splice(i,1);
+				existing.splice(i,1);
 				break;
 			}
 		}
@@ -149,6 +149,8 @@ CitizenCalendarSettingsHelper.save = function(){
 				return;
 			}
 			CitizenCalendarSettingsHelper._subscriptions.existing = CitizenCalendarSettingsHelper._subscriptions.next.slice(0);
+			CitizenCalendarSettingsHelper._subscriptions.add = [];
+			CitizenCalendarSettingsHelper._subscriptions.remove = [];
 			closeAllLoadingMessages();
 			humanMsg.displayMsg(reply.message);
 			return;

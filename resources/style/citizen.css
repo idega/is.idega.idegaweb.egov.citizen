@@ -81,6 +81,10 @@ ul.ui-autocomplete * img{
 	padding:0.2em;
 }
 
+.input-div{
+	text-align:center;
+}
+
 .button-div{
 	cursor:pointer;
 	border-radius:45%;

@@ -10,14 +10,22 @@
 	xmlns:iuser="http://xmlns.idega.com/com.idega.user" >
 <form class="dwr-form">
 	<fieldset class="citizen-calendar-subscription">
-		<legend>#{localizedStrings['is.idega.idegaweb.egov.citizen']['Calendars']}</legend>
+		<legend>#{localizedStrings['is.idega.idegaweb.egov.citizen']['subscribe_calendars']}</legend>
 		<div class="calendar-list">
+			<div class="data-row">
+				<div class="data-div" style="padding-right:4em;">
+					<h:outputText value="#{localizedStrings['is.idega.idegaweb.egov.citizen']['calendar_name']}" style="font-weight:bold" />
+				</div>
+				<div class="data-div">
+					<h:outputText value="    #{localizedStrings['is.idega.idegaweb.egov.citizen']['subscribe']}" style="font-weight:bold" />
+				</div>
+				</div>
 			<ui:repeat value="#{userSettingsRequest.availableCalendars}" var="calendar">
 				<div class="data-row">
 					<div class="data-div">
-						<h:outputText value="#{calendar.name}" style="font-weight:bold" />
+						<h:outputText value="#{calendar.name}" />
 					</div>
-					<div class="data-div">
+					<div class="data-div input-div">
 						<input type="checkbox" value="#{calendar.path}" />
 					</div>
 				</div>
