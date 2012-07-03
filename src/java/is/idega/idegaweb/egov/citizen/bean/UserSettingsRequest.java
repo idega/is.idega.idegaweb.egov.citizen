@@ -21,7 +21,7 @@ import com.idega.util.ListUtil;
 public class UserSettingsRequest {
 	public static final String SERVICE = "userSettingsRequest";
 	
-	@Autowired
+	@Autowired(required = false)
 	CalendarManagementService calendarManagementService;
 	
 	List<CalDAVCalendar> availableCalendars = null;
