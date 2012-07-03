@@ -101,7 +101,7 @@ public class CitizenServices extends DefaultSpringBean implements
 	private LoginDataHome loginDataHome = null;
 	private FamilyLogic familyLogic = null;
 	
-	@Autowired
+	@Autowired(required = false)
 	private CalendarManagementService calendarManagementService;
 
 	private UserHome userHome = null;
@@ -986,22 +986,30 @@ public class CitizenServices extends DefaultSpringBean implements
 	
 	@RemoteMethod
 	public Map <String,Object> saveCitizenCalendarSettings(Map<String,Collection<String>> settings){
-		HashMap<String, Object> response = new HashMap<String, Object>();
+		Map<String, Object> response = new HashMap<String, Object>();
 		
 		IWContext iwc = CoreUtil.getIWContext();
 		IWBundle bundle = iwc.getIWMainApplication().getBundle(CitizenConstants.IW_BUNDLE_IDENTIFIER);
 		IWResourceBundle iwrb = bundle.getResourceBundle(iwc);
-		if(!iwc.isLoggedOn()){
-			response.put("status","Unauthorized");
+		if (!iwc.isLoggedOn()) {
+			response.put("status", "Unauthorized");
 			response.put("message", iwrb.getLocalizedString("permission_denied", "Permission denied"));
 			return response;
 		}
+		
+		CalendarManagementService calendarService = getCalendarManagementService();
+		if (calendarService == null) {
+			response.put("status", "Error");
+			response.put("message", iwrb.getLocalizedString("unable_to_use_calendar", "Unable to use calendar service"));
+			return response;
+		}
+		
 		User user = iwc.getCurrentUser();
 		try {
-			Collection <String> paths = settings.get("subscribedCalendars");
-			calendarManagementService.subscribeCalendars(user, paths);
+			Collection<String> paths = settings.get("subscribedCalendars");
+			calendarService.subscribeCalendars(user, paths);
 			paths = settings.get("unsubscribedCalendars");
-			calendarManagementService.unsubscribeCalendars(user, paths);
+			calendarService.unsubscribeCalendars(user, paths);
 		}catch (Exception e) {
 			getLogger().log(Level.WARNING, "Erorr on removing user email", e);
 			response.put("status","Internal Error");
@@ -1011,4 +1019,11 @@ public class CitizenServices extends DefaultSpringBean implements
 		response.put("message", iwrb.getLocalizedString("saved", "saved"));
 		return response;
 	}
+	
+	private CalendarManagementService getCalendarManagementService() {
+		if (calendarManagementService == null)
+			ELUtil.getInstance().autowire(this);
+		return calendarManagementService;
+	}
+	
 }
