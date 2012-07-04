@@ -1,10 +1,10 @@
 /*
  * $Id$
- * 
+ *
  * Copyright (C) 2002 Idega hf. All Rights Reserved.
- * 
+ *
  * This software is the proprietary information of Idega hf. Use is subject to license terms.
- * 
+ *
  */
 package is.idega.idegaweb.egov.citizen.data;
 
@@ -32,6 +32,8 @@ import com.idega.user.data.User;
  */
 public class CitizenAccountBMPBean extends AbstractCaseBMPBean implements CitizenAccount, AccountApplication, Case {
 
+	private static final long serialVersionUID = 5771772346529015263L;
+
 	private final static String ENTITY_NAME = "comm_cit_acc";
 	private final static String CASE_CODE_KEY = "MBANSKO";
 	private final static String CASE_CODE_KEY_DESC = "Request for citizen account";
@@ -52,7 +54,6 @@ public class CitizenAccountBMPBean extends AbstractCaseBMPBean implements Citize
 
 	@Override
 	public void initializeAttributes() {
-		// addAttribute (getIDColumnName());
 		super.addGeneralCaseRelation();
 		addAttribute(NAME, "Name", true, true, String.class, 100);
 		addAttribute(SSN, "SSN", true, true, String.class, 40);
@@ -67,6 +68,8 @@ public class CitizenAccountBMPBean extends AbstractCaseBMPBean implements Citize
 		addAttribute(HAS_COHABITANT, "Has Cohabitant", true, true, Boolean.class);
 		addAttribute(CHILDREN_COUNT, "Children Count", true, true, Integer.class);
 		addAttribute(APPLICATION_REASON, "Application Reason", true, true, String.class, 40);
+
+		super.initializeAttributes();
 	}
 
 	@Override
@@ -86,46 +89,57 @@ public class CitizenAccountBMPBean extends AbstractCaseBMPBean implements Citize
 
 	// get methods for bean properties
 
+	@Override
 	public String getApplicantName() {
 		return getStringColumnValue(NAME);
 	}
 
+	@Override
 	public String getSsn() {
 		return getStringColumnValue(SSN);
 	}
 
+	@Override
 	public String getEmail() {
 		return getStringColumnValue(EMAIL);
 	}
 
+	@Override
 	public String getPhoneHome() {
 		return getStringColumnValue(PHONE_HOME);
 	}
 
+	@Override
 	public String getPhoneWork() {
 		return getStringColumnValue(PHONE_WORK);
 	}
 
+	@Override
 	public String getCareOf() {
 		return getStringColumnValue(CAREOF);
 	}
 
+	@Override
 	public String getStreet() {
 		return getStringColumnValue(STREET);
 	}
 
+	@Override
 	public String getZipCode() {
 		return getStringColumnValue(ZIP_CODE);
 	}
 
+	@Override
 	public String getCity() {
 		return getStringColumnValue(CITY);
 	}
 
+	@Override
 	public String getCivilStatus() {
 		return getStringColumnValue(CIVIL_STATUS);
 	}
 
+	@Override
 	public boolean hasCohabitant() {
 		boolean result = false;
 		try {
@@ -138,6 +152,7 @@ public class CitizenAccountBMPBean extends AbstractCaseBMPBean implements Citize
 		return result;
 	}
 
+	@Override
 	public int getChildrenCount() {
 		Integer result = null;
 		try {
@@ -150,40 +165,49 @@ public class CitizenAccountBMPBean extends AbstractCaseBMPBean implements Citize
 		return result != null ? result.intValue() : 0;
 	}
 
+	@Override
 	public String getApplicationReason() {
 		return getStringColumnValue(APPLICATION_REASON);
 	}
 
 	// set methods for bean properties
 
+	@Override
 	public void setApplicantName(final String name) {
 		setColumn(NAME, name);
 	}
 
+	@Override
 	public void setSsn(final String ssn) {
 		setColumn(SSN, ssn);
 	}
 
+	@Override
 	public void setEmail(final String email) {
 		setColumn(EMAIL, email);
 	}
 
+	@Override
 	public void setPhoneHome(final String phone) {
 		setColumn(PHONE_HOME, phone);
 	}
 
+	@Override
 	public void setPhoneWork(final String phone) {
 		setColumn(PHONE_WORK, phone);
 	}
 
+	@Override
 	public void setCareOf(final String careOf) {
 		setColumn(CAREOF, careOf);
 	}
 
+	@Override
 	public void setStreet(final String street) {
 		setColumn(STREET, street);
 	}
 
+	@Override
 	public void setZipCode(final String rawZipCode) {
 		final StringBuffer digitOnlyZipCode = new StringBuffer();
 		for (int i = 0; i < rawZipCode.length(); i++) {
@@ -194,22 +218,27 @@ public class CitizenAccountBMPBean extends AbstractCaseBMPBean implements Citize
 		setColumn(ZIP_CODE, digitOnlyZipCode.toString());
 	}
 
+	@Override
 	public void setCity(final String city) {
 		setColumn(CITY, city);
 	}
 
+	@Override
 	public void setCivilStatus(final String civilStatus) {
 		setColumn(CIVIL_STATUS, civilStatus);
 	}
 
+	@Override
 	public void setHasCohabitant(final boolean hasCohabitant) {
 		setColumn(HAS_COHABITANT, new Boolean(hasCohabitant));
 	}
 
+	@Override
 	public void setChildrenCount(final int childrenCount) {
 		setColumn(CHILDREN_COUNT, childrenCount);
 	}
 
+	@Override
 	public void setApplicationReason(final String applicationReason) {
 		setColumn(APPLICATION_REASON, applicationReason);
 	}
@@ -232,7 +261,7 @@ public class CitizenAccountBMPBean extends AbstractCaseBMPBean implements Citize
 
 	/**
 	 * Returns the total count of all CitizenAccountApplications
-	 * 
+	 *
 	 * @return int Number of records
 	 * @throws IDOException
 	 */
@@ -255,15 +284,18 @@ public class CitizenAccountBMPBean extends AbstractCaseBMPBean implements Citize
 		return idoGetNumberOfRecords(query);
 	}
 
+	@Override
 	public void addSubscriber(User subscriber)
 			throws IDOAddRelationshipException {
 		throw new UnsupportedOperationException("This method is not implemented!");
 	}
 
+	@Override
 	public Collection<User> getSubscribers() {
 		throw new UnsupportedOperationException("This method is not implemented!");
 	}
 
+	@Override
 	public void removeSubscriber(User subscriber)
 			throws IDORemoveRelationshipException {
 		throw new UnsupportedOperationException("This method is not implemented!");
