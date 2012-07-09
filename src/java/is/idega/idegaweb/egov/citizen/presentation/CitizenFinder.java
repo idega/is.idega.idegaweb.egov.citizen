@@ -1,8 +1,8 @@
 /*
  * $Id$ Created on Jan 23, 2006
- * 
+ *
  * Copyright (C) 2006 Idega Software hf. All Rights Reserved.
- * 
+ *
  * This software is the proprietary information of Idega hf. Use is subject to license terms.
  */
 package is.idega.idegaweb.egov.citizen.presentation;
@@ -61,9 +61,10 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 	private static final String PROPERTY_MINIMUM_AGE_CITIZEN_FINDER = "citizen.finder.minimum.age";
 
 	private ICPage iPage;
-	protected Collection users;
+	protected Collection<User> users;
 	protected IWResourceBundle iwrb;
 
+	@Override
 	public void present(IWContext iwc) {
 		this.iwrb = getResourceBundle(iwc);
 		parseAction(iwc);
@@ -96,7 +97,8 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 		return null;
 	}
 
-	private Collection getUsers(IWContext iwc, String firstName, String middleName, String lastName, String pid) throws RemoteException {
+	@SuppressWarnings("unchecked")
+	private Collection<User> getUsers(IWContext iwc, String firstName, String middleName, String lastName, String pid) throws RemoteException {
 		return getUserBusiness(iwc).findUsersByConditions(firstName, middleName, lastName, pid);
 	}
 
@@ -229,9 +231,8 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 		group = table.createBodyRowGroup();
 		int iRow = 1;
 
-		Iterator iter = this.users.iterator();
-		while (iter.hasNext()) {
-			User user = (User) iter.next();
+		for (Iterator<User> iter = this.users.iterator(); iter.hasNext();) {
+			User user = iter.next();
 			if (user.getPersonalID() == null || user.getPersonalID().length() == 0 || user.getPersonalID().indexOf("/") != -1) {
 				continue;
 			}
@@ -354,7 +355,7 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 		return 0;
 	}
 
-	protected Collection filterResults(IWContext iwc, Collection users) {
+	protected Collection<User> filterResults(IWContext iwc, Collection<User> users) {
 		return users;
 	}
 
@@ -371,6 +372,7 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 		return isOfAge;
 	}
 
+	@Override
 	public boolean actionPerformed(IWContext iwc) {
 		try {
 			if (iwc.isParameterSet(PARAMETER_USER_UNIQUE_ID)) {
