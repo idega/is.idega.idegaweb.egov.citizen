@@ -48,39 +48,40 @@ import com.idega.util.expression.ELUtil;
 import com.idega.webface.WFUtil;
 
 public class UserAccessSettings extends Block {
-	
+
 	private static final String LANGUAGE_CONTAINER_CLASS = "language-container-class";
 	private static final String LANGUAGE_SELECT_CLASS = "language-select-class";
-	
+
 	private static final String SINGLE_SING_ON_ID = "single-sing-on-user-id";
 	private static final String SINGLE_SING_ON_SERVER = "single-sing-on-server";
 	private static final String SINGLE_SING_ON_NAME = "single-sing-on-name";
 	private static final String SINGLE_SING_ON_PASSWORD = "single-sing-on-password";
-	
+
 	private String formId = null;
-	
+
 	private String userId = null;
-	
-	
+
 	@Autowired
 	private CitizenServices citizenServices;
-	
+
 	private Boolean needFiles = Boolean.TRUE;
-	
-	public UserAccessSettings(){
-		ELUtil.getInstance().autowire(this);
+
+	private CitizenServices getCitizenServices() {
+		if (citizenServices == null)
+			ELUtil.getInstance().autowire(this);
+		return citizenServices;
 	}
-	
+
 	@Override
 	public String getBundleIdentifier() {
 		return CitizenConstants.IW_BUNDLE_IDENTIFIER;
 	}
-	
+
 	@Override
 	public void main(IWContext iwc) throws Exception {
 		IWBundle bundle = getBundle(iwc);
 		IWResourceBundle iwrb = bundle.getResourceBundle(iwc);
-		
+
 		User user = getUser(iwc);
 		if(user == null){
 			Layer layer = new Layer();
@@ -102,11 +103,11 @@ public class UserAccessSettings extends Block {
 		}
 
 	}
-	
+
 	public void setNeedFiles(Boolean needFiles) {
 		this.needFiles = needFiles;
 	}
-	
+
 	private User getUser(IWContext iwc){
 		if(userId == null){
 			userId = iwc.getParameter(CitizenConstants.USER_EDIT_USER_ID_PARAMETER);
@@ -114,7 +115,7 @@ public class UserAccessSettings extends Block {
 		User user = null;
 		try{
 			if(userId != null){
-				user = citizenServices.getUserBusiness().getUser(Integer.valueOf(userId));
+				user = getCitizenServices().getUserBusiness().getUser(Integer.valueOf(userId));
 			}else if(iwc.isLoggedOn()){
 				user =iwc.getCurrentUser();
 			}
@@ -123,7 +124,7 @@ public class UserAccessSettings extends Block {
 		}
 		return user;
 	}
-	
+
 	private Layer getUserEditForm(User user,IWResourceBundle iwrb,IWContext iwc){
 		IWMainApplication iwma = iwc.getApplicationContext().getIWMainApplication();
 		IWBundle iwb = iwma.getBundle(CitizenConstants.IW_BUNDLE_IDENTIFIER);
@@ -134,7 +135,7 @@ public class UserAccessSettings extends Block {
 		String username = CoreConstants.EMPTY;
 		Collection<ICLanguage> userLanguages = Collections.emptyList();
 		if(user != null){
-			userData = citizenServices.getUserApplicationEngine().getUserInfo(user);
+			userData = getCitizenServices().getUserApplicationEngine().getUserInfo(user);
 			if(userData != null){
 				isData = true;
 			}
@@ -158,17 +159,17 @@ public class UserAccessSettings extends Block {
 			}
 		}
 		Layer main = new Layer();
-		
+
 		Form form = new Form();
 		main.add(form);
 		form.setStyleClass("dwr-form");
-		
+
 		// Id
 		Layer layer = new Layer();
 		form.add(layer);
 		HiddenInput idInput = new HiddenInput(CitizenConstants.USER_EDIT_USER_ID_PARAMETER,id);
 		layer.add(idInput);
-		
+
 		// Name
 		layer = new Layer();
 		form.add(layer);
@@ -179,12 +180,12 @@ public class UserAccessSettings extends Block {
 		layer.add(cellInfo);
 		layer.add(nameLabel);
 		cellInfo.addText(iwrb.getLocalizedString("name", "Name"));
-		
+
 		FieldSet fieldset = new FieldSet(iwrb.getLocalizedString("login_settings","Login settings"));
 		form.add(fieldset);
 		formId = form.getId();
-		
-		
+
+
 		// Username
 		layer = new Layer();
 		fieldset.add(layer);
@@ -194,7 +195,7 @@ public class UserAccessSettings extends Block {
 		layer.add(cellInfo);
 		layer.add(input);
 		cellInfo.addText(iwrb.getLocalizedString("login", "Login"));
-		
+
 		// Password
 		layer = new Layer();
 		fieldset.add(layer);
@@ -204,12 +205,12 @@ public class UserAccessSettings extends Block {
 		layer.add(cellInfo);
 		layer.add(passwordInput);
 		cellInfo.addText(iwrb.getLocalizedString("password", "Password"));
-		
+
 		// Languages
 		FieldSet languagesFieldset = new FieldSet(iwrb.getLocalizedString("languages_you_know", "Languages you know"));
 		form.add(languagesFieldset);
 		languagesFieldset.add(getLanguageSelectLayer(userLanguages, iwb, iwrb,user));
-		
+
 		// Single sing on
 		Form singleSingOnFrom = new Form();
 		main.add(singleSingOnFrom);
@@ -218,14 +219,14 @@ public class UserAccessSettings extends Block {
 		Layer singleSingOn = new  Layer();
 		singleSingonFieldset.add(singleSingOn);
 		try {
-			Collection<Block> layers = getSingleSingOnLayers(user,citizenServices.getLoginDataHome());
+			Collection<Block> layers = getSingleSingOnLayers(user,getCitizenServices().getLoginDataHome());
 			for(Block login : layers){
 				singleSingOn.add(login);
 			}
 		} catch (Exception e) {
 			Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Failed creating single sing on layers", e);
 		}
-		
+
 		// Add single sing on
 		layer = new Layer();
 		layer.setStyleClass("add-more-layer");
@@ -234,27 +235,27 @@ public class UserAccessSettings extends Block {
 		GenericButton add = new GenericButton("more", iwrb.getLocalizedString("add_single_sing_on_access", "Add single sing-on access"));
 		layer.add(add);
 		add.setOnClick("UserAccessSettingsHelper.addSingleSingOn('" + singleSingOnSelector + CoreConstants.JS_STR_PARAM_END);
-		
+
 		// Submit
 		GenericButton buttonSubmit = new GenericButton("buttonSubmit", iwrb.getLocalizedString("save", "Save"));
 		main.add(buttonSubmit);
 		buttonSubmit.setOnClick("UserAccessSettingsHelper.saveAccessSettings('#" + formId +CoreConstants.JS_STR_PARAM_SEPARATOR
 				+ singleSingOnSelector +CoreConstants.JS_STR_PARAM_SEPARATOR +id+ CoreConstants.JS_STR_PARAM_END);
-		
-		
+
+
 		return main;
 	}
-	
+
 	public static Block getSingleSingOnLayer(){
-		return new SingleSingOn(SINGLE_SING_ON_SERVER, SINGLE_SING_ON_NAME, 
+		return new SingleSingOn(SINGLE_SING_ON_SERVER, SINGLE_SING_ON_NAME,
 				SINGLE_SING_ON_PASSWORD,SINGLE_SING_ON_ID);
 	}
-	
+
 	public static ArrayList<Block> getSingleSingOnLayers(User user,LoginDataHome loginDataHome) throws Exception{
 		Collection <LoginData> logins =  loginDataHome.getLoginData(user);
 		ArrayList<Block> layers = new ArrayList<Block>(logins.size());
 		for(LoginData data : logins){
-			SingleSingOn login = new SingleSingOn(SINGLE_SING_ON_SERVER, SINGLE_SING_ON_NAME, 
+			SingleSingOn login = new SingleSingOn(SINGLE_SING_ON_SERVER, SINGLE_SING_ON_NAME,
 					SINGLE_SING_ON_PASSWORD,SINGLE_SING_ON_ID);
 			login.setAddress(data.getService().getPrimaryKey().toString());
 			login.setName(data.getUserName());
@@ -263,12 +264,12 @@ public class UserAccessSettings extends Block {
 		}
 		return layers;
 	}
-	
+
 	private Layer getLanguageSelectLayer(Collection<ICLanguage> userLanguages,IWBundle iwb,IWResourceBundle iwrb,User user){
 		Layer layer = new Layer();
 		layer.setStyleClass("language-layer");
 		try{
-			ICLanguageHome icLanguageHome= citizenServices.getICLanguageHome();
+			ICLanguageHome icLanguageHome= getCitizenServices().getICLanguageHome();
 			@SuppressWarnings("unchecked")
 			Collection<ICLanguage> languages = icLanguageHome.findAll();
 			SelectionBox languageSelection =  new SelectionBox();
@@ -296,8 +297,8 @@ public class UserAccessSettings extends Block {
 				.append(CoreConstants.JS_STR_PARAM_SEPARATOR).append(imgSrc)
 				.append(CoreConstants.JS_STR_PARAM_END);
 			addButton.setOnClick(onclickAction.toString());
-			
-			StringBuilder addLanguagesAction = 
+
+			StringBuilder addLanguagesAction =
 				new StringBuilder("jQuery(document).ready(function(){\nUserAccessSettingsHelper.languages = [];");
 			int i = 0;
 			for(ICLanguage language : userLanguages){
@@ -322,7 +323,7 @@ public class UserAccessSettings extends Block {
 		}
 		return layer;
 	}
-	
+
 	private String getLanguageFailerror(IWResourceBundle iwrb){
 		return iwrb.getLocalizedString("failed_getting_languages", "Failed getting languages");
 	}
@@ -341,11 +342,11 @@ public class UserAccessSettings extends Block {
 			.append("UserAccessSettingsHelper.SINGLE_SING_ON_PASSWORD_SELECTOR = '[name = ").append(SINGLE_SING_ON_PASSWORD)
 			.append("]';")
 			.append("\n}");
-		
+
 		String actionString = PresentationUtil.getJavaScriptAction(actions.toString());
 		layer.add(actionString);
 	}
-	
+
 	private List<String> getNeededScripts(IWContext iwc){
 		List<String> scripts = new ArrayList<String>();
 
@@ -384,10 +385,10 @@ public class UserAccessSettings extends Block {
 			Logger.getLogger(getClass().getName()).log(Level.WARNING, "Failed getting Web2Business no jQuery and it's plugins files were added");
 		}
 		IWMainApplication iwma = iwc.getApplicationContext().getIWMainApplication();
-		
+
 		IWBundle iwb = iwma.getBundle("is.idega.idegaweb.egov.application");
 		styles.add(iwb.getVirtualPathWithFileNameString("style/application.css"));
-		
+
 		iwb = iwma.getBundle(CitizenConstants.IW_BUNDLE_IDENTIFIER);
 		styles.add(iwb.getVirtualPathWithFileNameString("style/citizen.css"));
 		styles.add(iwb.getVirtualPathWithFileNameString("style/UserAccessSettings.css"));
