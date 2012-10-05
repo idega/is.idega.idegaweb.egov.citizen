@@ -1007,9 +1007,20 @@ public class CitizenServices extends DefaultSpringBean implements
 		User user = iwc.getCurrentUser();
 		try {
 			Collection<String> paths = settings.get("subscribedCalendars");
-			calendarService.subscribeCalendars(user, paths);
+			if (!calendarService.subscribeCalendars(user, paths)) {
+				response.put("status","Internal Error");
+				response.put("message", iwrb.getLocalizedString(
+						"error_while_subscribing", 
+						"Error while subscribing."));
+			}
+
 			paths = settings.get("unsubscribedCalendars");
-			calendarService.unsubscribeCalendars(user, paths);
+			if (!calendarService.unsubscribeCalendars(user, paths)) {
+				response.put("status","Internal Error");
+				response.put("message", iwrb.getLocalizedString(
+						"error_while_unsubscribing", 
+						"Error while unsubscribing."));
+			}
 		}catch (Exception e) {
 			getLogger().log(Level.WARNING, "Erorr on removing user email", e);
 			response.put("status","Internal Error");

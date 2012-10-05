@@ -63,7 +63,7 @@ public class UserSettingsRequest {
 		if(availableCalendars == null){
 			User user = getIwc().getCurrentUser();
 			try {
-				availableCalendars = calendarManagementService.getAllVisibleCalendars(user, -1, -1);
+				availableCalendars = calendarManagementService.getVisibleSubscriptions(user, -1, -1);
 			} catch (Exception e) {
 				availableCalendars = Collections.emptyList();
 			}
@@ -77,6 +77,7 @@ public class UserSettingsRequest {
 			try {
 				subscribedCalendars = calendarManagementService.getSubscribedCalendars(user, -1, -1);
 			} catch (Exception e) {
+				e.printStackTrace();
 				subscribedCalendars = Collections.emptyList();
 			}
 		}
