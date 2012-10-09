@@ -61,8 +61,8 @@ public class UserSettingsRequest extends DefaultSpringBean {
 		return phones;
 	}
 
-	public Collection<CalDAVCalendar> getAvailableCalendars(){
-		if(availableCalendars == null){
+	public Collection<CalDAVCalendar> getAvailableCalendars() {
+		if (availableCalendars == null) {
 			try {
 				availableCalendars = calendarManagementService.getVisibleSubscriptions(getIwc().getCurrentUser(), -1, -1);
 			} catch (Exception e) {
@@ -70,11 +70,13 @@ public class UserSettingsRequest extends DefaultSpringBean {
 				availableCalendars = Collections.emptyList();
 			}
 		}
+
+		getLogger().info("Available calendars: " + availableCalendars);
 		return availableCalendars;
 	}
 
 	public List<CalDAVCalendar> getSubscribedCalendars() {
-		if(subscribedCalendars == null){
+		if (subscribedCalendars == null) {
 			try {
 				subscribedCalendars = calendarManagementService.getSubscribedCalendars(getIwc().getCurrentUser(), -1, -1);
 			} catch (Exception e) {
@@ -82,13 +84,15 @@ public class UserSettingsRequest extends DefaultSpringBean {
 				subscribedCalendars = Collections.emptyList();
 			}
 		}
+
+		getLogger().info("Calendars user is subscribed to: " + subscribedCalendars);
 		return subscribedCalendars;
 	}
 
 	private IWContext getIwc() {
-		if(iwc==null){
-			return CoreUtil.getIWContext();
-		}
+		if (iwc == null)
+			iwc =  CoreUtil.getIWContext();
+
 		return iwc;
 	}
 }
