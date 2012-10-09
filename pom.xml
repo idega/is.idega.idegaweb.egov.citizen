@@ -90,11 +90,11 @@
       <version>1.4.4</version>
       <type>jar</type>
     </dependency>
-    <dependency>
+   <!--   <dependency>
       <groupId>opensaml</groupId>
       <artifactId>opensaml</artifactId>
       <version>1.0.1</version>
       <type>jar</type>
-    </dependency>
+    </dependency>-->
   </dependencies>
 </project>
