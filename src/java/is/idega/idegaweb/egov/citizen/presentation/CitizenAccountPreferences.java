@@ -66,12 +66,12 @@ import com.idega.util.StringUtil;
  * import com.idega.presentation.ExceptionWrapper; import com.idega.presentation.IWContext; import com.idega.presentation.*; import
  * com.idega.presentation.ui.*; import com.idega.core.data.Address; import com.idega.core.data.Email; import com.idega.user.data.*; import
  * com.idega.business.IBOLookup; import com.idega.user.business.UserBusiness;
- * 
+ *
  * import se.idega.idegaweb.commune.presentation.CommuneBlock;
  */
 /**
  * Title: Description: Copyright: Copyright (c) 2002 Company:
- * 
+ *
  * @author Anders Lindman
  * @version 1.0
  */
@@ -97,7 +97,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	protected final static String PARAMETER_NAME = "cap_name";
 	protected final static String PARAMETER_SSN = "cap_ssn";
 	private final static String PARAMETER_GENDER = "cap_gender";
-	
+
 	private final static String KEY_PREFIX = "citizen.";
 	private final static String KEY_EMAIL = KEY_PREFIX + "email";
 	private final static String KEY_UPDATE = KEY_PREFIX + "update";
@@ -144,13 +144,13 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	protected IWResourceBundle iwrb;
 
 	private boolean showPreferredLocaleChooser = false;
-	
+
 	private boolean showPreferredRoleChooser = true;
-	
+
 	private boolean showGenderChooser = false;
-	
+
 	private boolean showGenderChooserReadOnly = false;
-	
+
 	private boolean showNameAndPersonalID = false;
 	private boolean nameAndPersonalIDDisabled = true;
 
@@ -179,7 +179,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 			super.add(new ExceptionWrapper(e, this));
 		}
 	}
-	
+
 	protected User getUser(IWContext iwc) {
 		return iwc.getCurrentUser();
 	}
@@ -191,21 +191,21 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		}
 		return action;
 	}
-	
+
 	protected Layer getHeader(String text) {
 		Layer header = new Layer(Layer.DIV);
 		header.setStyleClass("header");
 
 		Heading1 heading = new Heading1(text);
 		header.add(heading);
-		
+
 		return header;
 	}
 
 	protected void viewForm(IWContext iwc) throws Exception {
 		add(getPreferencesForm(iwc));
 	}
-	
+
 	protected Form getPreferencesForm(IWContext iwc) throws Exception {
 		Form form = new Form();
 		form.setMultiPart();
@@ -241,19 +241,19 @@ public class CitizenAccountPreferences extends CitizenBlock {
 			homePhone = ub.getUsersHomePhone(this.user);
 		}
 		catch (NoPhoneFoundException e) {}
-		
+
 		Phone mobilePhone = null;
 		try {
 			mobilePhone = ub.getUsersMobilePhone(this.user);
 		}
 		catch (NoPhoneFoundException e) {}
-		
+
 		Phone workPhone = null;
 		try {
 			workPhone = ub.getUsersWorkPhone(this.user);
 		}
 		catch (NoPhoneFoundException e) {}
-		
+
 		Address coAddress = getCOAddress(iwc);
 		PostalCode postal = null;
 		if (coAddress != null) {
@@ -333,7 +333,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		if (isSetToShowNameAndPersonalID()) {
 			getUserInputs(iwc, form, section);
 		}
-		
+
 		Layer layer = new Layer(Layer.DIV);
 		layer.setID("citizenImage");
 		section.add(layer);
@@ -349,7 +349,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		}
 
 		layer.add(new CSSSpacer());
-		
+
 		createFormItem("imageUpload", this.iwrb.getLocalizedString("image_upload", "Image upload"), file, layer);
 
 		section.add(new CSSSpacer());
@@ -408,45 +408,45 @@ public class CitizenAccountPreferences extends CitizenBlock {
 
 		layer = new Layer(Layer.DIV);
 		section.add(layer);
-		
+
 		if(isSetToShowGenderChooser() || isSetToShowGenderChooserReadOnly()){
 			GenderHome genderHome = (GenderHome) IDOLookup.getHome(Gender.class);
 			String maleId = genderHome.getMaleGender().getPrimaryKey().toString();
 			String femaleId = genderHome.getFemaleGender().getPrimaryKey().toString();
-			
+
 			String userGenderId = null;
 			Gender userGender = user.getGender();
 			userGenderId = userGender == null ? CoreConstants.EMPTY : userGender.getPrimaryKey().toString();
-			
+
 			RadioGroup gender = new RadioGroup(PARAMETER_GENDER);
 			gender.addRadioButton(maleId, new Text(this.iwrb.getLocalizedString("male", "Male")), userGenderId.equals(maleId));
 			gender.addRadioButton(femaleId, new Text(this.iwrb.getLocalizedString("female", "Female")), userGenderId.equals(femaleId));
-			
+
 			if(isSetToShowGenderChooserReadOnly()){
 				gender.setReadOnly(true);
 			}
-			
+
 			createFormItem("citizenGender", this.iwrb.getLocalizedString("gender", "Gender"), gender, layer);
 		}
-		
-		
+
+
 		if(isSetToShowPreferredLocaleChooser()){
 			DropdownMenu localesDrop = LocalePresentationUtil.getAvailableLocalesDropdown(iwc.getIWMainApplication(), PARAMETER_PREFERRED_LOCALE);
-					
+
 			if (localesDrop.getChildCount() > 1) {
 				section.add(new CSSSpacer());
-	
+
 				if (user.getPreferredLocale() != null) {
 					localesDrop.setSelectedElement(user.getPreferredLocale());
 				}
 				else {
 					localesDrop.setSelectedElement(iwc.getCurrentLocale().toString());
 				}
-	
+
 				createFormItem("preferredLang", this.iwrb.getLocalizedString(PREFERRED_LANGUAGE, "Preferred language"), localesDrop, layer);
 			}
 		}
-		
+
 		if(isSetToShowPreferredRoleChooser()){
 			DropdownMenu rolesDrop = new DropdownMenu(PARAMETER_PREFERRED_ROLE);
 			List<ICRole> rolesForUser = ub.getAvailableRolesForUserAsPreferredRoles(user);
@@ -457,14 +457,14 @@ public class CitizenAccountPreferences extends CitizenBlock {
 					rolesDrop.addMenuElement(role.getId(), localisedPermissionName);
 				}
 			}
-			
+
 			if (rolesDrop.getChildCount() > 1) {
 				section.add(new CSSSpacer());
-	
+
 				if (user.getPreferredRole() != null) {
 					rolesDrop.setSelectedElement(user.getPreferredRole().getId());
 				}
-				
+
 				createFormItem("preferredRole", this.iwrb.getLocalizedString(PREFERRED_ROLE, "Preferred user role"), rolesDrop, layer);
 			}
 		}
@@ -487,12 +487,12 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	protected void getUserInputs(IWContext iwc, Form form, Layer section) {
 		TextInput name = new TextInput(PARAMETER_NAME, user.getName());
 		createFormItem(this.iwrb.getLocalizedString("name", "Name"), name, section);
-		
+
 		if (isNameAndPersonalIDDisabled()) {
 			name.setDisabled(true);
 			section.add(new HiddenInput(PARAMETER_NAME, user.getName()));
 		}
-		
+
 		TextInput ssn = new TextInput(PARAMETER_SSN, user.getPersonalID());
 		createFormItem(this.iwrb.getLocalizedString("social_security_number", "Social security number"), ssn, section);
 
@@ -505,24 +505,24 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	public boolean isSetToShowGenderChooserReadOnly() {
 		return showGenderChooserReadOnly;
 	}
-	
+
 	protected void createFormItem(String label, InterfaceObject uiObject, UIComponent container) {
 		createFormItem(null, null, label, uiObject, null, container);
 	}
-	
+
 	private void createFormItem(String formItemId, String label, InterfaceObject uiObject, UIComponent container) {
 		createFormItem(null, formItemId, label, uiObject, null, container);
 	}
-	
+
 	private void createFormItem(String formItemStyle, String formItemId, String label, InterfaceObject uiObject, UIComponent container) {
 		createFormItem(formItemStyle, formItemId, label, uiObject, null, container);
 	}
-	
+
 	private void createFormItem(String formItemStyle, String formItemId, String label, InterfaceObject uiObject, UIComponent child, UIComponent container) {
 		Layer formItem = getFormItem(formItemStyle, formItemId, label, uiObject, child);
 		container.getChildren().add(formItem);
 	}
-	
+
 	protected Layer getFormItem(String formItemStyle, String formItemId, String label, InterfaceObject uiObject, UIComponent child) {
 		Layer formItem = new Layer();
 		formItem.setStyleClass("formItem");
@@ -532,7 +532,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		if (!StringUtil.isEmpty(formItemId)) {
 			formItem.setId(formItemId);
 		}
-		
+
 		Label uiLabel = null;
 		if (uiObject == null) {
 			uiLabel = new Label();
@@ -552,11 +552,11 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		} else {
 			formItem.add(uiLabel);
 		}
-		
+
 		if (child != null) {
 			formItem.add(child);
 		}
-		
+
 		return formItem;
 	}
 
@@ -590,7 +590,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 				uploadFile.setId(-1);
 			}
 		}
-		
+
 		UserBusiness ub = IBOLookup.getServiceInstance(iwc, UserBusiness.class);
 
 		String name = iwc.getParameter(PARAMETER_NAME);
@@ -611,18 +611,18 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		boolean removeImage = iwc.isParameterSet(PARAMETER_REMOVE_IMAGE);
 		boolean removeSSN = StringUtil.isEmpty(ssn);
 		boolean updateGender = !StringUtil.isEmpty(gender);
-		
+
 		if (isSetToShowNameAndPersonalID() && StringUtil.isEmpty(name)) {
 			errors.add(this.iwrb.getLocalizedString("invalid_name", "Name is invalid"));
 		}
-		
+
 		if (!removeSSN) {
 			if (!ub.validatePersonalId(ssn, iwc.getCurrentLocale())) {
 				errors.add(new StringBuilder(this.iwrb.getLocalizedString("invalid_ssn", "SSN is invalid")).append(CoreConstants.COLON)
 						.append(CoreConstants.SPACE).append(ssn).toString());
 			}
 		}
-		
+
 		Integer genderId = null;
 		if (updateGender) {
 			try {
@@ -634,7 +634,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 				errors.add(this.iwrb.getLocalizedString("invalid_gender", "Invalid gender"));
 			}
 		}
-		
+
 		boolean updateEmail = false;
 		if (sEmail != null) {
 			updateEmail = EmailValidator.getInstance().validateEmail(sEmail);
@@ -664,22 +664,22 @@ public class CitizenAccountPreferences extends CitizenBlock {
 
 		if (ListUtil.isEmpty(errors)) {
 			//	No errors found
-			
+
 			if (isSetToShowNameAndPersonalID() && !isNameAndPersonalIDDisabled()) {
 				//	Name
 				user.setFullName(name);
-				
+
 				//	SSN
 				user.setPersonalID(removeSSN ? null : ssn);
 			}
-			
+
 			//	Gender
 			if (updateGender){
 				user.setGender(genderId);
 			}
-			
+
 			user.store();
-			
+
 			if (updateEmail) {
 				ub.storeUserEmail(this.user, sEmail, true);
 			}
@@ -692,10 +692,10 @@ public class CitizenAccountPreferences extends CitizenBlock {
 			}
 			if (preferredRoleID != null) {
 				IWMainApplication app = iwc.getIWMainApplication();
-				ICRole role = app.getAccessController().getRoleByRoleKey(preferredRoleID);
+				ICRole role = app.getAccessController().getRoleByRoleKeyOld(preferredRoleID);
 				ub.setUsersPreferredRole(user, role, true);
 			}
-			
+
 			if (useCOAddress) {
 				Address coAddress = getCOAddress(iwc);
 				//coAddress.setStreetName(coStreetAddress);
@@ -707,7 +707,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 				String streetNumber = addressBusiness.getStreetNumberFromAddressString(coStreetAddress);
 				coAddress.setStreetName(streetName);
 				coAddress.setStreetNumber(streetNumber);
-				
+
 				coAddress.setPostalCode(pc);
 				coAddress.setCity(coCity);
 				coAddress.store();
@@ -763,14 +763,14 @@ public class CitizenAccountPreferences extends CitizenBlock {
 			}
 
 			add(layer);
-			
+
 			return true;
 		}
 		else {
 			showErrors(iwc, errors);
 			viewForm(iwc);
 		}
-		
+
 		return false;
 	}
 
@@ -813,11 +813,11 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	public boolean isSetToShowPreferredLocaleChooser() {
 		return showPreferredLocaleChooser;
 	}
-	
+
 	public boolean isSetToShowPreferredRoleChooser() {
 		return showPreferredRoleChooser;
 	}
-	
+
 	public boolean isSetToShowGenderChooser() {
 		return showGenderChooser;
 	}
@@ -833,7 +833,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	public void setToShowPreferredLocaleChooser(boolean showPreferredLocaleChooser) {
 		this.showPreferredLocaleChooser = showPreferredLocaleChooser;
 	}
-	
+
 	/**
 	 * @param showPreferredRoleChooser
 	 *          The showPreferredRoleChooser to set.
@@ -841,7 +841,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	public void setToShowPreferredRoleChooser(boolean showPreferredRoleChooser) {
 		this.showPreferredRoleChooser = showPreferredRoleChooser;
 	}
-	
+
 	/**
 	 * @param showGenderChooser
 	 *          The showGenderChooser to set.
@@ -849,15 +849,15 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	public void setToShowGenderChooser(boolean showGenderChooser) {
 		this.showGenderChooser = showGenderChooser;
 	}
-	
+
 	public void setToShowNameAndPersonalID(boolean showNameAndPersonalID) {
 		this.showNameAndPersonalID = showNameAndPersonalID;
 	}
-	
+
 	public void setToShowGenderChooserReadOnly(boolean showGenderChooserReadOnly) {
 		this.showGenderChooserReadOnly = showGenderChooserReadOnly;
 	}
-	
+
 	protected User getUser() {
 		return this.user;
 	}

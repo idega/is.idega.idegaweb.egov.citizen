@@ -41,6 +41,7 @@ import com.idega.presentation.ui.PasswordInput;
 import com.idega.presentation.ui.SelectionBox;
 import com.idega.presentation.ui.TextInput;
 import com.idega.user.bean.UserDataBean;
+import com.idega.user.dao.UserDAO;
 import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
 import com.idega.util.PresentationUtil;
@@ -130,7 +131,6 @@ public class UserAccessSettings extends Block {
 		IWBundle iwb = iwma.getBundle(CitizenConstants.IW_BUNDLE_IDENTIFIER);
 		UserDataBean userData = null;
 		boolean isData = false;
-//		LoginDBHandler.getUserLogin(user).getUserPassword();
 		String id = String.valueOf(-1);
 		String username = CoreConstants.EMPTY;
 		Collection<ICLanguage> userLanguages = Collections.emptyList();
@@ -140,7 +140,10 @@ public class UserAccessSettings extends Block {
 				isData = true;
 			}
 			id = user.getId();
-			LoginContext loginContext = LoginBusinessBean.getLoginContext(user);
+
+			UserDAO userDAO = ELUtil.getInstance().getBean(UserDAO.class);
+			com.idega.user.data.bean.User tmp = userDAO.getUser(Integer.valueOf(id));
+			LoginContext loginContext = LoginBusinessBean.getLoginBusinessBean(iwc).getLoginContext(tmp);
 			username = loginContext.getUserName();
 			if(username == null){
 				username = CoreConstants.EMPTY;
