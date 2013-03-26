@@ -255,7 +255,7 @@ public class CitizenAccountBusinessBean extends AccountApplicationBusinessBean i
 			trans = this.getSessionContext().getUserTransaction();
 			trans.begin();
 
-			// encrypte new password
+			// encrypt new password
 			String encryptedPassword = Encrypter.encryptOneWay(newPassword);
 			// store new password
 			loginTable.setUserPassword(encryptedPassword, newPassword);
