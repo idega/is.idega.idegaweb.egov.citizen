@@ -231,7 +231,7 @@ public class UserAccessSettings extends Block {
 		layer = new Layer();
 		layer.setStyleClass("add-more-layer");
 		singleSingonFieldset.add(layer);
-		String singleSingOnSelector = CoreConstants.NUMBER_SIGN + singleSingOn.getId();
+		String singleSingOnSelector = CoreConstants.HASH + singleSingOn.getId();
 		GenericButton add = new GenericButton("more", iwrb.getLocalizedString("add_single_sing_on_access", "Add single sing-on access"));
 		layer.add(add);
 		add.setOnClick("UserAccessSettingsHelper.addSingleSingOn('" + singleSingOnSelector + CoreConstants.JS_STR_PARAM_END);
