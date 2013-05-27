@@ -735,7 +735,9 @@ public class CitizenAccountPreferences extends CitizenBlock {
 				WebApplicationContext springContext = WebApplicationContextUtils.getWebApplicationContext(iwc.getServletContext());
 				UserInfoToExternalSystemService service = (UserInfoToExternalSystemService) springContext.getBean(iwc.getApplicationSettings().getProperty("SEND_USER_INFO_SERVICE_NAME", "linnaWSBusiness"));
 				
-				service.updateUserInfo(ssn, sEmail, phoneHome, phoneWork, phoneMobile);
+				String identifycationString = iwc.getApplicationSettings().getProperty("SEND_USER_INFO_IDENTIFICATION_STRING", "RR");
+				
+				service.updateUserInfo(ssn, sEmail, phoneHome, phoneWork, phoneMobile, identifycationString);
 			}
 			
 			Layer header = new Layer(Layer.DIV);
