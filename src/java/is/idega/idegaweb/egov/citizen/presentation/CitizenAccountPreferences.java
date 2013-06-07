@@ -1,5 +1,6 @@
 package is.idega.idegaweb.egov.citizen.presentation;
 
+import is.idega.idegaweb.egov.business.UserInfoToExternalSystemService;
 import is.idega.idegaweb.egov.citizen.IWBundleStarter;
 import is.idega.idegaweb.egov.citizen.business.CitizenAccountSession;
 import is.idega.idegaweb.egov.message.business.MessageSession;
@@ -13,6 +14,9 @@ import java.util.List;
 
 import javax.ejb.FinderException;
 import javax.faces.component.UIComponent;
+
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import com.idega.business.IBOLookup;
 import com.idega.core.accesscontrol.data.ICRole;
@@ -726,6 +730,16 @@ public class CitizenAccountPreferences extends CitizenBlock {
 				this.user.store();
 			}
 
+			//send to external system if needed
+			if (iwc.getApplicationSettings().getBoolean("SEND_USER_INFO_TO_EXTERNAL", false)) {
+				WebApplicationContext springContext = WebApplicationContextUtils.getWebApplicationContext(iwc.getServletContext());
+				UserInfoToExternalSystemService service = (UserInfoToExternalSystemService) springContext.getBean(iwc.getApplicationSettings().getProperty("SEND_USER_INFO_SERVICE_NAME", "linnaWSBusiness"));
+				
+				String identifycationString = iwc.getApplicationSettings().getProperty("SEND_USER_INFO_IDENTIFICATION_STRING", "RR");
+				
+				service.updateUserInfo(ssn, sEmail, phoneHome, phoneWork, phoneMobile, identifycationString);
+			}
+			
 			Layer header = new Layer(Layer.DIV);
 			header.setStyleClass("header");
 			add(header);
