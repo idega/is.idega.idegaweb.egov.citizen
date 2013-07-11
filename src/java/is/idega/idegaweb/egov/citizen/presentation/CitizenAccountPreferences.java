@@ -737,7 +737,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 				
 				String identifycationString = iwc.getApplicationSettings().getProperty("SEND_USER_INFO_IDENTIFICATION_STRING", "RR");
 				
-				service.updateUserInfo(ssn, sEmail, phoneHome, phoneWork, phoneMobile, identifycationString);
+				service.updateUserInfo(iwc.getCurrentUser().getPersonalID(), sEmail, phoneHome, phoneWork, phoneMobile, identifycationString);
 			}
 			
 			Layer header = new Layer(Layer.DIV);
