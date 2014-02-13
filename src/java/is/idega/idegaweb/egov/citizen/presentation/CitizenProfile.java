@@ -501,7 +501,7 @@ public class CitizenProfile extends Block {
 						"js/jquery-ui-" + Web2BusinessBean.JQUERY_UI_LATEST_VERSION
 						+ ".custom.min.js"));
 			scripts.add(jQuery.getBundleURIToJQueryUILib(
-						Web2BusinessBean.JQUERY_UI_LATEST_VERSION,
+						Web2BusinessBean.JQUERY_UI_1_8_17_VERSION,
 						"ui.autocomplete.html.js"));
 
 			Locale locale = iwc.getLocale();
@@ -547,8 +547,7 @@ public class CitizenProfile extends Block {
 
 			styles.add(jQuery.getBundleURIToJQueryUILib(
 					Web2BusinessBean.JQUERY_UI_LATEST_VERSION,
-					"css/ui-lightness/jquery-ui-" +
-							Web2BusinessBean.JQUERY_UI_LATEST_VERSION + ".custom.css"));
+					"themes/smoothness/minified/jquery-ui.min.css"));
 
 			styles.add(web2.getBundleUriToHumanizedMessagesStyleSheet());
 
