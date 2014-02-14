@@ -375,7 +375,11 @@ public class CitizenServices extends DefaultSpringBean implements
 		return Boolean.TRUE;
 	}
 	
-	private String saveFamilyRelations(Map <String, List<String>> parameters,IWResourceBundle iwrb,IWContext iwc,User user){
+	private String saveFamilyRelations(
+			Map <String, List<String>> parameters,
+			IWResourceBundle iwrb,
+			IWContext iwc,
+			User user) {
 		String report = CoreConstants.EMPTY;
 		String failure = null;
 		try {
@@ -798,7 +802,6 @@ public class CitizenServices extends DefaultSpringBean implements
 	}
 	
 	private void removeUserEmail(User user, Object emailToRemoveId) throws Exception{
-		@SuppressWarnings("unchecked")
 		Collection<Email> emails = user.getEmails();
 		removeUserEmail(emails,emailToRemoveId);
 	}
@@ -825,7 +828,6 @@ public class CitizenServices extends DefaultSpringBean implements
 	}
 	
 	private void removeUserPhone(User user, Object phoneToRemoveId) throws Exception{
-		@SuppressWarnings("unchecked")
 		Collection<Phone> userphPhones = user.getPhones();
 		removeUserPhone(userphPhones, phoneToRemoveId);
 	}
@@ -955,9 +957,7 @@ public class CitizenServices extends DefaultSpringBean implements
 		User user = iwc.getCurrentUser();
 		try {
 			GroupBusiness groupBusiness = IBOLookup.getServiceInstance(iwc, GroupBusiness.class);
-			@SuppressWarnings("unchecked")
 			Collection<Email> userEmails = user.getEmails();
-			@SuppressWarnings("unchecked")
 			Collection<Phone> userPhones = user.getPhones();
 			
 			Collection<String> DataToRemoveIds = dataToRemove.get("emailsToRemove");
