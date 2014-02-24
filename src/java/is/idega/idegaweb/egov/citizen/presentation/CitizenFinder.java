@@ -44,7 +44,9 @@ import com.idega.user.business.NoEmailFoundException;
 import com.idega.user.business.UserSession;
 import com.idega.user.data.User;
 import com.idega.util.Age;
+import com.idega.util.CoreConstants;
 import com.idega.util.PersonalIDFormatter;
+import com.idega.util.StringUtil;
 import com.idega.util.text.Name;
 import com.idega.util.text.TextSoap;
 
@@ -293,30 +295,30 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 
 			cell = row.createCell();
 			cell.setStyleClass("address");
-			if (address != null) {
+			if (address != null && !StringUtil.isEmpty(address.getStreetAddress())) {
 				cell.add(new Text(address.getStreetAddress()));
 			}
 			else {
-				cell.add(new Text("-"));
+				cell.add(new Text(CoreConstants.MINUS));
 			}
 
 			cell = row.createCell();
 			cell.setStyleClass("postalCode");
-			if (postal != null) {
-				cell.add(new Text(postal.getPostalAddress()));
+			if (postal != null && !StringUtil.isEmpty(postal.getPostalCode())) {
+				cell.add(new Text(postal.getPostalCode()));
 			}
 			else {
-				cell.add(new Text("-"));
+				cell.add(new Text(CoreConstants.MINUS));
 			}
 
 			cell = row.createCell();
 			cell.setStyleClass("lastColumn");
 			cell.setStyleClass("email");
-			if (email != null && email.getEmailAddress() != null) {
+			if (email != null && !StringUtil.isEmpty(email.getEmailAddress())) {
 				cell.add(new Text(email.getEmailAddress()));
 			}
 			else {
-				cell.add(new Text("-"));
+				cell.add(new Text(CoreConstants.MINUS));
 			}
 
 			if (iRow % 2 == 0) {
