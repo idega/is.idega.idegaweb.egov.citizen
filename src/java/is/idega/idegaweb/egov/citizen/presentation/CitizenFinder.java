@@ -131,8 +131,8 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 		TextInput personalID = new TextInput(PARAMETER_PERSONAL_ID);
 		personalID.setStyleClass("personalID");
 		personalID.keepStatusOnAction(true);
-		personalID.setMaxlength(10);
-		personalID.setLength(10);
+		personalID.setMaxlength(15);
+		personalID.setLength(15);
 		personalID.setOnKeyPress("return enterSubmit(this,event)");
 
 		TextInput firstName = new TextInput(PARAMETER_FIRST_NAME);
