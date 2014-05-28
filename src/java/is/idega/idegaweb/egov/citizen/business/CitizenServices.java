@@ -100,21 +100,21 @@ public class CitizenServices extends DefaultSpringBean implements
 	private CountryHome countryHome = null;
 	private LoginDataHome loginDataHome = null;
 	private FamilyLogic familyLogic = null;
-	
+
 	@Autowired(required = false)
 	private CalendarManagementService calendarManagementService;
 
 	private UserHome userHome = null;
 	private ICLanguageHome iCLanguageHome = null;
-	
+
 	private Pattern pattern;
-	private static final String EMAIL_PATTERN = 
+	private static final String EMAIL_PATTERN =
             "^[_A-Za-z0-9-]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
-	
+
 	public CitizenServices(){
 		pattern = Pattern.compile(EMAIL_PATTERN);
 	}
-	
+
 	@RemoteMethod
 	public String saveUser(Map <String, List<String>> parameters){
 		IWContext iwc = CoreUtil.getIWContext();
@@ -169,9 +169,9 @@ public class CitizenServices extends DefaultSpringBean implements
 		try{
 			user.store();
 		}catch(Exception e){
-			
+
 		}
-		
+
 		// Setting user address data
 		String report = saveAddress(parameters, iwrb, user.getId());
 		if(!StringUtil.isEmpty(report)){
@@ -182,10 +182,10 @@ public class CitizenServices extends DefaultSpringBean implements
 		if(!StringUtil.isEmpty(report)){
 			successMsg += CoreConstants.NEWLINE + report;
 		}
-		
+
 		return successMsg;
 	}
-	
+
 	@RemoteMethod
 	public String getSingleSingOnLayer(){
 		Block layer = UserAccessSettings.getSingleSingOnLayer();
@@ -193,7 +193,7 @@ public class CitizenServices extends DefaultSpringBean implements
 				layer, null).getHtml();
 		return html;
 	}
-	
+
 	@RemoteMethod
 	public String getSingleSingOnLayers(Integer userId){
 		if(userId == null){
@@ -219,7 +219,7 @@ public class CitizenServices extends DefaultSpringBean implements
 				layer, null).getHtml();
 		return html;
 	}
-	
+
 	@RemoteMethod
 	public String saveUserAccessSetings(Map<String, List<String>> parameters, ArrayList<LoginDataBean> singleSingOn) {
 		IWContext iwc = CoreUtil.getIWContext();
@@ -230,7 +230,7 @@ public class CitizenServices extends DefaultSpringBean implements
 		if(!iwc.isLoggedOn()){
 			return failureMsg + CoreConstants.NEWLINE + iwrb.getLocalizedString("not_logged_in", "Not logged in");
 		}
-		
+
 		LoginTable loginTable = LoginDBHandler.getUserLogin(iwc.getCurrentUserId());
 		String login = null;
 		List<String> params = parameters.get(CitizenConstants.USER_EDIT_USERNAME_PARAMETER);
@@ -280,10 +280,10 @@ public class CitizenServices extends DefaultSpringBean implements
 		} catch (Exception e) {
 			getLogger().log(Level.WARNING, "Failed saving single sing on", e);
 			successMsg += CoreConstants.NEWLINE + iwrb.getLocalizedString("failed_saving_single_sing_on", "Failed saving single sing on");
-		}	
+		}
 		return successMsg;
 	}
-	
+
 
 	private void storeSingleSingOn(ArrayList<LoginDataBean> singleSingOn,User user) throws IDOLookupException{
 		LoginDataHome loginDataHome = getLoginDataHome();
@@ -327,7 +327,7 @@ public class CitizenServices extends DefaultSpringBean implements
 				continue;
 			}
 			login.setService(serviceId);
-			
+
 			input = user.getPersonalID();
 			if(StringUtil.isEmpty(input)){
 				continue;
@@ -341,7 +341,7 @@ public class CitizenServices extends DefaultSpringBean implements
 			login.store();
 		}
 	}
-	
+
 	@RemoteMethod
 	public Boolean removeSingleSingOn(Integer loginId){
 		LoginDataHome loginDataHome = null;
@@ -374,7 +374,7 @@ public class CitizenServices extends DefaultSpringBean implements
 		}
 		return Boolean.TRUE;
 	}
-	
+
 	private String saveFamilyRelations(
 			Map <String, List<String>> parameters,
 			IWResourceBundle iwrb,
@@ -429,7 +429,7 @@ public class CitizenServices extends DefaultSpringBean implements
 		}
 		return report;
 	}
-	
+
 	private String saveAddress(Map<String, List<String>> parameters, IWResourceBundle iwrb, String userId){
 		String report = CoreConstants.EMPTY;
 		String streetNameAndNumber = null;
@@ -478,7 +478,7 @@ public class CitizenServices extends DefaultSpringBean implements
 		}
 		return report;
 	}
-	
+
 	private PostalCode getPostalCode(String postalCode, String countryName){
 		try{
 			PostalCodeHome postalcCodeHome = getPostalCodeHome();
@@ -497,16 +497,16 @@ public class CitizenServices extends DefaultSpringBean implements
 				this.getLogger().log(Level.WARNING, "failed getting country by name" + countryName, e);
 			}
 			code.store();
-			
+
 			return code;
 		}catch (IDOLookupException e) {
 			this.getLogger().log(Level.WARNING, "failed getting PostalCodeHome", e);
 		} catch (CreateException e) {
 			this.getLogger().log(Level.WARNING, "failed creating PostalCode", e);
-		} 
+		}
 		return null;
 	}
-	
+
 	public UserBusiness getUserBusiness() {
 		if(userBusiness == null){
 			userBusiness = this.getServiceInstance(UserBusiness.class);
@@ -534,11 +534,11 @@ public class CitizenServices extends DefaultSpringBean implements
 	}
 	public FamilyLogic getFamilyLogic(IWContext iwc) throws IBOLookupException{
 		if(familyLogic == null){
-			familyLogic = (FamilyLogic) IBOLookup.getServiceInstance(iwc, FamilyLogic.class);
+			familyLogic = IBOLookup.getServiceInstance(iwc, FamilyLogic.class);
 		}
 		return familyLogic;
 	}
-	
+
 	public Map <String ,Collection<User>> getFamilyMembers(IWContext iwc, User user, Collection<String> relationTypes) {
 		Map<String,Collection<User>> members = new HashMap<String,Collection<User>>();
 		FamilyLogic familyLogic = null;
@@ -553,14 +553,14 @@ public class CitizenServices extends DefaultSpringBean implements
 					related = Collections.emptyList();
 					members.put(type, related);
 					continue;
-				} 
+				}
 			}
 		} catch (IBOLookupException e) {
 			Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Failed getting family data" , e);
 		}
 		return members;
 	}
-	
+
 	public List<String> getFamilyRelationTypes(IWContext iwc) throws Exception{
 		List<String> familyRelationTypes = new ArrayList<String>();
 		FamilyLogic familyLogic = getFamilyLogic(iwc);
@@ -572,7 +572,7 @@ public class CitizenServices extends DefaultSpringBean implements
 		familyRelationTypes.add(familyLogic.getCohabitantRelationType());
 		return familyRelationTypes;
 	}
-	
+
 	/**
 	 * This remote method returns a map of search status and users by request.
 	 * @param request the request by which users will be searched
@@ -588,14 +588,14 @@ public class CitizenServices extends DefaultSpringBean implements
 		request = request.toLowerCase();
 		Collection <User> requestedUsers = (this.getUserHome().ejbAutocompleteRequest(request, -1, maxAmount, 0));
 		UserApplicationEngine userApplicationEngine = this.getUserApplicationEngine();
-		
+
 		IWContext iwc = CoreUtil.getIWContext();
 		IWBundle bundle = iwc.getIWMainApplication().getBundle(CitizenConstants.IW_BUNDLE_IDENTIFIER);
 		IWResourceBundle iwrb = bundle.getResourceBundle(iwc);
 		IWMainApplication iwma = iwc.getApplicationContext().getIWMainApplication();
 		IWBundle iwb = iwma.getBundle(CitizenConstants.IW_BUNDLE_IDENTIFIER);
 		List <String>tables = new ArrayList<String>();
-		Map<String,Collection<String>> response = new HashMap<String,Collection<String>>(); 
+		Map<String,Collection<String>> response = new HashMap<String,Collection<String>>();
 		FamilyLogic fl = null;
 		if(relationType.equals("-1")){
 			response.put("status", Arrays.asList("bad_request"));
@@ -624,7 +624,7 @@ public class CitizenServices extends DefaultSpringBean implements
 		response.put("content", tables);
 		return response;
 	}
-	
+
 	public UserHome getUserHome() {
 		if (this.userHome  == null) {
 			try {
@@ -647,7 +647,7 @@ public class CitizenServices extends DefaultSpringBean implements
 		}
 		return this.loginDataHome;
 	}
-	
+
 	@RemoteMethod
 	public Boolean removeRelation(String userId,String relatedId,String relationType){
 		if(userId == null || relatedId == null || relationType == null){
@@ -664,21 +664,21 @@ public class CitizenServices extends DefaultSpringBean implements
 			this.getLogger().log(Level.WARNING, "failed getting FamilyLogic", e);
 			return Boolean.FALSE;
 		} catch (RemoteException e) {
-			this.getLogger().log(Level.WARNING, "failed removing " + relationType + 
+			this.getLogger().log(Level.WARNING, "failed removing " + relationType +
 					" relation from user " + userId + "  with " + relatedId, e);
 			return Boolean.FALSE;
 		} catch (RemoveException e) {
-			this.getLogger().log(Level.WARNING, "failed removing " + relationType + 
+			this.getLogger().log(Level.WARNING, "failed removing " + relationType +
 					" relation from user " + userId + "  with " + relatedId, e);
 			return Boolean.FALSE;
 		}catch(Exception e){
-			this.getLogger().log(Level.WARNING, "failed removing " + relationType + 
+			this.getLogger().log(Level.WARNING, "failed removing " + relationType +
 					" relation from user " + userId + "  with " + relatedId, e);
 			return Boolean.FALSE;
 		}
 		return Boolean.TRUE;
 	}
-	
+
 	@RemoteMethod
 	public Boolean removeLanguage(String userId,String languageId){
 		if(userId == null || languageId == null){
@@ -692,16 +692,16 @@ public class CitizenServices extends DefaultSpringBean implements
 			try{
 				user.removeLanguage(language);
 			}catch(IDORemoveRelationshipException e){
-				
+
 			}
 		}catch(Exception e){
-			this.getLogger().log(Level.WARNING, "failed removing " + languageId + 
+			this.getLogger().log(Level.WARNING, "failed removing " + languageId +
 					" language from user " + userId, e);
 			return Boolean.FALSE;
 		}
 		return Boolean.TRUE;
 	}
-	
+
 	@RemoteMethod
 	public Map <String,String> getUserLanguages(Integer userId){
 		if(userId == null || userId.equals(-1)){
@@ -731,8 +731,8 @@ public class CitizenServices extends DefaultSpringBean implements
 		}
 		return Collections.emptyMap();
 	}
-	
-	
+
+
 	@RemoteMethod
 	public Map <String,String> removeCurrentUserEmail(String id){
 		HashMap<String, String> response = new HashMap<String, String>();
@@ -786,12 +786,12 @@ public class CitizenServices extends DefaultSpringBean implements
 		response.put("status", "OK");
 		return response;
 	}
-	
+
 	private boolean isValidEmail(String email){
 		Matcher matcher = pattern.matcher(email);
 		return matcher.matches();
 	}
-	
+
 	private void removeUserEmails(Collection<Email> userEmails,Collection<?> emailsToRemoveIds) throws Exception{
 		if(ListUtil.isEmpty(userEmails) || ListUtil.isEmpty(emailsToRemoveIds)){
 			return;
@@ -800,12 +800,12 @@ public class CitizenServices extends DefaultSpringBean implements
 			removeUserEmail(userEmails, id);
 		}
 	}
-	
+
 	private void removeUserEmail(User user, Object emailToRemoveId) throws Exception{
 		Collection<Email> emails = user.getEmails();
 		removeUserEmail(emails,emailToRemoveId);
 	}
-	
+
 	private void removeUserEmail(Collection<Email> userEmails,Object emailToRemoveId) throws Exception{
 		String id = String.valueOf(emailToRemoveId);
 		for(Email email : userEmails){
@@ -817,7 +817,7 @@ public class CitizenServices extends DefaultSpringBean implements
 			}
 		}
 	}
-	
+
 	private void removeUserPhones(Collection<Phone> userPhones,Collection<?> phonesToRemoveIds) throws Exception{
 		if(ListUtil.isEmpty(userPhones) || ListUtil.isEmpty(phonesToRemoveIds)){
 			return;
@@ -826,7 +826,7 @@ public class CitizenServices extends DefaultSpringBean implements
 			removeUserPhone(userPhones, id);
 		}
 	}
-	
+
 	private void removeUserPhone(User user, Object phoneToRemoveId) throws Exception{
 		Collection<Phone> userphPhones = user.getPhones();
 		removeUserPhone(userphPhones, phoneToRemoveId);
@@ -842,7 +842,7 @@ public class CitizenServices extends DefaultSpringBean implements
 			}
 		}
 	}
-	
+
 	private void saveEmails(Collection<Map<String,String>> emails,GroupBusiness groupBusiness,User user,Collection<Email> userEmails) throws Exception{
 		if(ListUtil.isEmpty(emails) || (user == null) || (groupBusiness == null)){
 			return;
@@ -887,7 +887,7 @@ public class CitizenServices extends DefaultSpringBean implements
 			emailData.put("id", String.valueOf(email.getPrimaryKey()));
 		}
 	}
-	
+
 	private void savePhones(Collection<Map<String,String>> phones,GroupBusiness groupBusiness,User user,Collection<Phone> userPhones) throws Exception{
 		if(ListUtil.isEmpty(phones) || (user == null) || (groupBusiness == null)){
 			return;
@@ -941,11 +941,11 @@ public class CitizenServices extends DefaultSpringBean implements
 			contactData.put("id", String.valueOf(phone.getPrimaryKey()));
 		}
 	}
-	
+
 	@RemoteMethod
 	public Map <String,Object> saveUserMessagesData(Map<String,Collection<Map<String,String>>> values, Map<String,Collection<String>> dataToRemove ){
 		HashMap<String, Object> response = new HashMap<String, Object>();
-		
+
 		IWContext iwc = CoreUtil.getIWContext();
 		IWBundle bundle = iwc.getIWMainApplication().getBundle(CitizenConstants.IW_BUNDLE_IDENTIFIER);
 		IWResourceBundle iwrb = bundle.getResourceBundle(iwc);
@@ -959,19 +959,19 @@ public class CitizenServices extends DefaultSpringBean implements
 			GroupBusiness groupBusiness = IBOLookup.getServiceInstance(iwc, GroupBusiness.class);
 			Collection<Email> userEmails = user.getEmails();
 			Collection<Phone> userPhones = user.getPhones();
-			
+
 			Collection<String> DataToRemoveIds = dataToRemove.get("emailsToRemove");
 			removeUserEmails(userEmails, DataToRemoveIds);
-			
+
 			DataToRemoveIds = dataToRemove.get("phonesToRemove");
 			removeUserPhones(userPhones, DataToRemoveIds);
-			
+
 			Collection<Map<String,String>> emails = values.get("emails");
 			saveEmails(emails, groupBusiness, user, userEmails);
-			
+
 			Collection<Map<String,String>> phones = values.get("phones");
 			savePhones(phones, groupBusiness, user, userPhones);
-			
+
 			response.put("emails", emails);
 			response.put("phones", phones);
 		}catch (Exception e) {
@@ -983,11 +983,11 @@ public class CitizenServices extends DefaultSpringBean implements
 		response.put("message", iwrb.getLocalizedString("saved", "saved"));
 		return response;
 	}
-	
+
 	@RemoteMethod
 	public Map <String,Object> saveCitizenCalendarSettings(Map<String,Collection<String>> settings){
 		Map<String, Object> response = new HashMap<String, Object>();
-		
+
 		IWContext iwc = CoreUtil.getIWContext();
 		IWBundle bundle = iwc.getIWMainApplication().getBundle(CitizenConstants.IW_BUNDLE_IDENTIFIER);
 		IWResourceBundle iwrb = bundle.getResourceBundle(iwc);
@@ -996,21 +996,21 @@ public class CitizenServices extends DefaultSpringBean implements
 			response.put("message", iwrb.getLocalizedString("permission_denied", "Permission denied"));
 			return response;
 		}
-		
+
 		CalendarManagementService calendarService = getCalendarManagementService();
 		if (calendarService == null) {
 			response.put("status", "Error");
 			response.put("message", iwrb.getLocalizedString("unable_to_use_calendar", "Unable to use calendar service"));
 			return response;
 		}
-		
+
 		User user = iwc.getCurrentUser();
 		try {
 			Collection<String> paths = settings.get("subscribedCalendars");
 			if (!calendarService.subscribeCalendars(user, paths)) {
 				response.put("status","Internal Error");
 				response.put("message", iwrb.getLocalizedString(
-						"error_while_subscribing", 
+						"error_while_subscribing",
 						"Error while subscribing."));
 			}
 
@@ -1018,7 +1018,7 @@ public class CitizenServices extends DefaultSpringBean implements
 			if (!calendarService.unsubscribeCalendars(user, paths)) {
 				response.put("status","Internal Error");
 				response.put("message", iwrb.getLocalizedString(
-						"error_while_unsubscribing", 
+						"error_while_unsubscribing",
 						"Error while unsubscribing."));
 			}
 		}catch (Exception e) {
@@ -1030,11 +1030,43 @@ public class CitizenServices extends DefaultSpringBean implements
 		response.put("message", iwrb.getLocalizedString("saved", "saved"));
 		return response;
 	}
-	
+
 	private CalendarManagementService getCalendarManagementService() {
 		if (calendarManagementService == null)
 			ELUtil.getInstance().autowire(this);
 		return calendarManagementService;
 	}
-	
+
+	@RemoteMethod
+	public boolean setAsChild(String parentPersonalId, String childPersonalId) {
+		if (StringUtil.isEmpty(parentPersonalId) || StringUtil.isEmpty(childPersonalId)) {
+			return false;
+		}
+
+		try {
+			userBusiness = getUserBusiness();
+			User parent = userBusiness.getUser(parentPersonalId);
+			User child = userBusiness.getUser(childPersonalId);
+
+			FamilyLogic familyLogic = getServiceInstance(FamilyLogic.class);
+			familyLogic.setAsChildFor(child, parent);
+			familyLogic.setAsCustodianFor(parent, child);
+
+			Collection<User> children = familyLogic.getChildrenFor(parent);
+			if (children != null) {
+				getLogger().info("Children for " + parent + ": " + children);
+			}
+
+			Collection<User> custodians = familyLogic.getCustodiansFor(child);
+			if (custodians != null) {
+				getLogger().info("Custodians for: " + child + ": " + custodians);
+			}
+
+			return children != null && children.contains(child) && custodians != null && custodians.contains(parent);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
 }
