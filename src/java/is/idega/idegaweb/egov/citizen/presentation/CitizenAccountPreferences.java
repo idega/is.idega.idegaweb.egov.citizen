@@ -733,11 +733,17 @@ public class CitizenAccountPreferences extends CitizenBlock {
 			//send to external system if needed
 			if (iwc.getApplicationSettings().getBoolean("SEND_USER_INFO_TO_EXTERNAL", false)) {
 				WebApplicationContext springContext = WebApplicationContextUtils.getWebApplicationContext(iwc.getServletContext());
-				UserInfoToExternalSystemService service = (UserInfoToExternalSystemService) springContext.getBean(iwc.getApplicationSettings().getProperty("SEND_USER_INFO_SERVICE_NAME", "linnaWSBusiness"));
-				
-				String identifycationString = iwc.getApplicationSettings().getProperty("SEND_USER_INFO_IDENTIFICATION_STRING", "RR");
-				
-				service.updateUserInfo(iwc.getCurrentUser().getPersonalID(), sEmail, phoneHome, phoneWork, phoneMobile, identifycationString);
+				Object bean = springContext.getBean(iwc.getApplicationSettings().getProperty("SEND_USER_INFO_SERVICE_NAME", "linnaWSBusiness"));
+				if (bean instanceof UserInfoToExternalSystemService) {
+					UserInfoToExternalSystemService service = (UserInfoToExternalSystemService) bean;
+					
+					String identifycationString = iwc.getApplicationSettings().getProperty("SEND_USER_INFO_IDENTIFICATION_STRING", "RR");
+					
+					service.updateUserInfo(iwc.getCurrentUser().getPersonalID(), sEmail, phoneHome, phoneWork, phoneMobile, identifycationString);
+				} else {
+					getLogger().warning("Unable to update user info. Expected instance of " + UserInfoToExternalSystemService.class.getName() + ", got: " +
+							(bean == null ? "null" : bean.getClass().getName()));
+				}
 			}
 			
 			Layer header = new Layer(Layer.DIV);
