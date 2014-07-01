@@ -1,12 +1,12 @@
 /*
  * Created on 2004-maj-11
- * 
+ *
  * To change the template for this generated file go to Window - Preferences - Java - Code Generation - Code and Comments
  */
 
 /**
  * @author Malin
- * 
+ *
  * To change the template for this generated type comment go to Window -
  * Preferences - Java - Code Generation - Code and Comments
  */
@@ -24,6 +24,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Level;
 
 import com.idega.business.IBOLookup;
 import com.idega.core.accesscontrol.business.UserHasLoginException;
@@ -52,12 +53,14 @@ import com.idega.presentation.ui.TextInput;
 import com.idega.user.business.UserBusiness;
 import com.idega.user.data.User;
 import com.idega.util.Age;
+import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
+import com.idega.util.ListUtil;
 import com.idega.util.text.SocialSecurityNumber;
 
 /**
  * Last modified: $Date$ by $Author$
- * 
+ *
  * @author <a href="mail:laddi@idega.is">Laddi</a>
  * @version $Revision$
  */
@@ -161,7 +164,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 	 * Parse the request parameters and initialize this component with teir
 	 * values if they are set
 	 * </p>
-	 * 
+	 *
 	 * @param iwc
 	 */
 	protected void parseParameters(IWContext iwc) {
@@ -190,7 +193,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 	 * <p>
 	 * Maintain the needed parameters between submits.
 	 * </p>
-	 * 
+	 *
 	 * @param iwc
 	 * @param form
 	 */
@@ -373,9 +376,9 @@ public class CitizenAccountApplication extends CitizenBlock {
 			formItem.add(localesDrop);
 			section.add(formItem);
 		}
-		
+
 		renderComponentsBeforeTermOfUseAggreement(section);
-		
+
 
 		// TODO: localize the url to agreement file
 		Object[] linkToAgreement = new Object[] { getAgreementFileUrl() };
@@ -475,6 +478,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		boolean userHasLogin = false;
 		Collection<String> userLoginError = new ArrayList<String>();
 		if (user == null) {
+			getLogger().warning("Unknown citizen with personal ID: " + ssn);
 			errors.add(this.iwrb.getLocalizedString(UNKNOWN_CITIZEN_KEY, UNKNOWN_CITIZEN_DEFAULT));
 			hasErrors = true;
 		} else {
@@ -489,15 +493,16 @@ public class CitizenAccountApplication extends CitizenBlock {
 				// for better uniqueness
 				communesCSV = "," + communesCSV + ",";
 
-				Collection addresses = user.getAddresses();
-				Iterator iter = addresses.iterator();
-				while (iter.hasNext() && !inCorrectCommune) {
-					Address address = (Address) iter.next();
+				Collection<Address> addresses = user.getAddresses();
+				String userCommunes = CoreConstants.EMPTY;
+				for (Iterator<Address> iter = addresses.iterator(); (iter.hasNext() && !inCorrectCommune);) {
+					Address address = iter.next();
 					Commune commune = address.getCommune();
 
 					if (commune != null) {
 						String userCommune = commune.getCommuneCode();
 						if (userCommune != null) {
+							userCommunes = userCommunes.concat(userCommune);
 							if (communesCSV.indexOf("," + userCommune + ",") > -1) {
 								inCorrectCommune = true;
 							}
@@ -506,15 +511,17 @@ public class CitizenAccountApplication extends CitizenBlock {
 				}
 
 				if (!inCorrectCommune) {
+					getLogger().warning("Citizen with personal ID=" + ssn + " can not be accepted: he is from wrong commune(s): " + userCommunes + ". Allowed communes: " + communesCSV);
 					errors.add(this.iwrb.getLocalizedString(ERROR_APPLYING_FOR_WRONG_COMMUNE, ERROR_APPLYING_FOR_WRONG_COMMUNE_DEFAULT));
 					hasErrors = true;
 				}
 			}
 
 			try {
-				Collection logins = new ArrayList();
+				Collection<LoginTable> logins = new ArrayList<LoginTable>();
 				logins.addAll(getLoginTableHome().findLoginsForUser(user));
-				if (!logins.isEmpty()) {
+				if (!ListUtil.isEmpty(logins)) {
+					getLogger().warning("User with personal ID=" + ssn + " already has login");
 					userLoginError.add(this.iwrb.getLocalizedString(USER_ALLREADY_HAS_A_LOGIN_KEY, USER_ALLREADY_HAS_A_LOGIN_DEFAULT));
 					hasErrors = true;
 					userHasLogin = true;
@@ -525,6 +532,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 
 			if (email != null && email.length() > 0) {
 				if (emailRepeat == null || !email.equals(emailRepeat)) {
+					getLogger().warning("Emails do not match for user: " + ssn);
 					errors.add(this.iwrb.getLocalizedString(ERROR_EMAILS_DONT_MATCH, ERROR_EMAILS_DONT_MATCH_DEFAULT));
 					hasErrors = true;
 				}
@@ -532,13 +540,18 @@ public class CitizenAccountApplication extends CitizenBlock {
 
 			try {
 				if (!hasErrors) {
-					if (null == business.insertApplication(iwc, user, ssn, email, phoneHome, phoneWork, true, isCreateLoginAndLetter(), isSetToShowSendSnailMailChooser() ? sendSnailMail : true)) {
+					boolean sendSnailEmail = isSetToShowSendSnailMailChooser() ? sendSnailMail : true;
+					if (null == business.insertApplication(iwc, user, ssn, email, phoneHome, phoneWork, true, isCreateLoginAndLetter(), sendSnailEmail)) {
+						getLogger().warning("Error creating user application for applicant with personal ID: " + ssn + ", send mail: " + isCreateLoginAndLetter() + ", send snail mail: " + sendSnailEmail);
 						errors.add(this.iwrb.getLocalizedString(ERROR_NO_INSERT_KEY, ERROR_NO_INSERT_KEY));
 						hasErrors = true;
+					} else {
+						getLogger().info("Created user application for applicant with personal ID: " + ssn + ", send mail: " + isCreateLoginAndLetter() + ", send snail mail: " + sendSnailEmail);
 					}
 				}
 			} catch (UserHasLoginException e) {
 				errors.add(this.iwrb.getLocalizedString(USER_ALLREADY_HAS_A_LOGIN_KEY, USER_ALLREADY_HAS_A_LOGIN_DEFAULT));
+				getLogger().log(Level.WARNING, "Applicant with personal ID: " + ssn + " already has login", e);
 				hasErrors = true;
 			}
 		}
@@ -597,7 +610,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return a comma seperated values string with unique ids of communes in
 	 *         the IC_COMMUNE table
 	 */
@@ -608,7 +621,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 	/**
 	 * If the parameter is set then the applications checks if the user has an
 	 * address registered to one of the commune ids in this string
-	 * 
+	 *
 	 * @param communeUniqueIdsCSV
 	 *            a comma seperated values string with unique ids of communes in
 	 *            the IC_COMMUNE table
@@ -645,11 +658,11 @@ public class CitizenAccountApplication extends CitizenBlock {
 	}
 
 	protected WSCitizenAccountBusiness getBusiness(IWApplicationContext iwac) throws RemoteException {
-		return (WSCitizenAccountBusiness) IBOLookup.getServiceInstance(iwac, WSCitizenAccountBusiness.class);
+		return IBOLookup.getServiceInstance(iwac, WSCitizenAccountBusiness.class);
 	}
 
 	protected UserBusiness getUserBusiness(IWApplicationContext iwac) throws RemoteException {
-		return (UserBusiness) IBOLookup.getServiceInstance(iwac, UserBusiness.class);
+		return IBOLookup.getServiceInstance(iwac, UserBusiness.class);
 	}
 
 	protected LoginTableHome getLoginTableHome() {
@@ -738,7 +751,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 
 	/**
 	 * method to override to add your components to the form before term of use agreement
-	 * @param form 
+	 * @param form
 	 * @throws RemoteException
 	 */
 	protected void renderComponentsBeforeTermOfUseAggreement(Layer layer) throws RemoteException {

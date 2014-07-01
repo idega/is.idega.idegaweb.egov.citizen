@@ -1,10 +1,10 @@
 /*
  * $Id$
- * 
+ *
  * Copyright (C) 2002 Idega hf. All Rights Reserved.
- * 
+ *
  * This software is the proprietary information of Idega hf. Use is subject to license terms.
- * 
+ *
  */
 package is.idega.idegaweb.egov.citizen.business;
 
@@ -15,6 +15,7 @@ import is.idega.idegaweb.egov.message.business.CommuneMessageBusiness;
 
 import java.rmi.RemoteException;
 import java.text.MessageFormat;
+import java.util.logging.Level;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -30,6 +31,7 @@ import com.idega.data.IDOCreateException;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.user.data.Group;
 import com.idega.user.data.User;
+import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
 
 /**
@@ -38,19 +40,22 @@ import com.idega.util.IWTimestamp;
  */
 public abstract class AccountApplicationBusinessBean extends CaseBusinessBean implements AccountBusiness {
 
-	protected abstract Class getCaseEntityClass();
+	private static final long serialVersionUID = 8181014498371937015L;
 
+	protected abstract Class<?> getCaseEntityClass();
+
+	@Override
 	public CommuneMessageBusiness getMessageBusiness() throws RemoteException {
-		return (CommuneMessageBusiness) this.getServiceInstance(CommuneMessageBusiness.class);
+		return this.getServiceInstance(CommuneMessageBusiness.class);
 	}
 
 	protected AccountApplication getApplication(int applicationID) throws FinderException {
 		return (AccountApplication) this.getCase(applicationID);
 	}
-	
+
 	/**
 	 * Accepts the application for an application with ID applicationID by User performer
-	 * 
+	 *
 	 * @param The
 	 *          id of the application to be accepted
 	 * @param performer
@@ -62,6 +67,7 @@ public abstract class AccountApplicationBusinessBean extends CaseBusinessBean im
 	 * @throws FinderException
 	 *           If an application with applicationID is not found.
 	 */
+	@Override
 	public void acceptApplication(int applicationID, User performer, boolean createUserMessage, boolean createPasswordMessage, boolean sendEmail, boolean sendSnailMail) throws CreateException {
 		UserTransaction trans = null;
 		User user = null;
@@ -77,9 +83,10 @@ public abstract class AccountApplicationBusinessBean extends CaseBusinessBean im
 			createLoginAndSendMessage(theCase, createUserMessage, createPasswordMessage, sendEmail, sendSnailMail);
 
 			trans.commit();
-		}
-		catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			getLogger().log(Level.WARNING, "Error accepting application by ID: " + applicationID + ", performer: " + performer + (performer == null ? CoreConstants.EMPTY : "(" + performer.getPersonalID() + ")") +
+					", send email: " + sendEmail + ", send snail mail: " + sendSnailMail, e);
+
 			if (trans != null) {
 				try {
 					trans.rollback();
@@ -128,7 +135,7 @@ public abstract class AccountApplicationBusinessBean extends CaseBusinessBean im
 	/**
 	 * calls acceptApplication(int applicationID, User performer, Boolean createUserMessage, Boolean createPasswordMessage) with
 	 * createUserMessage=shouldEmailBeSentWhenANewAccountIsInserted()
-	 * 
+	 *
 	 * @param The
 	 *          id of the application to be accepted
 	 * @param performer
@@ -138,6 +145,7 @@ public abstract class AccountApplicationBusinessBean extends CaseBusinessBean im
 	 * @throws FinderException
 	 *           If an application with applicationID is not found.
 	 */
+	@Override
 	public void acceptApplication(int applicationID, User performer, boolean createPasswordMessage) throws CreateException {
 		acceptApplication(applicationID, performer, shouldEmailBeSentWhenANewAccountIsInserted(), createPasswordMessage, false, false);
 	}
@@ -151,6 +159,7 @@ public abstract class AccountApplicationBusinessBean extends CaseBusinessBean im
 
 	}
 
+	@Override
 	public String getAcceptMessageSubject(AccountApplication theCase) {
 		IWResourceBundle iwrb = this.getIWResourceBundleForUser(theCase.getOwner());
 		return iwrb.getLocalizedString("acc.app.appr.subj", "Your application has been approved");
@@ -179,10 +188,10 @@ public abstract class AccountApplicationBusinessBean extends CaseBusinessBean im
 			getMessageBusiness().sendMessage(email, subject, body);
 		}
 	}
-	
+
 	/**
 	 * Creates a Login for a user with application theCase and send a message to the user that applies if it is successful.
-	 * 
+	 *
 	 * @param theCase
 	 *          The Account Application
 	 * @throws CreateException
@@ -221,7 +230,7 @@ public abstract class AccountApplicationBusinessBean extends CaseBusinessBean im
 	}
 
 	protected CitizenBusiness getUserBusiness() throws RemoteException {
-		return (CitizenBusiness) this.getServiceInstance(CitizenBusiness.class);
+		return this.getServiceInstance(CitizenBusiness.class);
 	}
 
 	@Override

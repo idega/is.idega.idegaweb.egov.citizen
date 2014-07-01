@@ -10,6 +10,7 @@ import is.idega.idegaweb.egov.citizen.data.CitizenAccountHome;
 import is.idega.idegaweb.egov.message.business.CommuneMessageBusiness;
 
 import java.rmi.RemoteException;
+import java.util.logging.Level;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -37,26 +38,24 @@ import com.idega.util.StringUtil;
 
 /**
  * Last modified: $Date$ by $Author$
- * 
+ *
  * @author <a href="mail:palli@idega.is">Pall Helgason </a>
  * @author <a href="http://www.staffannoteberg.com">Staffan N?teberg </a>
  * @version $Revision$
  */
 public class CitizenAccountBusinessBean extends AccountApplicationBusinessBean implements CitizenAccountBusiness, AccountBusiness {
 
-	/**
-	 * Comment for <code>serialVersionUID</code>
-	 */
 	private static final long serialVersionUID = -8304259532337909367L;
+
 	private boolean acceptApplicationOnCreation = true;
 
 	protected CitizenAccountHome getCitizenAccountHome() throws RemoteException {
 		return (CitizenAccountHome) IDOLookup.getHome(CitizenAccount.class);
 	}
-	
+
 	/**
 	 * Creates an application for CitizenAccount for a user with a personalId that is in the system.
-	 * 
+	 *
 	 * @param user
 	 *          The user that makes the application
 	 * @param ssn
@@ -72,6 +71,7 @@ public class CitizenAccountBusinessBean extends AccountApplicationBusinessBean i
 	 *           If A User already has a login in the system.
 	 */
 
+	@Override
 	public Integer insertApplication(IWContext iwc, User user, String ssn, String email, String phoneHome, String phoneWork, boolean sendEmail, boolean createLoginAndSendLetter, boolean sendSnailMail) throws UserHasLoginException {
 		CitizenAccount application = null;
 		UserTransaction transaction = null;
@@ -101,8 +101,9 @@ public class CitizenAccountBusinessBean extends AccountApplicationBusinessBean i
 			application.store();
 
 			transaction.commit();
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
+			getLogger().log(Level.WARNING, "Error creating citizen account for " + ssn + ", email: " + email, e);
+
 			if (transaction != null) {
 				try {
 					// application = null;
@@ -115,7 +116,6 @@ public class CitizenAccountBusinessBean extends AccountApplicationBusinessBean i
 			if (e instanceof UserHasLoginException) {
 				throw (UserHasLoginException) e;
 			}
-			e.printStackTrace();
 
 			return null;
 		}
@@ -126,23 +126,21 @@ public class CitizenAccountBusinessBean extends AccountApplicationBusinessBean i
 				if (this.acceptApplicationOnCreation) {
 					if (!createLoginAndSendLetter) {
 						acceptApplication(applicationID, user, false);
-					}
-					else {
+					} else {
 						acceptApplication(applicationID, user, shouldEmailBeSentWhenANewAccountIsInserted(), true, sendEmail, sendSnailMail);
 					}
+				} else {
+					getLogger().info("It is configured not to accept citizen's application on creation. Applicant's personal ID:" + ssn);
 				}
 			}
-		}
-		catch (CreateException exc) {
-			exc.printStackTrace();
-		}
-		catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			getLogger().log(Level.WARNING, "Error accepting citizen's application for user with personal ID: " + ssn + ", email: " + email + ", send mail: " + sendEmail + ", send snail mail: " + sendSnailMail, e);
 		}
 
 		return (Integer) (application == null ? null : application.getPrimaryKey());
 	}
 
+	@Override
 	public User getUserIcelandic(String ssn) {
 		User user = null;
 		try {
@@ -190,10 +188,10 @@ public class CitizenAccountBusinessBean extends AccountApplicationBusinessBean i
 	}
 
 	@Override
-	protected Class getCaseEntityClass() {
+	protected Class<CitizenAccount> getCaseEntityClass() {
 		return CitizenAccount.class;
 	}
-	
+
 	@Override
 	public void acceptApplication(int applicationID, User performer, boolean createUserMessage, boolean createPasswordMessage, boolean sendEmail, boolean sendSnailMail) throws CreateException {
 		UserTransaction transaction = null;
@@ -234,7 +232,7 @@ public class CitizenAccountBusinessBean extends AccountApplicationBusinessBean i
 
 	/**
 	 * Changes a password for CitizenAccount for a user and sends a letter and/or email.
-	 * 
+	 *
 	 * @param loginTable
 	 *          LoginTable of the user
 	 * @param user
@@ -248,6 +246,7 @@ public class CitizenAccountBusinessBean extends AccountApplicationBusinessBean i
 	 * @throws CreateException
 	 *           If changing of the password failed.
 	 */
+	@Override
 	public void changePasswordAndSendLetterOrEmail(IWUserContext iwuc, LoginTable loginTable, User user, String newPassword, boolean sendLetter) throws CreateException {
 
 		UserTransaction trans = null;
@@ -260,7 +259,7 @@ public class CitizenAccountBusinessBean extends AccountApplicationBusinessBean i
 			// store new password
 			loginTable.setUserPassword(encryptedPassword, newPassword);
 			loginTable.store();
-			
+
 			LoginInfo loginInfo = ((LoginInfoHome) IDOLookup.getHome(LoginInfo.class)).findByPrimaryKey(loginTable.getPrimaryKey());
 			loginInfo.setFailedAttemptCount(0);
 			loginInfo.setAccessClosed(false);
@@ -299,6 +298,7 @@ public class CitizenAccountBusinessBean extends AccountApplicationBusinessBean i
 		}
 	}
 
+	@Override
 	public int getNumberOfApplications() throws RemoteException {
 		try {
 			return getCitizenAccountHome().getTotalCount();
@@ -331,12 +331,12 @@ public class CitizenAccountBusinessBean extends AccountApplicationBusinessBean i
 		body += "\n\n";
 		body += iwrb.getLocalizedString("acc.app.acc.body5", "You can log on via:") + " ";
 		body += getApplicationLoginURL();
-		
+
 		if (body.indexOf("{4}") != -1) {
 			String replace = CoreUtil.getIWContext().getDomain().getName();
 			body = StringHandler.replace(body, "{4}", StringUtil.isEmpty(replace) ? CoreConstants.EMPTY : replace);
 		}
-		
+
 		return body;
 	}
 
