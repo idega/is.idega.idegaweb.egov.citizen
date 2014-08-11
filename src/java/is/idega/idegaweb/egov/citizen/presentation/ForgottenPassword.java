@@ -291,6 +291,7 @@ public class ForgottenPassword extends CitizenBlock {
 		section.add(paragraph);
 
 		TextInput input = new TextInput(SSN_KEY);
+		input.setEscaped(isEscaped());
 		input.setStyleClass("personalID");
 		input.setMaxlength(10);
 		input.setLength(10);

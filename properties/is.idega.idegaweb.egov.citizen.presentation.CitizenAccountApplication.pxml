@@ -30,7 +30,7 @@
                             <key>
                               <name>iw_method_param_handler</name>
                               <type>java.lang.String</type>
-                              <value />
+                              <value></value>
                             </key>
                             <key>
                               <name>iw_method_param_prim_key</name>
@@ -84,7 +84,7 @@
                             <key>
                               <name>iw_method_param_handler</name>
                               <type>java.lang.String</type>
-                              <value />
+                              <value></value>
                             </key>
                             <key>
                               <name>iw_method_param_prim_key</name>
@@ -138,7 +138,7 @@
                             <key>
                               <name>iw_method_param_handler</name>
                               <type>java.lang.String</type>
-                              <value />
+                              <value></value>
                             </key>
                             <key>
                               <name>iw_method_param_prim_key</name>
@@ -192,7 +192,7 @@
                             <key>
                               <name>iw_method_param_handler</name>
                               <type>java.lang.String</type>
-                              <value />
+                              <value></value>
                             </key>
                             <key>
                               <name>iw_method_param_prim_key</name>
@@ -246,7 +246,7 @@
                             <key>
                               <name>iw_method_param_handler</name>
                               <type>java.lang.String</type>
-                              <value />
+                              <value></value>
                             </key>
                             <key>
                               <name>iw_method_param_prim_key</name>
@@ -285,10 +285,75 @@
             </value>
             <type>map</type>
           </key>
+          <key>
+            <name>:method:1:implied:void:setEscaped:boolean:</name>
+            <value>
+              <map>
+                <key>
+                  <name>iw_method_params</name>
+                  <value>
+                    <map>
+                      <key>
+                        <name>0</name>
+                        <value>
+                          <map>
+                            <key>
+                              <name>iw_method_param_handler</name>
+                              <type>java.lang.String</type>
+                              <value></value>
+                              <simple>false</simple>
+                              <reload>false</reload>
+                            </key>
+                            <key>
+                              <name>iw_method_param_prim_key</name>
+                              <type>java.lang.Boolean</type>
+                              <value>false</value>
+                              <simple>false</simple>
+                              <reload>false</reload>
+                            </key>
+                            <key>
+                              <name>iw_method_param_desc</name>
+                              <type>java.lang.String</type>
+                              <value>Does parameter values of inputs should be escaped?</value>
+                              <simple>false</simple>
+                              <reload>false</reload>
+                            </key>
+                          </map>
+                        </value>
+                        <type>map</type>
+                      </key>
+                    </map>
+                  </value>
+                  <type>map</type>
+                </key>
+                <key>
+                  <name>iw_method_option_multiv</name>
+                  <type>java.lang.Boolean</type>
+                  <value>false</value>
+                  <simple>false</simple>
+                  <reload>false</reload>
+                </key>
+                <key>
+                  <name>iw_method_description</name>
+                  <type>java.lang.String</type>
+                  <value>Does parameter values of inputs should be escaped?</value>
+                  <simple>false</simple>
+                  <reload>false</reload>
+                </key>
+                <key>
+                  <name>iw_method_identifier</name>
+                  <type>java.lang.String</type>
+                  <value>:method:1:implied:void:setEscaped:boolean:</value>
+                  <simple>false</simple>
+                  <reload>false</reload>
+                </key>
+              </map>
+            </value>
+            <type>map</type>
+          </key>
         </map>
       </value>
       <type>map</type>
     </key>
   </map>
 </pxml>
-

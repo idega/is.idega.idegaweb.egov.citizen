@@ -256,6 +256,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		maintainHiddenParameters(iwc, form);
 
 		TextInput email = new TextInput(EMAIL_KEY);
+		email.setEscaped(isEscaped());
 		email.keepStatusOnAction(true);
 
 		CheckBox snailMail = new CheckBox(SNAIL_MAIL_KEY);
@@ -263,12 +264,15 @@ public class CitizenAccountApplication extends CitizenBlock {
 		snailMail.keepStatusOnAction(true);
 
 		TextInput emailRepeat = new TextInput(EMAIL_KEY_REPEAT);
+		emailRepeat.setEscaped(isEscaped());
 		emailRepeat.keepStatusOnAction(true);
 
 		TextInput mobile = new TextInput(PHONE_CELL_KEY);
+		mobile.setEscaped(isEscaped());
 		mobile.keepStatusOnAction(true);
 
 		TextInput homePhone = new TextInput(PHONE_HOME_KEY);
+		homePhone.setEscaped(isEscaped());
 		homePhone.keepStatusOnAction(true);
 
 		CheckBox applicationAgreement = new CheckBox(APP_AGREEMENT_PARAM);
@@ -297,6 +301,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		if (isHidePersonalIdInput()) {
 			HiddenInput personalID = new HiddenInput(SSN_KEY);
 			personalID.keepStatusOnAction(true);
+			personalID.setEscaped(isEscaped());
 			section.add(personalID);
 		} else {
 			TextInput personalID = new TextInput(SSN_KEY);
@@ -304,6 +309,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 			personalID.setMaxlength(10);
 			personalID.setLength(10);
 			personalID.keepStatusOnAction(true);
+			personalID.setEscaped(isEscaped());
 
 			formItem = new Layer(Layer.DIV);
 			formItem.setStyleClass("formItem");
