@@ -2,10 +2,16 @@ package is.idega.idegaweb.egov.citizen.presentation;
 
 import is.idega.idegaweb.egov.business.UserInfoToExternalSystemService;
 import is.idega.idegaweb.egov.citizen.IWBundleStarter;
+import is.idega.idegaweb.egov.citizen.bean.SessionData;
 import is.idega.idegaweb.egov.citizen.business.CitizenAccountSession;
 import is.idega.idegaweb.egov.message.business.MessageSession;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.rmi.RemoteException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -14,7 +20,9 @@ import java.util.List;
 
 import javax.ejb.FinderException;
 import javax.faces.component.UIComponent;
+import javax.imageio.ImageIO;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
@@ -32,9 +40,12 @@ import com.idega.core.location.data.AddressType;
 import com.idega.core.location.data.Country;
 import com.idega.core.location.data.PostalCode;
 import com.idega.data.IDOLookup;
+import com.idega.graphics.image.business.impl.ImageResizerImpl;
+import com.idega.graphics.util.GraphicsConstants;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.io.UploadFile;
+import com.idega.io.serialization.ObjectReader;
 import com.idega.presentation.CSSSpacer;
 import com.idega.presentation.ExceptionWrapper;
 import com.idega.presentation.IWContext;
@@ -65,6 +76,8 @@ import com.idega.util.EmailValidator;
 import com.idega.util.FileUtil;
 import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
+import com.idega.util.expression.ELUtil;
+import com.idega.util.xml.XMLData;
 
 /*
  * import com.idega.presentation.ExceptionWrapper; import com.idega.presentation.IWContext; import com.idega.presentation.*; import
@@ -83,6 +96,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 
 	private final static int ACTION_VIEW_FORM = 1;
 	private final static int ACTION_FORM_SUBMIT = 2;
+	private final static int ACTION_IMAGE_CORP_SUBMIT = 3;
 
 	private final static String PARAMETER_FORM_SUBMIT = "cap_sbmt";
 	private final static String PARAMETER_EMAIL = "cap_email";
@@ -101,6 +115,11 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	protected final static String PARAMETER_NAME = "cap_name";
 	protected final static String PARAMETER_SSN = "cap_ssn";
 	private final static String PARAMETER_GENDER = "cap_gender";
+	private static final String PARAMETER_IMAGE_CORP_SUBMIT = "imgCrp_sbmt";
+	private static final String PARAMETER_IMAGE_POS_X = "img-dataX";
+	private static final String PARAMETER_IMAGE_POS_Y = "img-dataY";
+	private static final String PARAMETER_IMAGE_WIDTH = "img-dataWidth";
+	private static final String PARAMETER_IMAGE_HEIGHT = "img-dataHeight";
 
 	private final static String KEY_PREFIX = "citizen.";
 	private final static String KEY_EMAIL = KEY_PREFIX + "email";
@@ -142,6 +161,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	private final static String DEFAULT_NO_EMAIL_FOR_LETTERS = "No email entered to send letters to.";
 	public static final String CITIZEN_ACCOUNT_PREFERENCES_PROPERTIES = "citizen_account_preferences";
 	public static final String USER_PROPERTY_USE_CO_ADDRESS = "cap_use_co_address";
+	
 
 	protected User user = null;
 
@@ -152,12 +172,25 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	private boolean showPreferredRoleChooser = true;
 
 	private boolean showGenderChooser = false;
+	
+	private boolean showImageCorpTool = false;
+	
+	private String aspectRatio = null;
 
 	private boolean showGenderChooserReadOnly = false;
 
 	private boolean showNameAndPersonalID = false;
 	private boolean nameAndPersonalIDDisabled = true;
 
+	@Autowired
+	private SessionData sessionData;
+	
+	private SessionData getSessionData() {
+		if (sessionData == null)
+			ELUtil.getInstance().autowire(this);
+		return sessionData;
+	}
+	
 	public CitizenAccountPreferences() {
 	}
 
@@ -177,11 +210,103 @@ public class CitizenAccountPreferences extends CitizenBlock {
 				case ACTION_FORM_SUBMIT:
 					updatePreferences(iwc);
 					break;
+				case ACTION_IMAGE_CORP_SUBMIT:
+					updateImage(iwc);
+					break;
 			}
 		}
 		catch (Exception e) {
 			super.add(new ExceptionWrapper(e, this));
 		}
+	}
+
+	private void updateImage(IWContext iwc) throws Exception {
+		// TODO Test this
+
+		try {
+		int x = Integer.parseInt(iwc.getParameter(PARAMETER_IMAGE_POS_X));
+		int y = Integer.parseInt(iwc.getParameter(PARAMETER_IMAGE_POS_Y));
+		int w = Integer.parseInt(iwc.getParameter(PARAMETER_IMAGE_WIDTH));
+		int h = Integer.parseInt(iwc.getParameter(PARAMETER_IMAGE_HEIGHT));
+		
+		SessionData sessionData = getSessionData();
+		int fileID = sessionData.getFileID();
+		if (fileID > 0) {
+			try {
+				
+				ICFile fileOld = ((com.idega.core.file.data.ICFileHome) com.idega.data.IDOLookup.getHome(ICFile.class)).findByPrimaryKey(new Integer(fileID));
+				BufferedImage oldImage = ImageIO.read(fileOld.getFileValue());
+				BufferedImage newImage = oldImage.getSubimage(x, y, w, h); 
+				
+				
+				ByteArrayOutputStream os = new ByteArrayOutputStream();
+				ImageIO.write(newImage, "jpg", os);
+				InputStream input = new ByteArrayInputStream(os.toByteArray());
+				
+				ICFile file = ((com.idega.core.file.data.ICFileHome) com.idega.data.IDOLookup.getHome(ICFile.class)).create();
+				file.setName(fileOld.getName());
+				file.setMimeType(fileOld.getMimeType());
+				file.setFileValue(input);
+				file.setFileSize((int) os.size());
+				file.store();
+
+				fileID = ((Integer) file.getPrimaryKey()).intValue();
+				fileOld.delete();
+			}
+			catch (RemoteException e) {
+				e.printStackTrace(System.err);
+			}
+		}
+		if (fileID != -1) {
+			this.user.setSystemImageID(fileID);
+			this.user.store();
+		}
+		} catch (NumberFormatException e){
+			//TODO handle
+		}
+		UserBusiness ub = IBOLookup.getServiceInstance(iwc, UserBusiness.class);
+		
+		Layer layer = new Layer(Layer.DIV);
+		layer.setStyleClass("receipt");
+		
+		Layer header = new Layer(Layer.DIV);
+		header.setStyleClass("header");
+		add(header);
+
+		Heading1 heading = new Heading1(this.iwrb.getLocalizedString(
+				"citizen_preferences", "Citizen preferences"));
+		header.add(heading);
+
+		Layer image = new Layer(Layer.DIV);
+		image.setStyleClass("receiptImage");
+		layer.add(image);
+
+		heading = new Heading1(this.iwrb.getLocalizedString(
+				KEY_PREFERENCES_SAVED, DEFAULT_PREFERENCES_SAVED));
+		layer.add(heading);
+
+		Paragraph paragraph = new Paragraph();
+		paragraph.add(new Text(this.iwrb.getLocalizedString(
+				KEY_PREFERENCES_SAVED + "_text",
+				DEFAULT_PREFERENCES_SAVED + " info")));
+		layer.add(paragraph);
+
+		try {
+			ICPage page = ub.getHomePageForUser(this.user);
+			paragraph.add(new Break(2));
+
+			Layer span = new Layer(Layer.SPAN);
+			span.add(new Text(this.iwrb.getLocalizedString("my_page",
+					"My page")));
+			Link link = new Link(span);
+			link.setStyleClass("homeLink");
+			link.setPage(page);
+			paragraph.add(link);
+		} catch (FinderException fe) {
+			// No homepage found...
+		}
+		
+		add(layer);
 	}
 
 	protected User getUser(IWContext iwc) {
@@ -192,6 +317,9 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		int action = ACTION_VIEW_FORM;
 		if (iwc.isParameterSet(PARAMETER_FORM_SUBMIT)) {
 			action = ACTION_FORM_SUBMIT;
+			if (iwc.isParameterSet(PARAMETER_IMAGE_CORP_SUBMIT)){
+				action = ACTION_IMAGE_CORP_SUBMIT;
+			}
 		}
 		return action;
 	}
@@ -571,8 +699,14 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		UploadFile uploadFile = iwc.getUploadedFile();
 		if (uploadFile != null && uploadFile.getName() != null && uploadFile.getName().length() > 0) {
 			try {
-				FileInputStream input = new FileInputStream(uploadFile.getRealPath());
+				InputStream input = null;
 
+				if (isShowImageCorpTool()){
+					input = new ImageResizerImpl().getScaledImageIfBigger(500, new FileInputStream(uploadFile.getRealPath()), GraphicsConstants.JPG_FILE_NAME_EXTENSION);
+				} else {
+					input = new FileInputStream(uploadFile.getRealPath());
+				}
+				
 				ICFile file = ((com.idega.core.file.data.ICFileHome) com.idega.data.IDOLookup.getHome(ICFile.class)).create();
 				file.setName(uploadFile.getName());
 				file.setMimeType(uploadFile.getMimeType());
@@ -593,7 +727,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 				e.printStackTrace(System.err);
 				uploadFile.setId(-1);
 			}
-		}
+		} 
 
 		UserBusiness ub = IBOLookup.getServiceInstance(iwc, UserBusiness.class);
 
@@ -726,9 +860,14 @@ public class CitizenAccountPreferences extends CitizenBlock {
 				this.user.store();
 			}
 			if (fileID != -1) {
-				this.user.setSystemImageID(fileID);
-				this.user.store();
-			}
+				if (!isShowImageCorpTool()){
+					this.user.setSystemImageID(fileID);
+					this.user.store();
+				} else {
+					SessionData sessionData = getSessionData();
+					sessionData.setFileID(fileID);
+				}
+			} 
 
 			//send to external system if needed
 			if (iwc.getApplicationSettings().getBoolean("SEND_USER_INFO_TO_EXTERNAL", false)) {
@@ -746,42 +885,114 @@ public class CitizenAccountPreferences extends CitizenBlock {
 				}
 			}
 			
-			Layer header = new Layer(Layer.DIV);
-			header.setStyleClass("header");
-			add(header);
-
-			Heading1 heading = new Heading1(this.iwrb.getLocalizedString("citizen_preferences", "Citizen preferences"));
-			header.add(heading);
-
 			Layer layer = new Layer(Layer.DIV);
 			layer.setStyleClass("receipt");
-
-			Layer image = new Layer(Layer.DIV);
-			image.setStyleClass("receiptImage");
-			layer.add(image);
-
-			heading = new Heading1(this.iwrb.getLocalizedString(KEY_PREFERENCES_SAVED, DEFAULT_PREFERENCES_SAVED));
-			layer.add(heading);
-
-			Paragraph paragraph = new Paragraph();
-			paragraph.add(new Text(this.iwrb.getLocalizedString(KEY_PREFERENCES_SAVED + "_text", DEFAULT_PREFERENCES_SAVED + " info")));
-			layer.add(paragraph);
-
-			try {
-				ICPage page = ub.getHomePageForUser(this.user);
-				paragraph.add(new Break(2));
-
+			
+			//TODO test this
+			if (isShowImageCorpTool()){
+				
+				Layer imgToolsLayer = new Layer(Layer.DIV);
+				imgToolsLayer.setStyleClass("iw-image-tools");
+				
+				Layer imageLayer = new Layer(Layer.DIV);
+				imageLayer.setStyleClass("iw-image-layer");
+				imgToolsLayer.add(imageLayer);
+				
+				Image avatarImage = null;
+				if (fileID > 0) {
+					try {
+						avatarImage = new Image(fileID);
+					}
+					catch (SQLException e) {
+						e.printStackTrace();
+					}
+				}
+				if (avatarImage != null) {
+					imageLayer.add(avatarImage);
+				}
+				
+				Layer imagePreview = new Layer(Layer.DIV);
+				imagePreview.setStyleClass("iw-image-preview");
+				imgToolsLayer.add(imagePreview);
+				
+				Form form = new Form();
+				form.setMultiPart();
+				form.addParameter(PARAMETER_FORM_SUBMIT, Boolean.TRUE.toString());
+				form.addParameter(PARAMETER_IMAGE_CORP_SUBMIT, Boolean.TRUE.toString());
+				form.setID("iw-image-tools-form");
+				form.setStyleClass("iw-image-tools-form");
+				
+				HiddenInput dataX = new HiddenInput(PARAMETER_IMAGE_POS_X);
+				dataX.setId(PARAMETER_IMAGE_POS_X);
+				form.add(dataX);
+				
+				HiddenInput dataY = new HiddenInput(PARAMETER_IMAGE_POS_Y);
+				dataY.setID(PARAMETER_IMAGE_POS_Y);
+				form.add(dataY);
+				
+				HiddenInput dataHeight = new HiddenInput(PARAMETER_IMAGE_HEIGHT);
+				dataHeight.setID(PARAMETER_IMAGE_HEIGHT);
+				form.add(dataHeight);
+				
+				HiddenInput dataWidth = new HiddenInput(PARAMETER_IMAGE_WIDTH);
+				dataWidth.setID(PARAMETER_IMAGE_WIDTH);
+				form.add(dataWidth);
+				
+				HiddenInput aspectRatio = new HiddenInput("img-aspectRatio",getAspectRatio());
+				aspectRatio.setID("img-aspectRatio");
+				form.add(aspectRatio);
+				imgToolsLayer.add(form);
+				
+				Layer buttonLayer = new Layer(Layer.DIV);
+				buttonLayer.setStyleClass("button-blue");
+				imgToolsLayer.add(buttonLayer);
+				
 				Layer span = new Layer(Layer.SPAN);
-				span.add(new Text(this.iwrb.getLocalizedString("my_page", "My page")));
-				Link link = new Link(span);
-				link.setStyleClass("homeLink");
-				link.setPage(page);
-				paragraph.add(link);
-			}
-			catch (FinderException fe) {
-				// No homepage found...
-			}
+				span.add(new Text(this.iwrb.getLocalizedString(KEY_UPDATE, DEFAULT_UPDATE)));
+				Link send = new Link(span);
+				send.setToFormSubmit(form);
+				buttonLayer.add(send);
+				
+				layer.add(imgToolsLayer);
+			} else {
 
+				Layer header = new Layer(Layer.DIV);
+				header.setStyleClass("header");
+				add(header);
+
+				Heading1 heading = new Heading1(this.iwrb.getLocalizedString(
+						"citizen_preferences", "Citizen preferences"));
+				header.add(heading);
+
+				Layer image = new Layer(Layer.DIV);
+				image.setStyleClass("receiptImage");
+				layer.add(image);
+
+				heading = new Heading1(this.iwrb.getLocalizedString(
+						KEY_PREFERENCES_SAVED, DEFAULT_PREFERENCES_SAVED));
+				layer.add(heading);
+
+				Paragraph paragraph = new Paragraph();
+				paragraph.add(new Text(this.iwrb.getLocalizedString(
+						KEY_PREFERENCES_SAVED + "_text",
+						DEFAULT_PREFERENCES_SAVED + " info")));
+				layer.add(paragraph);
+
+				try {
+					ICPage page = ub.getHomePageForUser(this.user);
+					paragraph.add(new Break(2));
+
+					Layer span = new Layer(Layer.SPAN);
+					span.add(new Text(this.iwrb.getLocalizedString("my_page",
+							"My page")));
+					Link link = new Link(span);
+					link.setStyleClass("homeLink");
+					link.setPage(page);
+					paragraph.add(link);
+				} catch (FinderException fe) {
+					// No homepage found...
+				}
+			}
 			add(layer);
 
 			return true;
@@ -888,5 +1099,21 @@ public class CitizenAccountPreferences extends CitizenBlock {
 
 	public void setNameAndPersonalIDDisabled(boolean nameAndPersonalIDDisabled) {
 		this.nameAndPersonalIDDisabled = nameAndPersonalIDDisabled;
+	}
+
+	public boolean isShowImageCorpTool() {
+		return showImageCorpTool;
+	}
+
+	public void setShowImageCorpTool(boolean showImageCorpTool) {
+		this.showImageCorpTool = showImageCorpTool;
+	}
+
+	public String getAspectRatio() {
+		return aspectRatio;
+	}
+
+	public void setAspectRatio(String aspectRatio) {
+		this.aspectRatio = aspectRatio;
 	}
 }
