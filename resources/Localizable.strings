@@ -140,3 +140,7 @@ user_in_wrong_commune=You are not registered as a legal residence in the municip
 gender=Gender
 male=Male
 female=Female
+citizen.failed_saving_image=Unable to save image.
+citizen.failed_saving_image_text=Failed while trying to save profile image.
+please_crop_image=Please crop your image
+image_preview=Preview

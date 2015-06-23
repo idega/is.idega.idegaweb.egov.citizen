@@ -141,6 +141,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	private final static String KEY_NO_EMAIL_FOR_LETTERS = KEY_PREFIX + "no_email_to_send_letter_to";
 	private final static String PREFERRED_LANGUAGE = "preferred_language";
 	private final static String PREFERRED_ROLE = "preferred_role";
+	private final static String FAILED_SAVING_IMAGE = KEY_PREFIX + "failed_saving_image";
 
 	private final static String DEFAULT_EMAIL = "E-mail";
 	private final static String DEFAULT_UPDATE = "Update";
@@ -181,6 +182,8 @@ public class CitizenAccountPreferences extends CitizenBlock {
 
 	private boolean showNameAndPersonalID = false;
 	private boolean nameAndPersonalIDDisabled = true;
+	private int maxAvatarDimension = 500;
+	
 
 	@Autowired
 	private SessionData sessionData;
@@ -262,7 +265,32 @@ public class CitizenAccountPreferences extends CitizenBlock {
 			this.user.store();
 		}
 		} catch (NumberFormatException e){
-			//TODO handle
+			Layer layer = new Layer(Layer.DIV);
+			layer.setStyleClass("receipt");
+			
+			Layer header = new Layer(Layer.DIV);
+			header.setStyleClass("header");
+			add(header);
+
+			Heading1 heading = new Heading1(this.iwrb.getLocalizedString(
+					"citizen_preferences", "Citizen preferences"));
+			header.add(heading);
+
+			Layer image = new Layer(Layer.DIV);
+			image.setStyleClass("receiptImage");
+			layer.add(image);
+
+			heading = new Heading1(this.iwrb.getLocalizedString(
+					FAILED_SAVING_IMAGE, "Unable to save image."));
+			layer.add(heading);
+
+			Paragraph paragraph = new Paragraph();
+			paragraph.add(new Text(this.iwrb.getLocalizedString(
+					FAILED_SAVING_IMAGE + "_text", "Failed while trying to save profile image.")));
+			layer.add(paragraph);
+
+			add(layer);
+			return;
 		}
 		UserBusiness ub = IBOLookup.getServiceInstance(iwc, UserBusiness.class);
 		
@@ -702,7 +730,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 				InputStream input = null;
 
 				if (isShowImageCorpTool()){
-					input = new ImageResizerImpl().getScaledImageIfBigger(500, new FileInputStream(uploadFile.getRealPath()), GraphicsConstants.JPG_FILE_NAME_EXTENSION);
+					input = new ImageResizerImpl().getScaledImageIfBigger(getMaxAvatarDimension(), new FileInputStream(uploadFile.getRealPath()), GraphicsConstants.JPG_FILE_NAME_EXTENSION);
 				} else {
 					input = new FileInputStream(uploadFile.getRealPath());
 				}
@@ -894,6 +922,10 @@ public class CitizenAccountPreferences extends CitizenBlock {
 				Layer imgToolsLayer = new Layer(Layer.DIV);
 				imgToolsLayer.setStyleClass("iw-image-tools");
 				
+				Heading1 heading = new Heading1(this.iwrb.getLocalizedString(
+						"please_crop_image", "Please crop your image."));
+				imgToolsLayer.add(heading);
+				
 				Layer imageLayer = new Layer(Layer.DIV);
 				imageLayer.setStyleClass("iw-image-layer");
 				imgToolsLayer.add(imageLayer);
@@ -911,9 +943,17 @@ public class CitizenAccountPreferences extends CitizenBlock {
 					imageLayer.add(avatarImage);
 				}
 				
+				Layer imagePreviewContainer = new Layer(Layer.DIV);
+				imagePreviewContainer.setStyleClass("iw-image-preview-container");
+				imgToolsLayer.add(imagePreviewContainer);
+				
+				imagePreviewContainer.add(new Text(this.iwrb.getLocalizedString(
+						"image_preview",
+						"Preview")));
+				
 				Layer imagePreview = new Layer(Layer.DIV);
 				imagePreview.setStyleClass("iw-image-preview");
-				imgToolsLayer.add(imagePreview);
+				imagePreviewContainer.add(imagePreview);
 				
 				Form form = new Form();
 				form.setMultiPart();
@@ -1115,5 +1155,13 @@ public class CitizenAccountPreferences extends CitizenBlock {
 
 	public void setAspectRatio(String aspectRatio) {
 		this.aspectRatio = aspectRatio;
+	}
+
+	public int getMaxAvatarDimension() {
+		return maxAvatarDimension;
+	}
+
+	public void setMaxAvatarDimension(int maxAvatarDimension) {
+		this.maxAvatarDimension = maxAvatarDimension;
 	}
 }

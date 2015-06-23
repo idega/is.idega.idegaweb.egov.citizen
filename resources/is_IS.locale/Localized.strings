@@ -128,3 +128,7 @@ preferred_role=Sj\u00E1lfgefin byrjunars\u00ED\u00F0a
 male=Karl
 female=Kona
 gender=Kyn
+citizen.failed_saving_image=Ekki t\u00F3kst a\u00F0 vista myndina.
+citizen.failed_saving_image_text=Mist\u00F3kst a\u00F0 reyna a\u00F0 bjarga pr\u00F3f\u00EDl mynd.
+please_crop_image=Vinsamlegast klippa mynd
+image_preview=Fors\u00FDning

@@ -254,7 +254,13 @@
 
 .iw-image-preview {
   overflow: hidden;
-  display:inline-block;
   width: 120px;
   height: 120px;
+}
+
+.iw-image-preview-container{
+  display: inline-block;
+  vertical-align: top;
+  text-align: center;
+  font-size: 16px;
 }
