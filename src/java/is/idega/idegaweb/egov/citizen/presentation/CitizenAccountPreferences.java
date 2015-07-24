@@ -239,11 +239,13 @@ public class CitizenAccountPreferences extends CitizenBlock {
 				
 				ICFile fileOld = ((com.idega.core.file.data.ICFileHome) com.idega.data.IDOLookup.getHome(ICFile.class)).findByPrimaryKey(new Integer(fileID));
 				BufferedImage oldImage = ImageIO.read(fileOld.getFileValue());
-				BufferedImage newImage = oldImage.getSubimage(x, y, w, h); 
+				BufferedImage newImage = new BufferedImage(oldImage.getWidth(), oldImage.getHeight(), BufferedImage.TYPE_INT_RGB); 
+				newImage.createGraphics().drawImage(oldImage, null, null); 
+				newImage = newImage.getSubimage(x, y, w, h);
 				
 				
 				ByteArrayOutputStream os = new ByteArrayOutputStream();
-				ImageIO.write(newImage, "jpg", os);
+				ImageIO.write(newImage, "png", os);
 				InputStream input = new ByteArrayInputStream(os.toByteArray());
 				
 				ICFile file = ((com.idega.core.file.data.ICFileHome) com.idega.data.IDOLookup.getHome(ICFile.class)).create();
@@ -730,7 +732,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 				InputStream input = null;
 
 				if (isShowImageCorpTool()){
-					input = new ImageResizerImpl().getScaledImageIfBigger(getMaxAvatarDimension(), new FileInputStream(uploadFile.getRealPath()), GraphicsConstants.JPG_FILE_NAME_EXTENSION);
+					input = new ImageResizerImpl().getScaledImageIfBigger(getMaxAvatarDimension(), new FileInputStream(uploadFile.getRealPath()), GraphicsConstants.PNG_FILE_NAME_EXTENSION);
 				} else {
 					input = new FileInputStream(uploadFile.getRealPath());
 				}
@@ -917,7 +919,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 			layer.setStyleClass("receipt");
 			
 			//TODO test this
-			if (isShowImageCorpTool()){
+			if (isShowImageCorpTool() && fileID > 0){
 				
 				Layer imgToolsLayer = new Layer(Layer.DIV);
 				imgToolsLayer.setStyleClass("iw-image-tools");

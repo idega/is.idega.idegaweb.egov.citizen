@@ -12,6 +12,10 @@ package is.idega.idegaweb.egov.citizen.presentation;
 import is.idega.idegaweb.egov.citizen.IWBundleStarter;
 
 import java.util.Collection;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.idega.block.web2.business.JQuery;
 import com.idega.presentation.Block;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
@@ -21,10 +25,20 @@ import com.idega.presentation.text.Lists;
 import com.idega.presentation.text.Text;
 import com.idega.util.ListUtil;
 import com.idega.util.PresentationUtil;
+import com.idega.util.expression.ELUtil;
 
 
 public abstract class CitizenBlock extends Block {
-
+	
+	@Autowired
+	private JQuery jQuery; 
+	
+	private JQuery getJQuery() {
+		if (jQuery == null)
+			ELUtil.getInstance().autowire(this);
+		return jQuery;
+	}
+	
 	@Override
 	public String getBundleIdentifier() {
 		return IWBundleStarter.IW_BUNDLE_IDENTIFIER;
@@ -35,7 +49,7 @@ public abstract class CitizenBlock extends Block {
 		PresentationUtil.addStyleSheetToHeader(iwc, iwc.getIWMainApplication().getBundle("is.idega.idegaweb.egov.application").getVirtualPathWithFileNameString("style/application.css"));
 		PresentationUtil.addStyleSheetToHeader(iwc, iwc.getIWMainApplication().getBundle(IWBundleStarter.IW_BUNDLE_IDENTIFIER).getVirtualPathWithFileNameString("style/citizen.css"));
 		PresentationUtil.addStyleSheetToHeader(iwc, iwc.getIWMainApplication().getBundle(IWBundleStarter.IW_BUNDLE_IDENTIFIER).getVirtualPathWithFileNameString("style/cropper.css"));
-		PresentationUtil.addJavaScriptSourceLineToHeader(iwc, iwc.getIWMainApplication().getBundle("com.idega.block.web2.0").getVirtualPathWithFileNameString("javascript/jquery/1.7.1/jquery-compressed.js"));
+		PresentationUtil.addJavaScriptSourceLineToHeader(iwc, getJQuery().getBundleURIToJQueryLib());
 		PresentationUtil.addJavaScriptSourceLineToHeader(iwc, iwc.getIWMainApplication().getBundle(IWBundleStarter.IW_BUNDLE_IDENTIFIER).getVirtualPathWithFileNameString("javascript/cropper.js"));
 		PresentationUtil.addJavaScriptSourceLineToHeader(iwc, iwc.getIWMainApplication().getBundle(IWBundleStarter.IW_BUNDLE_IDENTIFIER).getVirtualPathWithFileNameString("javascript/cropperhelper.js"));
 		present(iwc);
