@@ -1,15 +1,8 @@
 package is.idega.idegaweb.egov.citizen.presentation;
 
-import is.idega.idegaweb.egov.business.UserInfoToExternalSystemService;
-import is.idega.idegaweb.egov.citizen.IWBundleStarter;
-import is.idega.idegaweb.egov.citizen.bean.SessionData;
-import is.idega.idegaweb.egov.citizen.business.CitizenAccountSession;
-import is.idega.idegaweb.egov.message.business.MessageSession;
-
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.rmi.RemoteException;
@@ -45,7 +38,6 @@ import com.idega.graphics.util.GraphicsConstants;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.io.UploadFile;
-import com.idega.io.serialization.ObjectReader;
 import com.idega.presentation.CSSSpacer;
 import com.idega.presentation.ExceptionWrapper;
 import com.idega.presentation.IWContext;
@@ -77,15 +69,13 @@ import com.idega.util.FileUtil;
 import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
 import com.idega.util.expression.ELUtil;
-import com.idega.util.xml.XMLData;
 
-/*
- * import com.idega.presentation.ExceptionWrapper; import com.idega.presentation.IWContext; import com.idega.presentation.*; import
- * com.idega.presentation.ui.*; import com.idega.core.data.Address; import com.idega.core.data.Email; import com.idega.user.data.*; import
- * com.idega.business.IBOLookup; import com.idega.user.business.UserBusiness;
- *
- * import se.idega.idegaweb.commune.presentation.CommuneBlock;
- */
+import is.idega.idegaweb.egov.business.UserInfoToExternalSystemService;
+import is.idega.idegaweb.egov.citizen.IWBundleStarter;
+import is.idega.idegaweb.egov.citizen.bean.SessionData;
+import is.idega.idegaweb.egov.citizen.business.CitizenAccountSession;
+import is.idega.idegaweb.egov.message.business.MessageSession;
+
 /**
  * Title: Description: Copyright: Copyright (c) 2002 Company:
  *
@@ -162,7 +152,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	private final static String DEFAULT_NO_EMAIL_FOR_LETTERS = "No email entered to send letters to.";
 	public static final String CITIZEN_ACCOUNT_PREFERENCES_PROPERTIES = "citizen_account_preferences";
 	public static final String USER_PROPERTY_USE_CO_ADDRESS = "cap_use_co_address";
-	
+
 
 	protected User user = null;
 
@@ -173,9 +163,9 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	private boolean showPreferredRoleChooser = true;
 
 	private boolean showGenderChooser = false;
-	
+
 	private boolean showImageCorpTool = false;
-	
+
 	private String aspectRatio = null;
 
 	private boolean showGenderChooserReadOnly = false;
@@ -183,17 +173,17 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	private boolean showNameAndPersonalID = false;
 	private boolean nameAndPersonalIDDisabled = true;
 	private int maxAvatarDimension = 500;
-	
+
 
 	@Autowired
 	private SessionData sessionData;
-	
+
 	private SessionData getSessionData() {
 		if (sessionData == null)
 			ELUtil.getInstance().autowire(this);
 		return sessionData;
 	}
-	
+
 	public CitizenAccountPreferences() {
 	}
 
@@ -231,28 +221,28 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		int y = Integer.parseInt(iwc.getParameter(PARAMETER_IMAGE_POS_Y));
 		int w = Integer.parseInt(iwc.getParameter(PARAMETER_IMAGE_WIDTH));
 		int h = Integer.parseInt(iwc.getParameter(PARAMETER_IMAGE_HEIGHT));
-		
+
 		SessionData sessionData = getSessionData();
 		int fileID = sessionData.getFileID();
 		if (fileID > 0) {
 			try {
-				
+
 				ICFile fileOld = ((com.idega.core.file.data.ICFileHome) com.idega.data.IDOLookup.getHome(ICFile.class)).findByPrimaryKey(new Integer(fileID));
 				BufferedImage oldImage = ImageIO.read(fileOld.getFileValue());
-				BufferedImage newImage = new BufferedImage(oldImage.getWidth(), oldImage.getHeight(), BufferedImage.TYPE_INT_RGB); 
-				newImage.createGraphics().drawImage(oldImage, null, null); 
+				BufferedImage newImage = new BufferedImage(oldImage.getWidth(), oldImage.getHeight(), BufferedImage.TYPE_INT_RGB);
+				newImage.createGraphics().drawImage(oldImage, null, null);
 				newImage = newImage.getSubimage(x, y, w, h);
-				
-				
+
+
 				ByteArrayOutputStream os = new ByteArrayOutputStream();
 				ImageIO.write(newImage, "png", os);
 				InputStream input = new ByteArrayInputStream(os.toByteArray());
-				
+
 				ICFile file = ((com.idega.core.file.data.ICFileHome) com.idega.data.IDOLookup.getHome(ICFile.class)).create();
 				file.setName(fileOld.getName());
 				file.setMimeType(fileOld.getMimeType());
 				file.setFileValue(input);
-				file.setFileSize((int) os.size());
+				file.setFileSize(os.size());
 				file.store();
 
 				fileID = ((Integer) file.getPrimaryKey()).intValue();
@@ -269,7 +259,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		} catch (NumberFormatException e){
 			Layer layer = new Layer(Layer.DIV);
 			layer.setStyleClass("receipt");
-			
+
 			Layer header = new Layer(Layer.DIV);
 			header.setStyleClass("header");
 			add(header);
@@ -295,10 +285,10 @@ public class CitizenAccountPreferences extends CitizenBlock {
 			return;
 		}
 		UserBusiness ub = IBOLookup.getServiceInstance(iwc, UserBusiness.class);
-		
+
 		Layer layer = new Layer(Layer.DIV);
 		layer.setStyleClass("receipt");
-		
+
 		Layer header = new Layer(Layer.DIV);
 		header.setStyleClass("header");
 		add(header);
@@ -335,7 +325,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		} catch (FinderException fe) {
 			// No homepage found...
 		}
-		
+
 		add(layer);
 	}
 
@@ -385,7 +375,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 		section.setStyleClass("formSection");
 		contents.add(section);
 
-		UserBusiness ub = (UserBusiness) IBOLookup.getServiceInstance(iwc, UserBusiness.class);
+		UserBusiness ub = IBOLookup.getServiceInstance(iwc, UserBusiness.class);
 
 		Image image = null;
 		if (this.user.getSystemImageID() > 0) {
@@ -736,7 +726,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 				} else {
 					input = new FileInputStream(uploadFile.getRealPath());
 				}
-				
+
 				ICFile file = ((com.idega.core.file.data.ICFileHome) com.idega.data.IDOLookup.getHome(ICFile.class)).create();
 				file.setName(uploadFile.getName());
 				file.setMimeType(uploadFile.getMimeType());
@@ -757,7 +747,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 				e.printStackTrace(System.err);
 				uploadFile.setId(-1);
 			}
-		} 
+		}
 
 		UserBusiness ub = IBOLookup.getServiceInstance(iwc, UserBusiness.class);
 
@@ -868,7 +858,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 				Address coAddress = getCOAddress(iwc);
 				//coAddress.setStreetName(coStreetAddress);
 
-				AddressBusiness addressBusiness = (AddressBusiness) IBOLookup.getServiceInstance(iwc, AddressBusiness.class);
+				AddressBusiness addressBusiness = IBOLookup.getServiceInstance(iwc, AddressBusiness.class);
 				Country country = addressBusiness.getCountryHome().findByPrimaryKey(new Integer(coCountry));
 				PostalCode pc = addressBusiness.getPostalCodeAndCreateIfDoesNotExist(coPostalCode, coCity, country);
 				String streetName = addressBusiness.getStreetNameFromAddressString(coStreetAddress);
@@ -897,7 +887,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 					SessionData sessionData = getSessionData();
 					sessionData.setFileID(fileID);
 				}
-			} 
+			}
 
 			//send to external system if needed
 			if (iwc.getApplicationSettings().getBoolean("SEND_USER_INFO_TO_EXTERNAL", false)) {
@@ -905,33 +895,33 @@ public class CitizenAccountPreferences extends CitizenBlock {
 				Object bean = springContext.getBean(iwc.getApplicationSettings().getProperty("SEND_USER_INFO_SERVICE_NAME", "linnaWSBusiness"));
 				if (bean instanceof UserInfoToExternalSystemService) {
 					UserInfoToExternalSystemService service = (UserInfoToExternalSystemService) bean;
-					
+
 					String identifycationString = iwc.getApplicationSettings().getProperty("SEND_USER_INFO_IDENTIFICATION_STRING", "RR");
-					
+
 					service.updateUserInfo(iwc.getCurrentUser().getPersonalID(), sEmail, phoneHome, phoneWork, phoneMobile, identifycationString);
 				} else {
 					getLogger().warning("Unable to update user info. Expected instance of " + UserInfoToExternalSystemService.class.getName() + ", got: " +
 							(bean == null ? "null" : bean.getClass().getName()));
 				}
 			}
-			
+
 			Layer layer = new Layer(Layer.DIV);
 			layer.setStyleClass("receipt");
-			
+
 			//TODO test this
 			if (isShowImageCorpTool() && fileID > 0){
-				
+
 				Layer imgToolsLayer = new Layer(Layer.DIV);
 				imgToolsLayer.setStyleClass("iw-image-tools");
-				
+
 				Heading1 heading = new Heading1(this.iwrb.getLocalizedString(
 						"please_crop_image", "Please crop your image."));
 				imgToolsLayer.add(heading);
-				
+
 				Layer imageLayer = new Layer(Layer.DIV);
 				imageLayer.setStyleClass("iw-image-layer");
 				imgToolsLayer.add(imageLayer);
-				
+
 				Image avatarImage = null;
 				if (fileID > 0) {
 					try {
@@ -944,57 +934,57 @@ public class CitizenAccountPreferences extends CitizenBlock {
 				if (avatarImage != null) {
 					imageLayer.add(avatarImage);
 				}
-				
+
 				Layer imagePreviewContainer = new Layer(Layer.DIV);
 				imagePreviewContainer.setStyleClass("iw-image-preview-container");
 				imgToolsLayer.add(imagePreviewContainer);
-				
+
 				imagePreviewContainer.add(new Text(this.iwrb.getLocalizedString(
 						"image_preview",
 						"Preview")));
-				
+
 				Layer imagePreview = new Layer(Layer.DIV);
 				imagePreview.setStyleClass("iw-image-preview");
 				imagePreviewContainer.add(imagePreview);
-				
+
 				Form form = new Form();
 				form.setMultiPart();
 				form.addParameter(PARAMETER_FORM_SUBMIT, Boolean.TRUE.toString());
 				form.addParameter(PARAMETER_IMAGE_CORP_SUBMIT, Boolean.TRUE.toString());
 				form.setID("iw-image-tools-form");
 				form.setStyleClass("iw-image-tools-form");
-				
+
 				HiddenInput dataX = new HiddenInput(PARAMETER_IMAGE_POS_X);
 				dataX.setId(PARAMETER_IMAGE_POS_X);
 				form.add(dataX);
-				
+
 				HiddenInput dataY = new HiddenInput(PARAMETER_IMAGE_POS_Y);
 				dataY.setID(PARAMETER_IMAGE_POS_Y);
 				form.add(dataY);
-				
+
 				HiddenInput dataHeight = new HiddenInput(PARAMETER_IMAGE_HEIGHT);
 				dataHeight.setID(PARAMETER_IMAGE_HEIGHT);
 				form.add(dataHeight);
-				
+
 				HiddenInput dataWidth = new HiddenInput(PARAMETER_IMAGE_WIDTH);
 				dataWidth.setID(PARAMETER_IMAGE_WIDTH);
 				form.add(dataWidth);
-				
+
 				HiddenInput aspectRatio = new HiddenInput("img-aspectRatio",getAspectRatio());
 				aspectRatio.setID("img-aspectRatio");
 				form.add(aspectRatio);
 				imgToolsLayer.add(form);
-				
+
 				Layer buttonLayer = new Layer(Layer.DIV);
 				buttonLayer.setStyleClass("button-blue");
 				imgToolsLayer.add(buttonLayer);
-				
+
 				Layer span = new Layer(Layer.SPAN);
 				span.add(new Text(this.iwrb.getLocalizedString(KEY_UPDATE, DEFAULT_UPDATE)));
 				Link send = new Link(span);
 				send.setToFormSubmit(form);
 				buttonLayer.add(send);
-				
+
 				layer.add(imgToolsLayer);
 			} else {
 
@@ -1050,7 +1040,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	private Address getCOAddress(IWContext iwc) {
 		Address coAddress = null;
 		try {
-			UserBusiness ub = (UserBusiness) IBOLookup.getServiceInstance(iwc, UserBusiness.class);
+			UserBusiness ub = IBOLookup.getServiceInstance(iwc, UserBusiness.class);
 			AddressHome ah = ub.getAddressHome();
 			AddressType coType = ah.getAddressType2();
 
@@ -1070,11 +1060,11 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	}
 
 	private MessageSession getMessageSession(IWContext iwc) throws RemoteException {
-		return (MessageSession) com.idega.business.IBOLookup.getSessionInstance(iwc, MessageSession.class);
+		return com.idega.business.IBOLookup.getSessionInstance(iwc, MessageSession.class);
 	}
 
 	private CitizenAccountSession getCitizenAccountSession(IWContext iwc) throws RemoteException {
-		return (CitizenAccountSession) com.idega.business.IBOLookup.getSessionInstance(iwc, CitizenAccountSession.class);
+		return com.idega.business.IBOLookup.getSessionInstance(iwc, CitizenAccountSession.class);
 	}
 
 	public void setToRemoveEmailWhenEmpty(boolean flag) {
