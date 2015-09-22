@@ -1,8 +1,5 @@
 package is.idega.idegaweb.egov.citizen.presentation;
 
-import is.idega.idegaweb.egov.citizen.business.WSCitizenAccountBusiness;
-import is.idega.idegaweb.egov.citizen.business.WSCitizenAccountBusinessBean;
-
 import java.rmi.RemoteException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -39,11 +36,15 @@ import com.idega.presentation.ui.TextInput;
 import com.idega.user.business.NoEmailFoundException;
 import com.idega.user.business.UserBusiness;
 import com.idega.user.data.User;
+import com.idega.util.CoreUtil;
 import com.idega.util.text.SocialSecurityNumber;
+
+import is.idega.idegaweb.egov.citizen.business.WSCitizenAccountBusiness;
+import is.idega.idegaweb.egov.citizen.business.WSCitizenAccountBusinessBean;
 
 /**
  * *
- * 
+ *
  * Title: idegaWeb Description: This class handles the case, when a user has forgotten his password. The presentation provides a single input field
  * for the personal id. After submitting the input is checked. If the inputfield is empty a warning dialog pops up. If the input represents an
  * impossible social security number (SSN) an error message is returned (with the inputfield again). If the input is a possible valid ssn the value is
@@ -52,13 +53,13 @@ import com.idega.util.text.SocialSecurityNumber;
  * yet again a link to to the citizen application form is returned. There are two different cases if the citizen has already an activated account: If
  * the user has never logged in you can not trust his registered email address. Therefore a new password is generated and send by regular post to the
  * person. If the the user has logged at some time a new password is generated and send by email.
- * 
+ *
  * Copyright: Copyright (c) 2002 Company: idega software
- * 
+ *
  * @author <a href="mailto:thomas@idega.is">Thomas Hilbig</a>
- * 
+ *
  * Last modified: $Date$ by $Author$<br/>
- * 
+ *
  * @version 1.0
  */
 public class ForgottenPassword extends CitizenBlock {
@@ -74,7 +75,7 @@ public class ForgottenPassword extends CitizenBlock {
 	private final static String ACTION_VIEW_FORM = "action_view_form";
 	private final static String ACTION_FORM_SUBMIT = "action_form_submit";
 	private static final String hasAppliedForPsw = "has_applied_before";
-	
+
 	protected final static String SNAIL_MAIL_KEY = "snail_mail";
 	protected final static String SNAIL_MAIL_DEFAULT = "Send password using ordinary mail";
 
@@ -103,7 +104,7 @@ public class ForgottenPassword extends CitizenBlock {
 
 	/**
 	 * Handles the input. Checks if the input is a possible valid ssn and if the user is known or unknown.
-	 * 
+	 *
 	 * @param iwc
 	 */
 	private void submitForm(IWContext iwc) {
@@ -127,7 +128,7 @@ public class ForgottenPassword extends CitizenBlock {
 		}
 
 		boolean sendSnailMail = iwc.getParameter(SNAIL_MAIL_KEY) != null && iwc.getParameter(SNAIL_MAIL_KEY).length() > 0;
-		
+
 		String ssn = iwc.getParameter(SSN_KEY);
 
 		boolean hasErrors = false;
@@ -135,7 +136,7 @@ public class ForgottenPassword extends CitizenBlock {
 		Collection<String> errors = new ArrayList<String>();
 
 		Locale locale = iwc.getCurrentLocale();
-		
+
 		if (ssn == null || ssn.length() == 0) {
 			errors.add(this.iwrb.getLocalizedString("must_provide_personal_id", "You have to enter a personal ID."));
 			hasErrors = true;
@@ -170,7 +171,7 @@ public class ForgottenPassword extends CitizenBlock {
 			boolean restrictLoginAccess = iwc.getApplicationSettings().getBoolean("egov.account.restrict.password.creation", true);
 
 			try {
-				UserBusiness business = (UserBusiness) IBOLookup.getServiceInstance(iwc, UserBusiness.class);
+				UserBusiness business = IBOLookup.getServiceInstance(iwc, UserBusiness.class);
 				email = business.getUsersMainEmail(user);
 			}
 			catch (RemoteException re) {
@@ -181,7 +182,7 @@ public class ForgottenPassword extends CitizenBlock {
 			}
 
 			boolean sendMessageToBank = isSendMessageToBank(user);
-			
+
 			LoginTable loginTable = LoginDBHandler.getUserLogin(user);
 			if (loginTable == null) {
 				errors.add(this.iwrb.getLocalizedString("no_login_found_for_user", "No login was found for the user with the personal ID you entered."));
@@ -195,16 +196,16 @@ public class ForgottenPassword extends CitizenBlock {
 				else if (!restrictLoginAccess || sendMessageToBank) {
 					canSendMessage = true;
 				}
-				
+
 				if (canSendMessage) {
 					String newPassword = createNewPassword();
 					try {
 						getBusiness(iwc).changePasswordAndSendLetterOrEmail(iwc, loginTable, user, newPassword, false);
+						CoreUtil.clearAllCaches();
 						if (sendSnailMail) {
 							getBusiness(iwc).sendLostPasswordMessage(user, loginTable.getUserLogin(), newPassword);
 						}
-					}
-					catch (RemoteException re) {
+					} catch (RemoteException re) {
 						throw new IBORuntimeException(re);
 					}
 					catch (CreateException ce) {
@@ -262,7 +263,7 @@ public class ForgottenPassword extends CitizenBlock {
 
 	/**
 	 * Builds a presentation containing the form with input field and submit button.
-	 * 
+	 *
 	 * @param iwc
 	 */
 	private void viewForm(final IWContext iwc) {
@@ -300,7 +301,7 @@ public class ForgottenPassword extends CitizenBlock {
 		CheckBox snailMail = new CheckBox(SNAIL_MAIL_KEY);
 		snailMail.setStyleClass("checkbox");
 		snailMail.keepStatusOnAction(true);
-		
+
 		if (this.iCommuneMap != null) {
 			DropdownMenu communes = new DropdownMenu(COMMUNE_KEY);
 			Iterator<String> iter = this.iCommuneMap.keySet().iterator();
@@ -342,7 +343,7 @@ public class ForgottenPassword extends CitizenBlock {
 		Layer clearLayer = new Layer(Layer.DIV);
 		clearLayer.setStyleClass("Clear");
 		section.add(clearLayer);
-		
+
 		Layer buttonLayer = new Layer(Layer.DIV);
 		buttonLayer.setStyleClass("buttonLayer");
 		contents.add(buttonLayer);
@@ -356,14 +357,14 @@ public class ForgottenPassword extends CitizenBlock {
 
 		add(form);
 	}
-	
+
 	protected boolean isSendMessageToBank(User user) {
 		return getIWApplicationContext().getApplicationSettings().getBoolean(WSCitizenAccountBusinessBean.BANK_SEND_REGISTRATION, false);
 	}
 
 	/**
 	 * Parses the parameter string.
-	 * 
+	 *
 	 * @param iwc
 	 * @return either string for action "view form" or string for action "form was submitted".
 	 */
@@ -377,13 +378,13 @@ public class ForgottenPassword extends CitizenBlock {
 
 	/**
 	 * Looks up service bean citizen account business
-	 * 
+	 *
 	 * @param iwc
 	 * @return a service bean CitizenAccountBusiness.
 	 */
 	private WSCitizenAccountBusiness getBusiness(IWContext iwc) {
 		try {
-			return (WSCitizenAccountBusiness) IBOLookup.getServiceInstance(iwc, WSCitizenAccountBusiness.class);
+			return IBOLookup.getServiceInstance(iwc, WSCitizenAccountBusiness.class);
 		}
 		catch (IBOLookupException ile) {
 			throw new IBORuntimeException(ile);
@@ -392,7 +393,7 @@ public class ForgottenPassword extends CitizenBlock {
 
 	/**
 	 * Creates a new unencrypted password.
-	 * 
+	 *
 	 * @return an unencrypted password.
 	 */
 	private String createNewPassword() {
@@ -414,7 +415,7 @@ public class ForgottenPassword extends CitizenBlock {
 		this.iCommuneMap.put(name, URL);
 		this.iForwardToURL = true;
 	}
-	
+
 	public boolean isSetToShowSendSnailMailChooser() {
 		return showSendSnailMailChooser;
 	}
