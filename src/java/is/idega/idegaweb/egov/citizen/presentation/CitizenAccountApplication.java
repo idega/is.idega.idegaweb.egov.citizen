@@ -13,8 +13,6 @@
 
 package is.idega.idegaweb.egov.citizen.presentation;
 
-import is.idega.idegaweb.egov.citizen.business.WSCitizenAccountBusiness;
-
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.text.MessageFormat;
@@ -50,13 +48,15 @@ import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.HiddenInput;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.TextInput;
-import com.idega.user.business.UserBusiness;
 import com.idega.user.data.User;
 import com.idega.util.Age;
 import com.idega.util.CoreConstants;
+import com.idega.util.EmailValidator;
 import com.idega.util.IWTimestamp;
 import com.idega.util.ListUtil;
 import com.idega.util.text.SocialSecurityNumber;
+
+import is.idega.idegaweb.egov.citizen.business.WSCitizenAccountBusiness;
 
 /**
  * Last modified: $Date$ by $Author$
@@ -159,6 +159,8 @@ public class CitizenAccountApplication extends CitizenBlock {
 		}
 	}
 
+	private boolean invalidMail = false, invalidPersonalId = false;
+
 	/**
 	 * <p>
 	 * Parse the request parameters and initialize this component with teir
@@ -168,7 +170,6 @@ public class CitizenAccountApplication extends CitizenBlock {
 	 * @param iwc
 	 */
 	protected void parseParameters(IWContext iwc) {
-
 		if (iwc.isParameterSet(PARAMETER_HIDE_PERSONALID_INPUT)) {
 			String value = iwc.getParameter(PARAMETER_HIDE_PERSONALID_INPUT);
 			if (Boolean.valueOf(value).booleanValue() == true) {
@@ -186,6 +187,17 @@ public class CitizenAccountApplication extends CitizenBlock {
 			if (value != null) {
 				setRedirectUrlOnSubmit(value);
 			}
+		}
+
+		if (iwc.isParameterSet(SSN_KEY) && !isValidPersonalId(iwc.getParameter(SSN_KEY), iwc.getIWMainApplication().getDefaultLocale())) {
+			invalidPersonalId = true;
+		}
+
+		if (iwc.isParameterSet(EMAIL_KEY) && !EmailValidator.getInstance().isValid(iwc.getParameter(EMAIL_KEY))) {
+			invalidMail = true;
+		}
+		if (iwc.isParameterSet(EMAIL_KEY_REPEAT) && !EmailValidator.getInstance().isValid(iwc.getParameter(EMAIL_KEY_REPEAT))) {
+			invalidMail = true;
 		}
 	}
 
@@ -255,7 +267,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 
 		maintainHiddenParameters(iwc, form);
 
-		TextInput email = new TextInput(EMAIL_KEY);
+		TextInput email = new TextInput(EMAIL_KEY, invalidMail ? CoreConstants.EMPTY : iwc.getParameter(EMAIL_KEY));
 		email.setEscaped(isEscaped());
 		email.keepStatusOnAction(true);
 
@@ -263,7 +275,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		snailMail.setStyleClass("checkbox");
 		snailMail.keepStatusOnAction(true);
 
-		TextInput emailRepeat = new TextInput(EMAIL_KEY_REPEAT);
+		TextInput emailRepeat = new TextInput(EMAIL_KEY_REPEAT, invalidMail ? CoreConstants.EMPTY : iwc.getParameter(EMAIL_KEY_REPEAT));
 		emailRepeat.setEscaped(isEscaped());
 		emailRepeat.keepStatusOnAction(true);
 
@@ -299,12 +311,11 @@ public class CitizenAccountApplication extends CitizenBlock {
 		Layer formItem;
 		Label label;
 		if (isHidePersonalIdInput()) {
-			HiddenInput personalID = new HiddenInput(SSN_KEY);
-			personalID.keepStatusOnAction(true);
+			HiddenInput personalID = new HiddenInput(SSN_KEY, invalidPersonalId ? CoreConstants.EMPTY : iwc.getParameter(SSN_KEY));
 			personalID.setEscaped(isEscaped());
 			section.add(personalID);
 		} else {
-			TextInput personalID = new TextInput(SSN_KEY);
+			TextInput personalID = new TextInput(SSN_KEY, invalidPersonalId ? CoreConstants.EMPTY : iwc.getParameter(SSN_KEY));
 			personalID.setStyleClass("personalID");
 			personalID.setMaxlength(10);
 			personalID.setLength(10);
@@ -385,7 +396,6 @@ public class CitizenAccountApplication extends CitizenBlock {
 
 		renderComponentsBeforeTermOfUseAggreement(section);
 
-
 		// TODO: localize the url to agreement file
 		Object[] linkToAgreement = new Object[] { getAgreementFileUrl() };
 		formItem = new Layer(Layer.DIV);
@@ -448,7 +458,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		if (ssn == null || ssn.length() == 0) {
 			errors.add(this.iwrb.getLocalizedString("must_provide_personal_id", "You have to enter a personal ID."));
 			hasErrors = true;
-		} else if (!SocialSecurityNumber.isValidIcelandicSocialSecurityNumber(ssn)) {
+		} else if (!isValidPersonalId(ssn, iwc.getIWMainApplication().getDefaultLocale())) {
 			errors.add(this.iwrb.getLocalizedString("not_a_valid_personal_id", "The personal ID you've entered is not valid."));
 			hasErrors = true;
 		}
@@ -459,7 +469,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		}
 
 		String email = iwc.getParameter(EMAIL_KEY);
-		if (email == null || email.length() == 0) {
+		if (!EmailValidator.getInstance().isValid(email)) {
 			errors.add(this.iwrb.getLocalizedString("email_can_not_be_empty", "You must provide a valid e-mail address"));
 			hasErrors = true;
 		}
@@ -536,8 +546,8 @@ public class CitizenAccountApplication extends CitizenBlock {
 				// no problem, no login found
 			}
 
-			if (email != null && email.length() > 0) {
-				if (emailRepeat == null || !email.equals(emailRepeat)) {
+			if (EmailValidator.getInstance().isValid(email)) {
+				if (!EmailValidator.getInstance().isValid(emailRepeat) || !email.equals(emailRepeat)) {
 					getLogger().warning("Emails do not match for user: " + ssn);
 					errors.add(this.iwrb.getLocalizedString(ERROR_EMAILS_DONT_MATCH, ERROR_EMAILS_DONT_MATCH_DEFAULT));
 					hasErrors = true;
@@ -640,7 +650,7 @@ public class CitizenAccountApplication extends CitizenBlock {
 		int validAge = Integer.parseInt(iwc.getApplicationSettings().getProperty(ATTRIBUTE_VALID_ACCOUNT_AGE, String.valueOf(18)));
 		boolean validAgeYear = iwc.getApplicationSettings().getBoolean(ATTRIBUTE_VALID_ACCOUNT_AGE_YEAR);
 
-		if (ssn != null && SocialSecurityNumber.isValidIcelandicSocialSecurityNumber(ssn)) {
+		if (ssn != null && isValidPersonalId(ssn, iwc.getIWMainApplication().getDefaultLocale())) {
 			IWTimestamp dateOfBirth = new IWTimestamp(SocialSecurityNumber.getDateFromSocialSecurityNumber(ssn));
 			if (validAgeYear) {
 				dateOfBirth.setDay(1);
@@ -665,10 +675,6 @@ public class CitizenAccountApplication extends CitizenBlock {
 
 	protected WSCitizenAccountBusiness getBusiness(IWApplicationContext iwac) throws RemoteException {
 		return IBOLookup.getServiceInstance(iwac, WSCitizenAccountBusiness.class);
-	}
-
-	protected UserBusiness getUserBusiness(IWApplicationContext iwac) throws RemoteException {
-		return IBOLookup.getServiceInstance(iwac, UserBusiness.class);
 	}
 
 	protected LoginTableHome getLoginTableHome() {

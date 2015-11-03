@@ -36,8 +36,8 @@ import com.idega.presentation.ui.TextInput;
 import com.idega.user.business.NoEmailFoundException;
 import com.idega.user.business.UserBusiness;
 import com.idega.user.data.User;
+import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
-import com.idega.util.text.SocialSecurityNumber;
 
 import is.idega.idegaweb.egov.citizen.business.WSCitizenAccountBusiness;
 import is.idega.idegaweb.egov.citizen.business.WSCitizenAccountBusinessBean;
@@ -127,7 +127,7 @@ public class ForgottenPassword extends CitizenBlock {
 			return;
 		}
 
-		boolean sendSnailMail = iwc.getParameter(SNAIL_MAIL_KEY) != null && iwc.getParameter(SNAIL_MAIL_KEY).length() > 0;
+		boolean sendSnailMail = iwc.isParameterSet(SNAIL_MAIL_KEY) && SNAIL_MAIL_KEY.equals(iwc.getParameter(SNAIL_MAIL_KEY));
 
 		String ssn = iwc.getParameter(SSN_KEY);
 
@@ -141,7 +141,7 @@ public class ForgottenPassword extends CitizenBlock {
 			errors.add(this.iwrb.getLocalizedString("must_provide_personal_id", "You have to enter a personal ID."));
 			hasErrors = true;
 			invalidPersonalID = true;
-		} else if (!SocialSecurityNumber.isValidSocialSecurityNumber(ssn, locale)) {
+		} else if (!isValidPersonalId(ssn, locale)) {
 			errors.add(this.iwrb.getLocalizedString("not_a_valid_personal_id", "The personal ID you've entered is not valid."));
 			hasErrors = true;
 			invalidPersonalID = true;
@@ -288,17 +288,19 @@ public class ForgottenPassword extends CitizenBlock {
 		contents.add(section);
 
 		Paragraph paragraph = new Paragraph();
-		paragraph.add(new Text(getLocalizedString("forgot_password_helper_text", "Please enter your personal ID and click 'Send'.  A new password will be created and sent to your e-mail address.", iwc)));
+		paragraph.add(new Text(getLocalizedString("forgot_password_helper_text", "Please enter your personal ID and click 'Send'. A new password will be created and sent to your e-mail address.", iwc)));
 		section.add(paragraph);
 
-		TextInput input = new TextInput(SSN_KEY);
+		String personalId = iwc.isParameterSet(SSN_KEY) ? iwc.getParameter(SSN_KEY) : CoreConstants.EMPTY;
+		personalId = isValidPersonalId(personalId, iwc.getIWMainApplication().getDefaultLocale()) ? personalId : CoreConstants.EMPTY;
+		TextInput input = new TextInput(SSN_KEY, personalId);
 		input.setEscaped(isEscaped());
 		input.setStyleClass("personalID");
 		input.setMaxlength(10);
 		input.setLength(10);
 		input.keepStatusOnAction(true);
 
-		CheckBox snailMail = new CheckBox(SNAIL_MAIL_KEY);
+		CheckBox snailMail = new CheckBox(SNAIL_MAIL_KEY, SNAIL_MAIL_KEY);
 		snailMail.setStyleClass("checkbox");
 		snailMail.keepStatusOnAction(true);
 

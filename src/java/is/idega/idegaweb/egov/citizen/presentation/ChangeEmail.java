@@ -1,8 +1,8 @@
 /*
  * $Id$ Created on Jan 24, 2006
- * 
+ *
  * Copyright (C) 2006 Idega Software hf. All Rights Reserved.
- * 
+ *
  * This software is the proprietary information of Idega hf. Use is subject to license terms.
  */
 package is.idega.idegaweb.egov.citizen.presentation;
@@ -20,7 +20,6 @@ import com.idega.core.accesscontrol.business.LoginDBHandler;
 import com.idega.core.accesscontrol.data.LoginTable;
 import com.idega.core.builder.data.ICPage;
 import com.idega.core.contact.data.Email;
-import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.idegaweb.IWUserContext;
 import com.idega.presentation.IWContext;
@@ -52,11 +51,11 @@ public class ChangeEmail extends CitizenBlock {
 	private boolean iUseSessionUser = false;
 
 	private IWResourceBundle iwrb;
-	
+
 	private ICPage backPage = null;
 
 	private boolean allowNonCitizens = false;
-	
+
 	@Override
 	public void present(IWContext iwc) {
 		this.iwrb = getResourceBundle(iwc);
@@ -77,7 +76,7 @@ public class ChangeEmail extends CitizenBlock {
 
 	/**
 	 * Parses the parameter string.
-	 * 
+	 *
 	 * @param iwc
 	 * @return either string for action "view form" or string for action "form was submitted".
 	 */
@@ -147,7 +146,7 @@ public class ChangeEmail extends CitizenBlock {
 
 			ICPage userHomePage = null;
 			try {
-				UserBusiness ub = (UserBusiness) IBOLookup.getServiceInstance(iwc, UserBusiness.class);
+				UserBusiness ub = IBOLookup.getServiceInstance(iwc, UserBusiness.class);
 				userHomePage = ub.getHomePageForUser(user);
 			}
 			catch (FinderException fe) {
@@ -165,9 +164,9 @@ public class ChangeEmail extends CitizenBlock {
 				link.setPage(this.backPage);
 				paragraph.add(new Break(2));
 				paragraph.add(link);
-				
+
 			}
-			
+
 			if (userHomePage != null) {
 				Layer span = new Layer(Layer.SPAN);
 				span.add(new Text(this.iwrb.getLocalizedString("my_page", "My page")));
@@ -189,7 +188,7 @@ public class ChangeEmail extends CitizenBlock {
 
 	/**
 	 * Builds a presentation containing the form with input field and submit button.
-	 * 
+	 *
 	 * @param iwc
 	 */
 	private void viewForm(final IWContext iwc) throws RemoteException {
@@ -320,18 +319,9 @@ public class ChangeEmail extends CitizenBlock {
 		}
 	}
 
-	private UserBusiness getUserBusiness(IWApplicationContext iwac) {
-		try {
-			return (UserBusiness) IBOLookup.getServiceInstance(iwac, UserBusiness.class);
-		}
-		catch (IBOLookupException ile) {
-			throw new IBORuntimeException(ile);
-		}
-	}
-
 	private UserSession getUserSession(IWUserContext iwuc) {
 		try {
-			return (UserSession) IBOLookup.getSessionInstance(iwuc, UserSession.class);
+			return IBOLookup.getSessionInstance(iwuc, UserSession.class);
 		}
 		catch (IBOLookupException ile) {
 			throw new IBORuntimeException(ile);
@@ -341,19 +331,19 @@ public class ChangeEmail extends CitizenBlock {
 	public void setUseSessionUser(boolean useSessionUser) {
 		this.iUseSessionUser = useSessionUser;
 	}
-	
+
 	public void setBackPage(ICPage page) {
 		this.backPage = page;
 	}
-	
+
 	public ICPage getBackPage() {
 		return this.backPage;
 	}
-	
+
 	public void setAllowNonCitizens(boolean allow) {
 		this.allowNonCitizens = allow;
 	}
-	
+
 	public boolean getAllowNonCitizens() {
 		return this.allowNonCitizens;
 	}
