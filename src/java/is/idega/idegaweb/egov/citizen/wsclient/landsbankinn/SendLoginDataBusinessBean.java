@@ -21,13 +21,11 @@ import com.thoughtworks.xstream.io.xml.XppDriver;
  * @author <a href="mailto:civilis@idega.com">Vytautas Čivilis</a>
  * @version 1.0
  */
-public class SendLoginDataBusinessBean extends IBOServiceBean implements
-		SendLoginDataBusiness {
+public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLoginDataBusiness {
 
 	private static final long serialVersionUID = 3509433414652752725L;
 
-	private static Logger logger = Logger
-			.getLogger(SendLoginDataBusinessBean.class.getName());
+	private static Logger logger = Logger.getLogger(SendLoginDataBusinessBean.class.getName());
 
 	private XStream login_xstream;
 	private XStream logout_xstream;
@@ -48,19 +46,20 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements
 
 	private static final String ck = "8CTW4ktdt1oVAdve4I2GGTpyDkP4ROuztfxRcBzo2xTT8CGFqhMFxMrbtmCH1c3yUz8qYV9LRd8XTPzZj9YMLyP16eJyWOrZWKgQ";
 
+	@Override
 	public boolean verifyBankAccount(String bankNumber, String ledger, String accountNumber, String personalID) {
 		if (bankNumber == null || ledger == null || accountNumber == null) {
 			return false;
 		}
-		
+
 		if (bankNumber.length() > 4 || ledger.length() > 2 || accountNumber.length() > 6) {
 			return false;
 		}
-		
+
 		int bankNumberInt = 0;
 		int ledgerInt = 0;
 		int accountNumberInt = 0;
-				
+
 		try {
 			bankNumberInt = Integer.parseInt(bankNumber);
 			ledgerInt = Integer.parseInt(ledger);
@@ -73,8 +72,8 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements
 			return true;
 		}
 
-		
-		
+
+
 		NumberFormat f = NumberFormat.getIntegerInstance();
 		f.setGroupingUsed(false);
 
@@ -84,21 +83,21 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements
 
 			bankNumber = f.format(bankNumberInt);
 		}
-		
+
 		if (ledger.length() < 2) {
 			f.setMinimumIntegerDigits(2);
 			f.setMaximumIntegerDigits(2);
 
 			ledger = f.format(ledgerInt);
 		}
-		
+
 		if (accountNumber.length() < 6) {
 			f.setMinimumIntegerDigits(6);
 			f.setMaximumIntegerDigits(6);
 
 			accountNumber = f.format(accountNumberInt);
 		}
-		
+
 		String session_id = login();
 
 		if (session_id == null) {
@@ -113,11 +112,11 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements
 		verify.setSession_id(session_id);
 		verify.setPersonal_id(personalID);
 		verify.setBank_account(account);
-		
+
 		PostMethod response = sendXMLData(verify, getVerifyBankAccountRequestXStream());
 
 		InputStream respStream = null;
-		
+
 		String temp = null;
 		try {
 			temp = response.getResponseBodyAsString();
@@ -128,23 +127,19 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements
 			if (resp.getAccountExists() != null && ("TRUE".equalsIgnoreCase(resp.getAccountExists()) || "0".equals(resp.getAccountExists()))) {
 				return true;
 			}
-		}
-		catch (BaseException e) {
-			e.printStackTrace();
-			System.out.println("error = " + temp);
-			handleResponseParseException(respStream, e);
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-
-		}
-		finally {
+		} catch (Exception e) {
+			logger.log(Level.WARNING, "error = " + temp, e);
+			if (e instanceof BaseException) {
+				handleResponseParseException(respStream, (BaseException) e);
+			}
+		} finally {
 			response.releaseConnection();
 		}
-		
+
 		return false;
 	}
-	
+
+	@Override
 	public void send(String xml_str) {
 
 		if (xml_str == null) {
@@ -180,22 +175,15 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements
 				return;
 			}
 
-			System.out.println("ERROR SENDING TO LANDSBANKI");
-			System.out.println("err = " + err.getErrorMsg());
-			System.out.println("errNumber = " + err.getErrorNumber());
-			System.out.println("xml = " + xml_str);
-
+			logger.warning("ERROR SENDING TO LANDSBANKI: err = " + err.getErrorMsg() + ", errNumber = " + err.getErrorNumber() + ", xml =\n" + xml_str);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.log(Level.WARNING, "Exception while parsing sendXMLData response", e);
 
-			RuntimeException ex = new RuntimeException(
-					"Exception while parsing sendXMLData response");
+			RuntimeException ex = new RuntimeException("Exception while parsing sendXMLData response");
 			ex.initCause(e);
 
 			throw ex;
-
 		} finally {
-
 			response.releaseConnection();
 			logout(session_id);
 		}
@@ -206,7 +194,6 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements
 	}
 
 	protected String login() {
-
 		String[] loginAndPass = getLoginAndPassword();
 		LoginRequest req = new LoginRequest();
 		req.setLoginName(loginAndPass[0]);
@@ -216,23 +203,16 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements
 
 		InputStream respStream = null;
 
-		// String temp = null;
 		try {
-			// temp = response.getResponseBodyAsString();
 			respStream = response.getResponseBodyAsStream();
-			LoginResponse resp = (LoginResponse) getLoginResponseXStream()
-					.fromXML(response.getResponseBodyAsStream());
+			LoginResponse resp = (LoginResponse) getLoginResponseXStream().fromXML(response.getResponseBodyAsStream());
 			return resp.getSessionId();
-
-		} catch (BaseException e) {
-			// e.printStackTrace();
-			// System.out.println("error = " + temp);
-			handleResponseParseException(respStream, e);
 		} catch (Exception e) {
+			logger.log(Level.SEVERE, "Exception while loging-in", e);
 
-			logger.log(Level.SEVERE, "Exception while reading login response",
-					e);
-
+			if (e instanceof BaseException) {
+				handleResponseParseException(respStream, (BaseException) e);
+			}
 		} finally {
 			response.releaseConnection();
 		}
@@ -240,30 +220,22 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements
 		return null;
 	}
 
-	protected void handleResponseParseException(InputStream responseStream,
-			BaseException e) {
-
+	protected void handleResponseParseException(InputStream responseStream, BaseException e) {
 		if (responseStream == null) {
 			return;
 		}
 
 		try {
-
-			GeneralErrorMessage err = (GeneralErrorMessage) getGeneralErrorMessageXStream()
-					.fromXML(responseStream);
-			logger.log(Level.SEVERE, "Error msg got from response: "
-					+ err.getErrorMsg());
-
+			GeneralErrorMessage err = (GeneralErrorMessage) getGeneralErrorMessageXStream().fromXML(responseStream);
+			logger.log(Level.SEVERE, "Error msg got from response: " + err.getErrorMsg());
 		} catch (BaseException e2) {
 			logger.log(Level.SEVERE, "Error while parsing error message", e2);
 		}
 	}
 
 	protected void logout(String session_id) {
-
 		if (session_id == null) {
-			logger.log(Level.WARNING,
-					"Null was provided as session id for logout.");
+			logger.log(Level.WARNING, "Null was provided as session id for logout.");
 			return;
 		}
 
@@ -280,31 +252,29 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements
 	}
 
 	protected PostMethod sendXMLData(Object req, XStream xstream) {
-		PostMethod post = new PostMethod(getIWMainApplication().getSettings()
-				.getProperty(LANDSBANKINN_SERVICE_URL, DEFAULT_SERVICE_URL));
-		
+		PostMethod post = new PostMethod(getIWMainApplication().getSettings().getProperty(LANDSBANKINN_SERVICE_URL, DEFAULT_SERVICE_URL));
+
+		String data = null;
 		try {
-			String data = XML_HEADER + xstream.toXML(req);
+			data = XML_HEADER + xstream.toXML(req);
 			post.setRequestBody(data);
 			post.setRequestHeader("Content-type", "text/xml; charset=ISO-8859-1");
 
 			HttpClient client = new HttpClient();
 
 			client.getHttpConnectionManager().getParams().setConnectionTimeout(5000);
-			
+
 			int result = client.executeMethod(post);
-            
+
             // Display status code
-            System.out.println("Response status code: " + result);
-            
+           	logger.info("Response status code: " + result);
+
             // Display response
-            System.out.println("Response body: ");
-            System.out.println(post.getResponseBodyAsString());
+           	logger.info("Response body: " + post.getResponseBodyAsString());
 
             return post;
 		} catch (Exception e) {
-			e.printStackTrace();
-			logger.log(Level.SEVERE, "Exception while sending xml data.", e);
+			logger.log(Level.SEVERE, "Exception while sending xml data:\n" + data, e);
 			return null;
 		}
 	}
@@ -463,7 +433,7 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements
 
 		return send_data_xstream;
 	}
-	
+
 	protected synchronized XStream getVerifyBankAccountRequestXStream() {
 		if (verify_xstream == null) {
 			XStream xstream = new XStream(new XppDriver(new XmlFriendlyReplacer("$", "_")));
@@ -487,7 +457,7 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements
 
 		return verify_xstream;
 	}
-	
+
 	protected synchronized XStream getVerifyBankAccountResponseXStream() {
 		if (verify_resp_xstream == null || true) {
 			XStream xstream = new XStream(new XppDriver(new XmlFriendlyReplacer("$", "_")));
