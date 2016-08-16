@@ -18,6 +18,7 @@ import com.idega.presentation.IWContext;
 import com.idega.user.data.User;
 import com.idega.util.CoreUtil;
 import com.idega.util.ListUtil;
+import com.idega.util.expression.ELUtil;
 
 @Service(UserSettingsRequest.SERVICE)
 @Scope("request")
@@ -31,17 +32,26 @@ public class UserSettingsRequest extends DefaultSpringBean {
 	private List<CalDAVCalendar> availableCalendars = null,
 								subscribedCalendars = null;
 
-	private  IWContext iwc = null;
+	private CalendarManagementService getCalendarManagementService() {
+		try {
+			if (calendarManagementService == null) {
+				ELUtil.getInstance().autowire(this);
+			}
+			return calendarManagementService;
+		} catch (Exception e) {}
+		return null;
+	}
+
+	private IWContext iwc = null;
 
 	public Collection<Email> getEmails(){
 		IWContext iwc = getIwc();
-		if(!iwc.isLoggedOn()){
+		if (!iwc.isLoggedOn()) {
 			return Collections.emptyList();
 		}
 		User user = iwc.getCurrentUser();
-		@SuppressWarnings("unchecked")
 		Collection<Email> emails = user.getEmails();
-		if(ListUtil.isEmpty(emails)){
+		if (ListUtil.isEmpty(emails)) {
 			return Collections.emptyList();
 		}
 		return emails;
@@ -49,13 +59,13 @@ public class UserSettingsRequest extends DefaultSpringBean {
 
 	public Collection<Phone> getPhones(){
 		IWContext iwc = getIwc();
-		if(!iwc.isLoggedOn()){
+		if (!iwc.isLoggedOn()) {
 			return Collections.emptyList();
 		}
+
 		User user = iwc.getCurrentUser();
-		@SuppressWarnings("unchecked")
 		Collection<Phone> phones = user.getPhones();
-		if(ListUtil.isEmpty(phones)){
+		if (ListUtil.isEmpty(phones)) {
 			return Collections.emptyList();
 		}
 		return phones;
@@ -64,28 +74,28 @@ public class UserSettingsRequest extends DefaultSpringBean {
 	public Collection<CalDAVCalendar> getAvailableCalendars() {
 		if (availableCalendars == null) {
 			try {
-				availableCalendars = calendarManagementService.getVisibleSubscriptions(getIwc().getCurrentUser(), -1, -1);
+				CalendarManagementService calendarManagementService = getCalendarManagementService();
+				availableCalendars = calendarManagementService == null ? null : calendarManagementService.getVisibleSubscriptions(getIwc().getCurrentUser(), -1, -1);
 			} catch (Exception e) {
 				getLogger().log(Level.WARNING, "Error getting available calendars for current user", e);
 				availableCalendars = Collections.emptyList();
 			}
 		}
 
-		getLogger().info("Available calendars: " + availableCalendars);
 		return availableCalendars;
 	}
 
 	public List<CalDAVCalendar> getSubscribedCalendars() {
 		if (subscribedCalendars == null) {
 			try {
-				subscribedCalendars = calendarManagementService.getSubscribedCalendars(getIwc().getCurrentUser(), -1, -1);
+				CalendarManagementService calendarManagementService = getCalendarManagementService();
+				subscribedCalendars = calendarManagementService == null ? null : calendarManagementService.getSubscribedCalendars(getIwc().getCurrentUser(), -1, -1);
 			} catch (Exception e) {
 				getLogger().log(Level.WARNING, "Error getting subscribed calendars for current user", e);
 				subscribedCalendars = Collections.emptyList();
 			}
 		}
 
-		getLogger().info("Calendars user is subscribed to: " + subscribedCalendars);
 		return subscribedCalendars;
 	}
 

@@ -1,13 +1,5 @@
 package is.idega.idegaweb.egov.citizen.business;
 
-import is.idega.block.family.business.FamilyLogic;
-import is.idega.idegaweb.egov.citizen.CitizenConstants;
-import is.idega.idegaweb.egov.citizen.bean.LoginDataBean;
-import is.idega.idegaweb.egov.citizen.data.LoginData;
-import is.idega.idegaweb.egov.citizen.data.LoginDataHome;
-import is.idega.idegaweb.egov.citizen.presentation.CitizenProfile;
-import is.idega.idegaweb.egov.citizen.presentation.UserAccessSettings;
-
 import java.rmi.RemoteException;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -83,6 +75,14 @@ import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
 import com.idega.util.expression.ELUtil;
 
+import is.idega.block.family.business.FamilyLogic;
+import is.idega.idegaweb.egov.citizen.CitizenConstants;
+import is.idega.idegaweb.egov.citizen.bean.LoginDataBean;
+import is.idega.idegaweb.egov.citizen.data.LoginData;
+import is.idega.idegaweb.egov.citizen.data.LoginDataHome;
+import is.idega.idegaweb.egov.citizen.presentation.CitizenProfile;
+import is.idega.idegaweb.egov.citizen.presentation.UserAccessSettings;
+
 @Service(CitizenServices.SERVICE)
 @Scope(BeanDefinition.SCOPE_SINGLETON)
 @RemoteProxy(creator=SpringCreator.class, creatorParams={
@@ -103,6 +103,16 @@ public class CitizenServices extends DefaultSpringBean implements
 
 	@Autowired(required = false)
 	private CalendarManagementService calendarManagementService;
+
+	private CalendarManagementService getCalendarManagementService() {
+		try {
+			if (calendarManagementService == null) {
+				ELUtil.getInstance().autowire(this);
+			}
+			return calendarManagementService;
+		} catch (Exception e) {}
+		return null;
+	}
 
 	private UserHome userHome = null;
 	private ICLanguageHome iCLanguageHome = null;
@@ -1029,12 +1039,6 @@ public class CitizenServices extends DefaultSpringBean implements
 		response.put("status", "OK");
 		response.put("message", iwrb.getLocalizedString("saved", "saved"));
 		return response;
-	}
-
-	private CalendarManagementService getCalendarManagementService() {
-		if (calendarManagementService == null)
-			ELUtil.getInstance().autowire(this);
-		return calendarManagementService;
 	}
 
 	@RemoteMethod
