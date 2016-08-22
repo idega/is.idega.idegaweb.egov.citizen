@@ -67,17 +67,21 @@
       <version>${axis-axis-jaxrpc-version}</version>
       <type>jar</type>
     </dependency>
-    <dependency>
-      <groupId>org.apache.ws.security</groupId>
-      <artifactId>wss4j</artifactId>
-      <version>${wss4j-wss4j-version}</version>
-      <type>jar</type>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.santuario</groupId>
-      <artifactId>xmlsec</artifactId>
-      <version>1.4.4</version>
-      <type>jar</type>
-    </dependency>
+ <dependency>
+    <groupId>org.apache.ws.security</groupId>
+    <artifactId>wss4j</artifactId>
+    <version>2.1.5</version>
+    <type>pom</type>
+</dependency>
+<dependency>
+    <groupId>org.apache.wss4j</groupId>
+    <artifactId>wss4j-ws-security-common</artifactId>
+    <version>2.1.5</version>
+</dependency>
+<dependency>
+    <groupId>org.apache.wss4j</groupId>
+    <artifactId>wss4j-ws-security-dom</artifactId>
+    <version>2.1.5</version>
+</dependency>	
   </dependencies>
 </project>
