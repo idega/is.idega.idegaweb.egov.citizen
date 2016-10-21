@@ -1,12 +1,5 @@
 package is.idega.idegaweb.egov.citizen.business;
 
-import is.idega.idegaweb.egov.citizen.data.AccountApplication;
-import is.idega.idegaweb.egov.citizen.data.UnsentCitizenAccount;
-import is.idega.idegaweb.egov.citizen.data.UnsentCitizenAccountHome;
-import is.idega.idegaweb.egov.citizen.wsclient.islandsbanki.BirtingakerfiWSLocator;
-import is.idega.idegaweb.egov.citizen.wsclient.islandsbanki.BirtingakerfiWSSoap_PortType;
-import is.idega.idegaweb.egov.citizen.wsclient.landsbankinn.SendLoginDataBusiness;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -16,6 +9,7 @@ import java.net.URL;
 import java.rmi.RemoteException;
 import java.text.MessageFormat;
 import java.util.Locale;
+import java.util.logging.Level;
 
 import javax.ejb.CreateException;
 import javax.security.auth.callback.Callback;
@@ -49,10 +43,18 @@ import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.idegaweb.IWUserContext;
 import com.idega.user.data.User;
+import com.idega.util.CoreConstants;
 import com.idega.util.Encrypter;
 import com.idega.util.FileUtil;
 import com.idega.util.IWTimestamp;
 import com.idega.util.text.Name;
+
+import is.idega.idegaweb.egov.citizen.data.AccountApplication;
+import is.idega.idegaweb.egov.citizen.data.UnsentCitizenAccount;
+import is.idega.idegaweb.egov.citizen.data.UnsentCitizenAccountHome;
+import is.idega.idegaweb.egov.citizen.wsclient.islandsbanki.BirtingakerfiWSLocator;
+import is.idega.idegaweb.egov.citizen.wsclient.islandsbanki.BirtingakerfiWSSoap_PortType;
+import is.idega.idegaweb.egov.citizen.wsclient.landsbankinn.SendLoginDataBusiness;
 
 public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 		implements WSCitizenAccountBusiness, CitizenAccountBusiness,
@@ -79,7 +81,7 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 	protected static final String BANK_SENDER_TYPE_VERSION = "BANK_SENDER_TYPE_VERSION";
 
 	protected static final String USER_CREATION_TYPE = "RVKLB";
-	
+
 	public static final String CITIZEN_MAYOR_NAME = "citizen.mayor.name";
 	public static final String CITIZEN_MAYOR_SIGNATURE_URL = "citizen.mayor.signature.url";
 
@@ -88,7 +90,7 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 	/**
 	 * Creates a Login for a user with application theCase and send a message to
 	 * the user that applies if it is successful.
-	 * 
+	 *
 	 * @param theCase
 	 *            The Account Application
 	 * @throws CreateException
@@ -147,7 +149,7 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 
 					if (sendToLandsbankinn()) {
 
-						SendLoginDataBusiness send_data = (SendLoginDataBusiness) getServiceInstance(SendLoginDataBusiness.class);
+						SendLoginDataBusiness send_data = getServiceInstance(SendLoginDataBusiness.class);
 
 						send_data.send(xml);
 
@@ -208,7 +210,7 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 	/**
 	 * Changes a password for CitizenAccount for a user and sends a letter
 	 * and/or email.
-	 * 
+	 *
 	 * @param loginTable
 	 *            LoginTable of the user
 	 * @param user
@@ -249,6 +251,7 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 				loginInfo.setAccountEnabled(true);
 				loginInfo.store();
 
+				String xml = null;
 				try {
 					String pageLink = getIWApplicationContext()
 							.getApplicationSettings().getProperty(
@@ -263,11 +266,11 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 							.getApplicationSettings().getProperty(
 									BANK_SENDER_TYPE_VERSION, "001");
 
-					String xml = getXML(new Name(user.getFirstName(), user.getMiddleName(), user.getLastName()).getName(), loginTable.getUserLogin(), newPassword,
+					xml = getXML(new Name(user.getFirstName(), user.getMiddleName(), user.getLastName()).getName(), loginTable.getUserLogin(), newPassword,
 							pageLink, logoLink, Integer.toString(bankCount),
 							user.getPersonalID(), user3, user3version);
 
-					SendLoginDataBusiness send_data = (SendLoginDataBusiness) getServiceInstance(SendLoginDataBusiness.class);
+					SendLoginDataBusiness send_data = getServiceInstance(SendLoginDataBusiness.class);
 
 					send_data.send(xml);
 
@@ -276,13 +279,13 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 					loginInfo.setCreationType(USER_CREATION_TYPE);
 					loginInfo.store();
 				} catch (Exception e) {
-					UnsentCitizenAccount unsent = getUnsentCitizenAccountHome()
-							.create();
+					getLogger().log(Level.WARNING, "Error sending XML to change password:\n" + xml, e);
+
+					UnsentCitizenAccount unsent = getUnsentCitizenAccountHome().create();
 					unsent.setLogin(loginTable);
 					unsent.setKey(newPassword);
 					if (e.getMessage().length() > 1000) {
-						unsent.setOriginalError(e.getMessage().substring(0,
-								1000));
+						unsent.setOriginalError(e.getMessage().substring(0, 1000));
 					} else {
 						unsent.setOriginalError(e.getMessage());
 					}
@@ -293,8 +296,12 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 
 				trans.commit();
 			} catch (Exception e) {
-				System.err.println(e.getMessage());
-				// e.printStackTrace();
+				getLogger().log(
+						Level.WARNING,
+						"Error changing password and sending letter or email to " + user + (user == null ? CoreConstants.EMPTY : ", ID: " + user.getId() + ", personal ID: " + user.getPersonalID()),
+						e
+				);
+
 				if (trans != null) {
 					try {
 						trans.rollback();
@@ -302,13 +309,10 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 						se.printStackTrace();
 					}
 				}
-				throw new CreateException(
-						"There was an error changing the password. Message was: "
-								+ e.getMessage());
+				throw new CreateException("There was an error changing the password. Message was: " + e.getMessage());
 			}
 		} else {
-			super.changePasswordAndSendLetterOrEmail(iwuc, loginTable, user,
-					newPassword, sendLetter);
+			super.changePasswordAndSendLetterOrEmail(iwuc, loginTable, user, newPassword, sendLetter);
 		}
 	}
 
@@ -323,7 +327,7 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 
 		String pin = getIWApplicationContext().getApplicationSettings()
 				.getProperty(BANK_SENDER_PIN);
-		
+
 		String mayor = getIWApplicationContext().getApplicationSettings().getProperty(CITIZEN_MAYOR_NAME);
 		String signature = getIWApplicationContext().getApplicationSettings().getProperty(CITIZEN_MAYOR_SIGNATURE_URL);
 
@@ -448,7 +452,8 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 		}
 	}
 
-	
+
+	@Override
 	public void handle(Callback[] callbacks)
 			throws UnsupportedCallbackException {
 		String userId = getIWApplicationContext().getApplicationSettings()
@@ -469,6 +474,7 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 		}
 	}
 
+	@Override
 	public boolean sendMessageToBank() {
 		return getIWApplicationContext().getApplicationSettings().getBoolean(
 				BANK_SEND_REGISTRATION, false);
@@ -491,6 +497,7 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 		}
 	}
 
+	@Override
 	public void sendLostPasswordMessage(User citizen, String login,
 			String password) throws RemoteException, CreateException {
 		String messageBody = this
@@ -499,7 +506,7 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 
 		this.getMessageBusiness().createUserMessage(null, citizen, null, null, messageSubject,
 				messageBody, messageBody, false, null, false, false);
-		
+
 		this.getMessageBusiness().createPasswordMessage(citizen, login, password);
 	}
 
@@ -517,6 +524,7 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 
 	}
 
+	@Override
 	public String getAcceptMessageSubject(User owner) {
 		IWResourceBundle iwrb = this.getIWResourceBundleForUser(owner);
 		return iwrb.getLocalizedString("lost.pass.subj",
