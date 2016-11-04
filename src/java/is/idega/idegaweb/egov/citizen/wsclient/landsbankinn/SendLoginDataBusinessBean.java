@@ -7,13 +7,18 @@ import java.util.logging.Logger;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.methods.RequestEntity;
+import org.apache.commons.httpclient.methods.StringRequestEntity;
 
 import com.ibm.icu.text.NumberFormat;
 import com.idega.business.IBOServiceBean;
+import com.idega.core.file.util.MimeTypeUtil;
 import com.idega.idegaweb.IWMainApplication;
+import com.idega.util.CoreUtil;
 import com.idega.util.CypherText;
+import com.idega.util.StringUtil;
 import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.core.BaseException;
+import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.io.xml.XmlFriendlyReplacer;
 import com.thoughtworks.xstream.io.xml.XppDriver;
 
@@ -48,6 +53,10 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 
 	@Override
 	public boolean verifyBankAccount(String bankNumber, String ledger, String accountNumber, String personalID) {
+		return verifyBankAccount(null, bankNumber, ledger, accountNumber, personalID);
+	}
+
+	private boolean verifyBankAccount(String sessionId, String bankNumber, String ledger, String accountNumber, String personalID) {
 		if (bankNumber == null || ledger == null || accountNumber == null) {
 			return false;
 		}
@@ -71,8 +80,6 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 		if (bankNumberInt == 9797 && ledgerInt == 97 && accountNumberInt == 979797) {
 			return true;
 		}
-
-
 
 		NumberFormat f = NumberFormat.getIntegerInstance();
 		f.setGroupingUsed(false);
@@ -98,7 +105,7 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 			accountNumber = f.format(accountNumberInt);
 		}
 
-		String session_id = login();
+		String session_id = StringUtil.isEmpty(sessionId) ? login() : sessionId;
 
 		if (session_id == null) {
 			throw new RuntimeException("Session id couldn't be retrieved while logging in");
@@ -129,8 +136,8 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 			}
 		} catch (Exception e) {
 			logger.log(Level.WARNING, "error = " + temp, e);
-			if (e instanceof BaseException) {
-				handleResponseParseException(respStream, (BaseException) e);
+			if (e instanceof XStreamException) {
+				handleResponseParseException(respStream, (XStreamException) e);
 			}
 		} finally {
 			response.releaseConnection();
@@ -141,16 +148,18 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 
 	@Override
 	public void send(String xml_str) {
+		send(null, null, xml_str);
+	}
 
+	private void send(String sessionId, String serviceURL, String xml_str) {
 		if (xml_str == null) {
 			throw new NullPointerException("XML data not provided");
 		}
 
-		String session_id = login();
+		String session_id = sessionId == null ? login() : sessionId;
 
 		if (session_id == null) {
-			throw new RuntimeException(
-					"Session id couldn't be retrieved while logging in");
+			throw new RuntimeException("Session id couldn't be retrieved while logging in");
 		}
 
 		SendingInData data = new SendingInData();
@@ -163,13 +172,12 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 			data.setData(xml_str);
 		}
 
-		PostMethod response = sendXMLData(data, getSendDataXStream());
+		PostMethod response = serviceURL == null ? sendXMLData(data, getSendDataXStream()) : sendXMLData(serviceURL, data, getSendDataXStream());
 
 		SendingInDataResponse err = null;
 
 		try {
-			err = (SendingInDataResponse) getSendDataResponseErrorMessageXStream()
-					.fromXML(response.getResponseBodyAsStream());
+			err = (SendingInDataResponse) getSendDataResponseErrorMessageXStream().fromXML(response.getResponseBodyAsStream());
 
 			if (err.getErrorMsg() == null && err.getErrorNumber() == null) {
 				return;
@@ -195,11 +203,15 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 
 	protected String login() {
 		String[] loginAndPass = getLoginAndPassword();
+		return login(loginAndPass, null);
+	}
+
+	private String login(String[] loginAndPass, String serviceURL) {
 		LoginRequest req = new LoginRequest();
 		req.setLoginName(loginAndPass[0]);
 		req.setLoginPassword(loginAndPass[1]);
 
-		PostMethod response = sendXMLData(req, getLoginRequestXStream());
+		PostMethod response = sendXMLData(serviceURL, req, getLoginRequestXStream());
 
 		InputStream respStream = null;
 
@@ -208,10 +220,10 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 			LoginResponse resp = (LoginResponse) getLoginResponseXStream().fromXML(response.getResponseBodyAsStream());
 			return resp.getSessionId();
 		} catch (Exception e) {
-			logger.log(Level.SEVERE, "Exception while loging-in", e);
+			logger.log(Level.SEVERE, "Exception while loging-in.", e);
 
-			if (e instanceof BaseException) {
-				handleResponseParseException(respStream, (BaseException) e);
+			if (e instanceof XStreamException) {
+				handleResponseParseException(respStream, (XStreamException) e);
 			}
 		} finally {
 			response.releaseConnection();
@@ -220,7 +232,19 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 		return null;
 	}
 
-	protected void handleResponseParseException(InputStream responseStream, BaseException e) {
+	public static final void main(String[] args) {
+		SendLoginDataBusinessBean service = new SendLoginDataBusinessBean();
+
+		String sessionId = service.login(new String[] {"3HeH568lfi", "KQb88fi"}, DEFAULT_SERVICE_URL);
+		if (sessionId != null) {
+			service.send(sessionId, DEFAULT_SERVICE_URL, "Idega Test");
+		}
+
+		boolean valid = service.verifyBankAccount(sessionId, "134", "26", "1524", "0907814489");
+		logger.info("Valid: " + valid);
+	}
+
+	protected void handleResponseParseException(InputStream responseStream, XStreamException e) {
 		if (responseStream == null) {
 			return;
 		}
@@ -228,7 +252,7 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 		try {
 			GeneralErrorMessage err = (GeneralErrorMessage) getGeneralErrorMessageXStream().fromXML(responseStream);
 			logger.log(Level.SEVERE, "Error msg got from response: " + err.getErrorMsg());
-		} catch (BaseException e2) {
+		} catch (XStreamException e2) {
 			logger.log(Level.SEVERE, "Error while parsing error message", e2);
 		}
 	}
@@ -251,17 +275,29 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 		}
 	}
 
+	private String getServiceURL() {
+		return getIWMainApplication().getSettings().getProperty(LANDSBANKINN_SERVICE_URL, DEFAULT_SERVICE_URL);
+	}
+
 	protected PostMethod sendXMLData(Object req, XStream xstream) {
-		PostMethod post = new PostMethod(getIWMainApplication().getSettings().getProperty(LANDSBANKINN_SERVICE_URL, DEFAULT_SERVICE_URL));
+		return sendXMLData(getServiceURL(), req, xstream);
+	}
+
+	private PostMethod sendXMLData(String serviceURL, Object req, XStream xstream) {
+		serviceURL = StringUtil.isEmpty(serviceURL) ? getServiceURL() : serviceURL;
+		PostMethod post = new PostMethod(serviceURL);
 
 		String data = null;
 		try {
+			String contentType = MimeTypeUtil.MIME_TYPE_XML;
+			String charset = "ISO-8859-1";
+			post.setRequestHeader("Content-type", contentType.concat("; charset=").concat(charset));
+
 			data = XML_HEADER + xstream.toXML(req);
-			post.setRequestBody(data);
-			post.setRequestHeader("Content-type", "text/xml; charset=ISO-8859-1");
+			RequestEntity requestEntity = new StringRequestEntity(data, contentType, charset);
+			post.setRequestEntity(requestEntity);
 
 			HttpClient client = new HttpClient();
-
 			client.getHttpConnectionManager().getParams().setConnectionTimeout(5000);
 
 			int result = client.executeMethod(post);
@@ -274,7 +310,9 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 
             return post;
 		} catch (Exception e) {
-			logger.log(Level.SEVERE, "Exception while sending xml data:\n" + data, e);
+			String message = "Exception while sending xml data:\n" + data;
+			CoreUtil.sendExceptionNotification(message, e);
+			logger.log(Level.SEVERE, message, e);
 			return null;
 		}
 	}
