@@ -40,6 +40,7 @@ import com.idega.data.IDOLookup;
 import com.idega.data.IDOLookupException;
 import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWBundle;
+import com.idega.idegaweb.IWMainApplicationSettings;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.idegaweb.IWUserContext;
 import com.idega.user.data.User;
@@ -225,9 +226,13 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 	 *             If changing of the password failed.
 	 */
 	@Override
-	public void changePasswordAndSendLetterOrEmail(IWUserContext iwuc,
-			LoginTable loginTable, User user, String newPassword,
-			boolean sendLetter) throws CreateException {
+	public void changePasswordAndSendLetterOrEmail(
+			IWUserContext iwuc,
+			LoginTable loginTable,
+			User user,
+			String newPassword,
+			boolean sendLetter
+	) throws CreateException {
 		if (sendMessageToBank() && sendToLandsbankinn()) {
 			UserTransaction trans = null;
 			try {
@@ -253,28 +258,28 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 
 				String xml = null;
 				try {
-					String pageLink = getIWApplicationContext()
-							.getApplicationSettings().getProperty(
-									BANK_SENDER_PAGELINK);
-					String logoLink = getIWApplicationContext()
-							.getApplicationSettings().getProperty(
-									BANK_SENDER_LOGOLINK);
-					String user3 = getIWApplicationContext()
-							.getApplicationSettings().getProperty(
-									BANK_SENDER_TYPE);
-					String user3version = getIWApplicationContext()
-							.getApplicationSettings().getProperty(
-									BANK_SENDER_TYPE_VERSION, "001");
+					IWMainApplicationSettings settings = getIWApplicationContext().getApplicationSettings();
 
-					xml = getXML(new Name(user.getFirstName(), user.getMiddleName(), user.getLastName()).getName(), loginTable.getUserLogin(), newPassword,
-							pageLink, logoLink, Integer.toString(bankCount),
-							user.getPersonalID(), user3, user3version);
+					String pageLink = settings.getProperty(BANK_SENDER_PAGELINK);
+					String logoLink = settings.getProperty(BANK_SENDER_LOGOLINK);
+					String user3 = settings.getProperty(BANK_SENDER_TYPE);
+					String user3version = settings.getProperty(BANK_SENDER_TYPE_VERSION, "001");
+
+					xml = getXML(
+							new Name(user.getFirstName(), user.getMiddleName(), user.getLastName()).getName(),
+							loginTable.getUserLogin(),
+							newPassword,
+							pageLink,
+							logoLink,
+							Integer.toString(bankCount),
+							user.getPersonalID(),
+							user3,
+							user3version
+					);
 
 					SendLoginDataBusiness send_data = getServiceInstance(SendLoginDataBusiness.class);
 
 					send_data.send(xml);
-
-					// System.out.println("xml (forgotten) = " + xml);
 
 					loginInfo.setCreationType(USER_CREATION_TYPE);
 					loginInfo.store();
@@ -317,16 +322,21 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 	}
 
 	private boolean sendToLandsbankinn() {
-		return getIWApplicationContext().getApplicationSettings().getBoolean(
-				USE_LANDSBANKINN, false);
+		return getIWApplicationContext().getApplicationSettings().getBoolean(USE_LANDSBANKINN, false);
 	}
 
-	private String getXML(String name, String login, String password, String pageLink,
-			String logo, String xkey, String user1, String user3,
-			String user3version) {
-
-		String pin = getIWApplicationContext().getApplicationSettings()
-				.getProperty(BANK_SENDER_PIN);
+	private String getXML(
+			String name,
+			String login,
+			String password,
+			String pageLink,
+			String logo,
+			String xkey,
+			String user1,
+			String user3,
+			String user3version
+	) {
+		String pin = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_PIN);
 
 		String mayor = getIWApplicationContext().getApplicationSettings().getProperty(CITIZEN_MAYOR_NAME);
 		String signature = getIWApplicationContext().getApplicationSettings().getProperty(CITIZEN_MAYOR_SIGNATURE_URL);
@@ -339,7 +349,7 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 		user3 = user3 + "-" + user3version;
 		String user4 = acct + xkey;
 
-		String encoding = /*sendToLandsbankinn() ? "UTF-8" : */"iso-8859-1";
+		String encoding = "iso-8859-1";
 
 		StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"");
 		xml.append(encoding);
@@ -402,29 +412,20 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 	}
 
 	private void encodeAndSendXML(String xml, String filename, String personalID) {
-		String userId = getIWApplicationContext().getApplicationSettings()
-				.getProperty(BANK_SENDER_USER_ID);
+		String userId = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_USER_ID);
 
 		try {
-			File file  = FileUtil.getFileFromWorkspace(getResourceRealPath(
-						getBundle(getIWApplicationContext()),
-						null)
-						+ "deploy_client.wsdd");
+			File file  = FileUtil.getFileFromWorkspace(getResourceRealPath( getBundle(getIWApplicationContext()), null) + "deploy_client.wsdd");
 
-			EngineConfiguration config = new FileProvider(new FileInputStream(
-					file));
+			EngineConfiguration config = new FileProvider(new FileInputStream(file));
 			BirtingakerfiWSLocator locator = new BirtingakerfiWSLocator(config);
-			BirtingakerfiWSSoap_PortType port = locator
-					.getBirtingakerfiWSSoap(new URL(SERVICE_URL));
+			BirtingakerfiWSSoap_PortType port = locator.getBirtingakerfiWSSoap(new URL(SERVICE_URL));
 
 			Stub stub = (Stub) port;
-			stub._setProperty(WSHandlerConstants.ACTION,
-					WSHandlerConstants.USERNAME_TOKEN);
-			stub._setProperty(WSHandlerConstants.PASSWORD_TYPE,
-					WSConstants.PW_TEXT);
+			stub._setProperty(WSHandlerConstants.ACTION, WSHandlerConstants.USERNAME_TOKEN);
+			stub._setProperty(WSHandlerConstants.PASSWORD_TYPE, WSConstants.PW_TEXT);
 			stub._setProperty(WSHandlerConstants.USER, userId);
-			stub._setProperty(WSHandlerConstants.PW_CALLBACK_CLASS, this
-					.getClass().getName());
+			stub._setProperty(WSHandlerConstants.PW_CALLBACK_CLASS, this.getClass().getName());
 
 			port.sendaSkra(filename, Base64.encode(xml.getBytes()), personalID);
 		} catch (ServiceException e) {
@@ -446,20 +447,16 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 
 	protected String getResourceRealPath(IWBundle iwb, Locale locale) {
 		if (locale != null) {
-			return iwb.getResourcesRealPath(locale) + "/";
+			return iwb.getResourcesRealPath(locale) + File.separator;
 		} else {
-			return iwb.getResourcesRealPath() + "/";
+			return iwb.getResourcesRealPath() + File.separator;
 		}
 	}
 
-
 	@Override
-	public void handle(Callback[] callbacks)
-			throws UnsupportedCallbackException {
-		String userId = getIWApplicationContext().getApplicationSettings()
-				.getProperty(BANK_SENDER_USER_ID);
-		String passwd = getIWApplicationContext().getApplicationSettings()
-				.getProperty(BANK_SENDER_USER_PASSWORD);
+	public void handle(Callback[] callbacks) throws UnsupportedCallbackException {
+		String userId = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_USER_ID);
+		String passwd = getIWApplicationContext().getApplicationSettings().getProperty(BANK_SENDER_USER_PASSWORD);
 
 		for (int i = 0; i < callbacks.length; i++) {
 			if (callbacks[i] instanceof WSPasswordCallback) {
@@ -468,16 +465,14 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 					pc.setPassword(passwd);
 				}
 			} else {
-				throw new UnsupportedCallbackException(callbacks[i],
-						"Unrecognized Callback");
+				throw new UnsupportedCallbackException(callbacks[i], "Unrecognized Callback");
 			}
 		}
 	}
 
 	@Override
 	public boolean sendMessageToBank() {
-		return getIWApplicationContext().getApplicationSettings().getBoolean(
-				BANK_SEND_REGISTRATION, false);
+		return getIWApplicationContext().getApplicationSettings().getBoolean(BANK_SEND_REGISTRATION, false);
 	}
 
 	private LoginInfoHome getLoginInfoHome() {
@@ -490,45 +485,36 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 
 	private UnsentCitizenAccountHome getUnsentCitizenAccountHome() {
 		try {
-			return (UnsentCitizenAccountHome) IDOLookup
-					.getHome(UnsentCitizenAccount.class);
+			return (UnsentCitizenAccountHome) IDOLookup.getHome(UnsentCitizenAccount.class);
 		} catch (IDOLookupException ile) {
 			throw new IBORuntimeException(ile);
 		}
 	}
 
 	@Override
-	public void sendLostPasswordMessage(User citizen, String login,
-			String password) throws RemoteException, CreateException {
-		String messageBody = this
-				.getAcceptMessageBody(citizen, login, password);
+	public void sendLostPasswordMessage(User citizen, String login, String password) throws RemoteException, CreateException {
+		String messageBody = this.getAcceptMessageBody(citizen, login, password);
 		String messageSubject = this.getAcceptMessageSubject(citizen);
 
-		this.getMessageBusiness().createUserMessage(null, citizen, null, null, messageSubject,
-				messageBody, messageBody, false, null, false, false);
+		this.getMessageBusiness().createUserMessage(null, citizen, null, null, messageSubject, messageBody, messageBody, false, null, false, false);
 
 		this.getMessageBusiness().createPasswordMessage(citizen, login, password);
 	}
 
-	protected String getAcceptMessageBody(User owner, String login,
-			String password) {
+	protected String getAcceptMessageBody(User owner, String login, String password) {
 		IWResourceBundle iwrb = this.getIWResourceBundleForUser(owner);
 
-		Object[] arguments = { owner.getName(), login, password,
-				getApplicationLoginURL() };
-		String body = iwrb
-				.getLocalizedString(
+		Object[] arguments = { owner.getName(), login, password, getApplicationLoginURL() };
+		String body = iwrb.getLocalizedString(
 						"lost.pass.body",
 						"Dear mr./ms./mrs. {0}\n\nYour can now login to the system with the following login information:\n\nUserName: {1}\nPassword: {2}\n\nYou can log on via: {3}.");
 		return MessageFormat.format(body, arguments);
-
 	}
 
 	@Override
 	public String getAcceptMessageSubject(User owner) {
 		IWResourceBundle iwrb = this.getIWResourceBundleForUser(owner);
-		return iwrb.getLocalizedString("lost.pass.subj",
-				"New password");
+		return iwrb.getLocalizedString("lost.pass.subj", "New password");
 	}
 
 }
