@@ -14,6 +14,7 @@ import com.ibm.icu.text.NumberFormat;
 import com.idega.business.IBOServiceBean;
 import com.idega.core.file.util.MimeTypeUtil;
 import com.idega.idegaweb.IWMainApplication;
+import com.idega.util.ArrayUtil;
 import com.idega.util.CoreUtil;
 import com.idega.util.CypherText;
 import com.idega.util.StringUtil;
@@ -235,7 +236,10 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 	public static final void main(String[] args) {
 		SendLoginDataBusinessBean service = new SendLoginDataBusinessBean();
 
-		String sessionId = service.login(new String[] {"3HeH568lfi", "KQb88fi"}, DEFAULT_SERVICE_URL);
+		String[] loginAndPassword = ArrayUtil.isEmpty(args) || args.length < 2 ?
+				new String[] {"3HeH568lfi", "KQb88fi"} :
+				args;
+		String sessionId = service.login(loginAndPassword, DEFAULT_SERVICE_URL);
 		if (sessionId != null) {
 			service.send(sessionId, DEFAULT_SERVICE_URL, "Idega Test");
 		}
