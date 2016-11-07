@@ -17,6 +17,7 @@ import com.idega.idegaweb.IWMainApplication;
 import com.idega.util.ArrayUtil;
 import com.idega.util.CoreUtil;
 import com.idega.util.CypherText;
+import com.idega.util.IOUtil;
 import com.idega.util.StringUtil;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.XStreamException;
@@ -123,13 +124,14 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 
 		PostMethod response = sendXMLData(verify, getVerifyBankAccountRequestXStream());
 
-		InputStream respStream = null;
+		InputStream respStream = null, stream = null;
 
 		String temp = null;
 		try {
 			temp = response.getResponseBodyAsString();
 			respStream = response.getResponseBodyAsStream();
-			VerifyBankAccountResponse resp = (VerifyBankAccountResponse) getVerifyBankAccountResponseXStream().fromXML(response.getResponseBodyAsStream());
+			stream = response.getResponseBodyAsStream();
+			VerifyBankAccountResponse resp = (VerifyBankAccountResponse) getVerifyBankAccountResponseXStream().fromXML(stream);
 
 			//Yes, it's supposed to be 0!! Ask Landsbankinn why.
 			if (resp.getAccountExists() != null && ("TRUE".equalsIgnoreCase(resp.getAccountExists()) || "0".equals(resp.getAccountExists()))) {
@@ -141,7 +143,8 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 				handleResponseParseException(respStream, (XStreamException) e);
 			}
 		} finally {
-			response.releaseConnection();
+			releaseResources(response, respStream, stream);
+			logout(session_id);
 		}
 
 		return false;
@@ -150,6 +153,20 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 	@Override
 	public void send(String xml_str) {
 		send(null, null, xml_str);
+	}
+
+	private void releaseResources(PostMethod response, InputStream... streams) {
+		if (response != null) {
+			try {
+				response.releaseConnection();
+			} catch (Exception e) {}
+		}
+
+		if (!ArrayUtil.isEmpty(streams)) {
+			for (InputStream stream: streams) {
+				IOUtil.close(stream);
+			}
+		}
 	}
 
 	private void send(String sessionId, String serviceURL, String xml_str) {
@@ -173,12 +190,16 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 			data.setData(xml_str);
 		}
 
-		PostMethod response = serviceURL == null ? sendXMLData(data, getSendDataXStream()) : sendXMLData(serviceURL, data, getSendDataXStream());
+		PostMethod response = serviceURL == null ?
+				sendXMLData(data, getSendDataXStream()) :
+				sendXMLData(serviceURL, data, getSendDataXStream());
 
 		SendingInDataResponse err = null;
 
+		InputStream stream = null;
 		try {
-			err = (SendingInDataResponse) getSendDataResponseErrorMessageXStream().fromXML(response.getResponseBodyAsStream());
+			stream = response.getResponseBodyAsStream();
+			err = (SendingInDataResponse) getSendDataResponseErrorMessageXStream().fromXML(stream);
 
 			if (err.getErrorMsg() == null && err.getErrorNumber() == null) {
 				return;
@@ -193,7 +214,7 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 
 			throw ex;
 		} finally {
-			response.releaseConnection();
+			releaseResources(response, stream);
 			logout(session_id);
 		}
 
@@ -215,10 +236,11 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 		PostMethod response = sendXMLData(serviceURL, req, getLoginRequestXStream());
 
 		InputStream respStream = null;
-
+		InputStream stream = null;
 		try {
 			respStream = response.getResponseBodyAsStream();
-			LoginResponse resp = (LoginResponse) getLoginResponseXStream().fromXML(response.getResponseBodyAsStream());
+			stream = response.getResponseBodyAsStream();
+			LoginResponse resp = (LoginResponse) getLoginResponseXStream().fromXML(stream);
 			return resp.getSessionId();
 		} catch (Exception e) {
 			logger.log(Level.SEVERE, "Exception while loging-in.", e);
@@ -227,7 +249,7 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 				handleResponseParseException(respStream, (XStreamException) e);
 			}
 		} finally {
-			response.releaseConnection();
+			releaseResources(response, respStream, stream);
 		}
 
 		return null;
@@ -261,7 +283,7 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 		}
 	}
 
-	protected void logout(String session_id) {
+	private void logout(String session_id) {
 		if (session_id == null) {
 			logger.log(Level.WARNING, "Null was provided as session id for logout.");
 			return;
@@ -275,7 +297,7 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 		try {
 			response = sendXMLData(req, getLogoutRequestXStream());
 		} finally {
-			response.releaseConnection();
+			releaseResources(response);
 		}
 	}
 
@@ -283,7 +305,7 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 		return getIWMainApplication().getSettings().getProperty(LANDSBANKINN_SERVICE_URL, DEFAULT_SERVICE_URL);
 	}
 
-	protected PostMethod sendXMLData(Object req, XStream xstream) {
+	private PostMethod sendXMLData(Object req, XStream xstream) {
 		return sendXMLData(getServiceURL(), req, xstream);
 	}
 
