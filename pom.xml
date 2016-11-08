@@ -42,6 +42,10 @@
       <artifactId>com.idega.block.cal</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.idega.block.addon</groupId>
+      <artifactId>com.idega.restful</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.idega.block.egov</groupId>
       <artifactId>is.idega.idegaweb.egov</artifactId>
     </dependency>

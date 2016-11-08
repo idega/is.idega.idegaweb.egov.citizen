@@ -57,9 +57,7 @@ import is.idega.idegaweb.egov.citizen.wsclient.islandsbanki.BirtingakerfiWSLocat
 import is.idega.idegaweb.egov.citizen.wsclient.islandsbanki.BirtingakerfiWSSoap_PortType;
 import is.idega.idegaweb.egov.citizen.wsclient.landsbankinn.SendLoginDataBusiness;
 
-public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
-		implements WSCitizenAccountBusiness, CitizenAccountBusiness,
-		CallbackHandler {
+public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean implements WSCitizenAccountBusiness, CitizenAccountBusiness, CallbackHandler {
 
 	private static final long serialVersionUID = -8824721140289363380L;
 
@@ -100,11 +98,13 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 	 *             If an error occurs creating login for the user.
 	 */
 	@Override
-	protected void createLoginAndSendMessage(AccountApplication theCase,
-			boolean createUserMessage, boolean createPasswordMessage,
-			boolean sendEmail, boolean sendSnailMail) throws RemoteException,
-			CreateException, LoginCreateException {
-
+	protected void createLoginAndSendMessage(
+			AccountApplication theCase,
+			boolean createUserMessage,
+			boolean createPasswordMessage,
+			boolean sendEmail,
+			boolean sendSnailMail
+	) throws RemoteException, CreateException, LoginCreateException {
 		boolean sendLetter = false;
 		User citizen = theCase.getOwner();
 		LoginTable lt = getUserBusiness().generateUserLogin(citizen);
@@ -113,81 +113,64 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 		try {
 			String password = lt.getUnencryptedUserPassword();
 
-			String messageBody = this.getAcceptMessageBody(theCase, login,
-					password);
+			String messageBody = this.getAcceptMessageBody(theCase, login, password);
 			String messageSubject = this.getAcceptMessageSubject(theCase);
 
-			if (createPasswordMessage && sendSnailMail)
-				this.getMessageBusiness().createPasswordMessage(citizen, login,
-						password);
-
+			if (createPasswordMessage && sendSnailMail) {
+				this.getMessageBusiness().createPasswordMessage(citizen, login, password);
+			}
 			createUserMessage = sendEmail;
 
 			boolean sendMessageToBank = sendMessageToBank();
 
 			if (sendMessageToBank) {
 				try {
-					String pageLink = getIWApplicationContext()
-							.getApplicationSettings().getProperty(
-									BANK_SENDER_PAGELINK);
-					String logoLink = getIWApplicationContext()
-							.getApplicationSettings().getProperty(
-									BANK_SENDER_LOGOLINK);
-					String ssn = getIWApplicationContext()
-							.getApplicationSettings().getProperty(
-									BANK_SENDER_PIN);
-					String user3 = getIWApplicationContext()
-							.getApplicationSettings().getProperty(
-									BANK_SENDER_TYPE);
-					String user3version = getIWApplicationContext()
-							.getApplicationSettings().getProperty(
-									BANK_SENDER_TYPE_VERSION, "001");
+					IWMainApplicationSettings settings = getIWApplicationContext().getApplicationSettings();
+					String pageLink = settings.getProperty(BANK_SENDER_PAGELINK);
+					String logoLink = settings.getProperty(BANK_SENDER_LOGOLINK);
+					String ssn = settings.getProperty(BANK_SENDER_PIN);
+					String user3 = settings.getProperty(BANK_SENDER_TYPE);
+					String user3version = settings.getProperty(BANK_SENDER_TYPE_VERSION, "001");
 
-					String xml = getXML(new Name(citizen.getFirstName(), citizen.getMiddleName(), citizen.getLastName()).getName(), login, password, pageLink, logoLink,
-							sendToLandsbankinn() ? "1" : citizen
-									.getPrimaryKey().toString(), citizen
-									.getPersonalID(), user3, user3version);
+					String xml = getXML(
+							new Name(citizen.getFirstName(), citizen.getMiddleName(), citizen.getLastName()).getName(),
+							login,
+							password,
+							pageLink,
+							logoLink,
+							sendToLandsbankinn() ? "1" : citizen.getPrimaryKey().toString(),
+							citizen.getPersonalID(),
+							user3,
+							user3version
+					);
 
 					if (sendToLandsbankinn()) {
-
 						SendLoginDataBusiness send_data = getServiceInstance(SendLoginDataBusiness.class);
 
 						send_data.send(xml);
 
-						// System.out.println("xml = " + xml);
-
 						try {
-							LoginInfo loginInfo = getLoginInfoHome()
-									.findByPrimaryKey(lt.getPrimaryKey());
+							LoginInfo loginInfo = getLoginInfoHome().findByPrimaryKey(lt.getPrimaryKey());
 							loginInfo.setCreationType(USER_CREATION_TYPE);
 							loginInfo.store();
-
 						} catch (Exception e) {
-							throw new RuntimeException(
-									"Failed to flag secure user registration",
-									e);
+							throw new RuntimeException("Failed to flag secure user registration", e);
 						}
-
 					} else {
-
-						StringBuffer filename = new StringBuffer(user3
-								.toLowerCase());
+						StringBuffer filename = new StringBuffer(user3.toLowerCase());
 						filename.append("sunnan3");
-						IdGenerator uidGenerator = IdGeneratorFactory
-								.getUUIDGenerator();
+						IdGenerator uidGenerator = IdGeneratorFactory.getUUIDGenerator();
 						filename.append(uidGenerator.generateId());
 						filename.append(".xml");
 
 						encodeAndSendXML(xml, filename.toString(), ssn);
 					}
 				} catch (Exception e) {
-					UnsentCitizenAccount unsent = getUnsentCitizenAccountHome()
-							.create();
+					UnsentCitizenAccount unsent = getUnsentCitizenAccountHome().create();
 					unsent.setLogin(lt);
 					unsent.setKey(password);
 					if (e.getMessage().length() > 1000) {
-						unsent.setOriginalError(e.getMessage().substring(0,
-								1000));
+						unsent.setOriginalError(e.getMessage().substring(0, 1000));
 					} else {
 						unsent.setOriginalError(e.getMessage());
 					}
@@ -196,10 +179,8 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 					unsent.store();
 				}
 			} else if (createUserMessage) {
-				this.getMessageBusiness().createUserMessage(citizen,
-						messageSubject, messageBody, sendLetter);
+				this.getMessageBusiness().createUserMessage(citizen, messageSubject, messageBody, sendLetter);
 			}
-
 		} catch (PasswordNotKnown e) {
 			// e.printStackTrace();
 			throw new IDOCreateException(e);
@@ -241,7 +222,7 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 
 				int bankCount = loginTable.getBankCount();
 
-				// encrypte new password
+				// encrypt new password
 				String encryptedPassword = Encrypter.encryptOneWay(newPassword);
 				// store new password
 				loginTable.setUserPassword(encryptedPassword, newPassword);
@@ -408,7 +389,11 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean
 		xml.append("\t</Statement>\n");
 		xml.append("</XML-S>");
 
-		return xml.toString();
+		String data = xml.toString();
+		if (getSettings().getBoolean("BANK_SENDER_PRINT_XML", false)) {
+			getLogger().info("XML to send:\n" + data);
+		}
+		return data;
 	}
 
 	private void encodeAndSendXML(String xml, String filename, String personalID) {
