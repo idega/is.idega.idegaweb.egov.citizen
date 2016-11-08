@@ -201,6 +201,10 @@ public class ForgottenPassword extends CitizenBlock {
 				if (canSendMessage) {
 					String newPassword = createNewPassword();
 					try {
+						if (iwc.getIWMainApplication().getSettings().getBoolean("forgotten_password.print_new", false)) {
+							getLogger().info("Credentials: " + loginTable.getUserLogin() + CoreConstants.SLASH + newPassword);
+						}
+
 						getBusiness(iwc).changePasswordAndSendLetterOrEmail(iwc, loginTable, user, newPassword, false);
 						CoreUtil.clearAllCaches();
 						if (sendSnailMail) {
