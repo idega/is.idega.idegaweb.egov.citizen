@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.logging.Level;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -200,6 +201,10 @@ public class ForgottenPassword extends CitizenBlock {
 				if (canSendMessage) {
 					String newPassword = createNewPassword();
 					try {
+						if (iwc.getIWMainApplication().getSettings().getBoolean("forgotten_password.print_new", false)) {
+							getLogger().info("Credentials: " + loginTable.getUserLogin() + CoreConstants.SLASH + newPassword);
+						}
+
 						getBusiness(iwc).changePasswordAndSendLetterOrEmail(iwc, loginTable, user, newPassword, false);
 						CoreUtil.clearAllCaches();
 						if (sendSnailMail) {
@@ -209,7 +214,7 @@ public class ForgottenPassword extends CitizenBlock {
 						throw new IBORuntimeException(re);
 					}
 					catch (CreateException ce) {
-						ce.printStackTrace();
+						getLogger().log(Level.WARNING, "Error creating/changing password for user " + user + (user == null ? CoreConstants.EMPTY : ", ID: " + user.getId() + ", personal ID: " + user.getPersonalID()));
 						errors.add(this.iwrb.getLocalizedString("password_creation_failed", "Password creation failed."));
 						hasErrors = true;
 					}
