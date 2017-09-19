@@ -8,11 +8,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.glassfish.jersey.client.ClientResponse;
 
 import com.ibm.icu.text.NumberFormat;
 import com.idega.builder.bean.AdvancedProperty;
@@ -26,8 +29,6 @@ import com.idega.util.CypherText;
 import com.idega.util.IOUtil;
 import com.idega.util.StringHandler;
 import com.idega.util.StringUtil;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.ClientResponse.Status;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.io.xml.XmlFriendlyReplacer;
@@ -372,14 +373,14 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
 					null
 			);
 
-			if (response == null || Status.OK != response.getClientResponseStatus()) {
+			if (response == null || Status.OK.getStatusCode() != response.getStatus()) {
 				if (response == null) {
 					logger.warning("No response from " + serviceURL + ". Data sent:\n" + data);
 					return null;
 				} else {
-					logger.warning("Response from " + serviceURL + " is not OK: " + response.getClientResponseStatus() +
+					logger.warning("Response from " + serviceURL + " is not OK: " + response.getStatus() +
 							", code: " + response.getStatus() + ". Data sent:\n" + data);
-					return StringHandler.getContentFromInputStream(response.getEntityInputStream());
+					return StringHandler.getContentFromInputStream(response.getEntityStream());
 				}
 			}
 			int result = response.getStatus();
@@ -387,7 +388,7 @@ public class SendLoginDataBusinessBean extends IBOServiceBean implements SendLog
             // Display status code
            	logger.info("Response status code: " + result);
 
-           	String content = StringHandler.getContentFromInputStream(response.getEntityInputStream());
+           	String content = StringHandler.getContentFromInputStream(response.getEntityStream());
             // Display response
            	logger.info("Response body: " + content);
 
