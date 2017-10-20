@@ -21,6 +21,7 @@ import com.idega.core.accesscontrol.business.LoginDBHandler;
 import com.idega.core.accesscontrol.data.LoginTable;
 import com.idega.core.builder.data.ICPage;
 import com.idega.core.contact.data.Email;
+import com.idega.idegaweb.IWMainApplicationSettings;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
@@ -137,12 +138,13 @@ public class ForgottenPassword extends CitizenBlock {
 		Collection<String> errors = new ArrayList<String>();
 
 		Locale locale = iwc.getCurrentLocale();
+		IWMainApplicationSettings settings = iwc.getApplicationSettings();
 
 		if (ssn == null || ssn.length() == 0) {
 			errors.add(this.iwrb.getLocalizedString("must_provide_personal_id", "You have to enter a personal ID."));
 			hasErrors = true;
 			invalidPersonalID = true;
-		} else if (!isValidPersonalId(ssn, locale)) {
+		} else if (settings.getBoolean("egov.account.validate_personal_id", true) && !isValidPersonalId(ssn, locale)) {
 			errors.add(this.iwrb.getLocalizedString("not_a_valid_personal_id", "The personal ID you've entered is not valid."));
 			hasErrors = true;
 			invalidPersonalID = true;
@@ -169,7 +171,7 @@ public class ForgottenPassword extends CitizenBlock {
 
 		Email email = null;
 		if (user != null && !hasAppliedForPassword) {
-			boolean restrictLoginAccess = iwc.getApplicationSettings().getBoolean("egov.account.restrict.password.creation", true);
+			boolean restrictLoginAccess = settings.getBoolean("egov.account.restrict.password.creation", true);
 
 			try {
 				UserBusiness business = IBOLookup.getServiceInstance(iwc, UserBusiness.class);
