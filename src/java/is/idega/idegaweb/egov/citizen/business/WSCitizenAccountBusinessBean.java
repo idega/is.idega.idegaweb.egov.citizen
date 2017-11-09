@@ -214,7 +214,9 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean imp
 			String newPassword,
 			boolean sendLetter
 	) throws CreateException {
-		if (sendMessageToBank() && sendToLandsbankinn()) {
+		boolean sendMessageToBank = sendMessageToBank();
+		boolean sendToLandsbankinn = sendToLandsbankinn();
+		if (sendMessageToBank && sendToLandsbankinn) {
 			UserTransaction trans = null;
 			try {
 				trans = this.getSessionContext().getUserTransaction();
@@ -298,6 +300,8 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean imp
 				throw new CreateException("There was an error changing the password. Message was: " + e.getMessage());
 			}
 		} else {
+			getLogger().info("Not sending new password to the bank (sendMessageToBank: " + sendMessageToBank + ", sendToLandsbankinn: " + sendToLandsbankinn + ") for " +
+					user + (user == null ? CoreConstants.EMPTY : ", ID: " + user.getId() + ", personal ID: " + user.getPersonalID()));
 			super.changePasswordAndSendLetterOrEmail(iwuc, loginTable, user, newPassword, sendLetter);
 		}
 	}
