@@ -4,11 +4,6 @@
  */
 package is.idega.idegaweb.egov.citizen.business;
 
-import is.idega.idegaweb.egov.citizen.data.AccountApplication;
-import is.idega.idegaweb.egov.citizen.data.CitizenAccount;
-import is.idega.idegaweb.egov.citizen.data.CitizenAccountHome;
-import is.idega.idegaweb.egov.message.business.CommuneMessageBusiness;
-
 import java.rmi.RemoteException;
 import java.util.logging.Level;
 
@@ -35,6 +30,11 @@ import com.idega.util.CoreUtil;
 import com.idega.util.Encrypter;
 import com.idega.util.StringHandler;
 import com.idega.util.StringUtil;
+
+import is.idega.idegaweb.egov.citizen.data.AccountApplication;
+import is.idega.idegaweb.egov.citizen.data.CitizenAccount;
+import is.idega.idegaweb.egov.citizen.data.CitizenAccountHome;
+import is.idega.idegaweb.egov.message.business.CommuneMessageBusiness;
 
 /**
  * Last modified: $Date$ by $Author$
@@ -284,8 +284,11 @@ public class CitizenAccountBusinessBean extends AccountApplicationBusinessBean i
 			trans.commit();
 		}
 		catch (Exception e) {
-			System.err.println(e.getMessage());
-			// e.printStackTrace();
+			getLogger().log(
+					Level.WARNING,
+					"Error changing password and sending letter or email to " + user + (user == null ? CoreConstants.EMPTY : ", ID: " + user.getId() + ", personal ID: " + user.getPersonalID()),
+					e
+			);
 			if (trans != null) {
 				try {
 					trans.rollback();
