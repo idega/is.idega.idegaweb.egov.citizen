@@ -3,6 +3,7 @@ package is.idega.idegaweb.egov.citizen.presentation;
 import java.rmi.RemoteException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -17,10 +18,13 @@ import javax.ejb.FinderException;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.business.IBORuntimeException;
+import com.idega.company.business.CompanyBusiness;
+import com.idega.company.data.Company;
 import com.idega.core.accesscontrol.business.LoginDBHandler;
 import com.idega.core.accesscontrol.data.LoginTable;
 import com.idega.core.builder.data.ICPage;
 import com.idega.core.contact.data.Email;
+import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWMainApplicationSettings;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.IWContext;
@@ -35,14 +39,20 @@ import com.idega.presentation.ui.DropdownMenu;
 import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.TextInput;
+import com.idega.user.business.GroupBusiness;
 import com.idega.user.business.NoEmailFoundException;
 import com.idega.user.business.UserBusiness;
+import com.idega.user.data.Group;
 import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
+import com.idega.util.ListUtil;
+import com.idega.util.expression.ELUtil;
 
 import is.idega.idegaweb.egov.citizen.business.WSCitizenAccountBusiness;
 import is.idega.idegaweb.egov.citizen.business.WSCitizenAccountBusinessBean;
+import is.idega.idegaweb.egov.company.business.CompanyApplicationBusiness;
+import is.idega.idegaweb.egov.company.business.CompanyPortalBusiness;
 
 /**
  * *
@@ -144,7 +154,7 @@ public class ForgottenPassword extends CitizenBlock {
 			errors.add(this.iwrb.getLocalizedString("must_provide_personal_id", "You have to enter a personal ID."));
 			hasErrors = true;
 			invalidPersonalID = true;
-		} else if (settings.getBoolean("egov.account.validate_personal_id", true) && !isValidPersonalId(ssn, locale)) {
+		} else if (settings.getBoolean("egov.account.only_user_pid", false) && settings.getBoolean("egov.account.validate_personal_id", true) && !isValidPersonalId(ssn, locale)) {
 			errors.add(this.iwrb.getLocalizedString("not_a_valid_personal_id", "The personal ID you've entered is not valid."));
 			hasErrors = true;
 			invalidPersonalID = true;
@@ -164,9 +174,14 @@ public class ForgottenPassword extends CitizenBlock {
 			} catch (RemoteException re) {
 				throw new IBORuntimeException(re);
 			} catch (FinderException ex) {
-				errors.add(this.iwrb.getLocalizedString("no_user_found_with_personal_id", "No user was found with the personal ID you entered."));
-				hasErrors = true;
+				//User was not found, searching for the company and company's user
+				user = getCompanyUser(ssn);
 			}
+		}
+
+		if (user == null) {
+			errors.add(this.iwrb.getLocalizedString("no_user_found_with_personal_id", "No user was found with the personal ID you entered."));
+			hasErrors = true;
 		}
 
 		Email email = null;
@@ -266,6 +281,56 @@ public class ForgottenPassword extends CitizenBlock {
 			showErrors(iwc, errors);
 			viewForm(iwc);
 		}
+	}
+
+	private User getCompanyUser(String ssn) {
+		User user = null;
+
+		try {
+			CompanyBusiness companyBusiness = getCompanyBusiness(getIWApplicationContext());
+
+			//Get the company by ssn
+			Company company = companyBusiness.getCompany(ssn);
+
+			//Get the user for the company
+			if (company != null) {
+				Collection<User> companyUsers = companyBusiness.getOwnersForCompanies(Arrays.asList(company));
+				if (!ListUtil.isEmpty(companyUsers)) {
+					for (User companyUser: companyUsers) {
+						if (companyUser != null) {
+							user = companyUser;
+							break;
+						}
+					}
+				}
+			}
+
+			//If user is not found, search the company admin user
+			if (user == null && company != null) {
+				Group adminsGroupForCompany = getCompanyPortalBusiness(getIWApplicationContext()).getCompanyAdminsGroup(getIWApplicationContext(), company.getName(), company.getPersonalID());
+				if (adminsGroupForCompany != null) {
+					GroupBusiness groupBusiness = getGroupBusiness(getIWApplicationContext());
+					Collection<User> adminUsers = groupBusiness.getUsers(adminsGroupForCompany);
+					if (!ListUtil.isEmpty(adminUsers)) {
+						for (User adminUser : adminUsers) {
+							if (adminUser != null) {
+								user = adminUser;
+								break;
+							}
+						}
+					}
+				}
+			}
+
+			//If user was not found, get the company contact/admin user
+			if (user == null && company != null) {
+				user = getCompanyApplicationBusiness(getIWApplicationContext()).getCompanyContact(company);
+			}
+		} catch (Exception eComp) {
+			getLogger().log(Level.WARNING, "Could not find the company by SSN: " + ssn, eComp);
+		}
+
+		return user;
 	}
 
 	/**
@@ -432,4 +497,27 @@ public class ForgottenPassword extends CitizenBlock {
 	public void setToShowSendSnailMailChooser(boolean showSendSnailMailChooser) {
 		this.showSendSnailMailChooser = showSendSnailMailChooser;
 	}
+
+
+	protected CompanyBusiness getCompanyBusiness(IWApplicationContext iwac) throws RemoteException {
+		return IBOLookup.getServiceInstance(iwac, CompanyBusiness.class);
+	}
+
+	protected GroupBusiness getGroupBusiness(IWApplicationContext iwac) throws RemoteException {
+		return IBOLookup.getServiceInstance(iwac, GroupBusiness.class);
+	}
+
+	protected CompanyApplicationBusiness getCompanyApplicationBusiness(IWApplicationContext iwac) throws RemoteException {
+		return IBOLookup.getServiceInstance(iwac, CompanyApplicationBusiness.class);
+	}
+
+	private CompanyPortalBusiness getCompanyPortalBusiness(IWApplicationContext iwac) {
+		try {
+			return ELUtil.getInstance().getBean(CompanyPortalBusiness.SPRING_BEAN_IDENTIFIER);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 }

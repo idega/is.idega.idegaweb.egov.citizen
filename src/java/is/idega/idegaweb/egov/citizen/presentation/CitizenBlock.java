@@ -109,4 +109,6 @@ public abstract class CitizenBlock extends Block {
 	}
 
 	public abstract void present(IWContext iwc);
+
+
 }
