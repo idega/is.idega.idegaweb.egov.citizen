@@ -297,7 +297,7 @@ public class ForgottenPassword extends CitizenBlock {
 				Collection<User> companyUsers = companyBusiness.getOwnersForCompanies(Arrays.asList(company));
 				if (!ListUtil.isEmpty(companyUsers)) {
 					for (User companyUser: companyUsers) {
-						if (companyUser != null) {
+						if (companyUser != null && LoginDBHandler.getUserLogin(companyUser) != null) {
 							user = companyUser;
 							break;
 						}
@@ -313,7 +313,7 @@ public class ForgottenPassword extends CitizenBlock {
 					Collection<User> adminUsers = groupBusiness.getUsers(adminsGroupForCompany);
 					if (!ListUtil.isEmpty(adminUsers)) {
 						for (User adminUser : adminUsers) {
-							if (adminUser != null) {
+							if (adminUser != null && LoginDBHandler.getUserLogin(adminUser) != null) {
 								user = adminUser;
 								break;
 							}
@@ -324,7 +324,10 @@ public class ForgottenPassword extends CitizenBlock {
 
 			//If user was not found, get the company contact/admin user
 			if (user == null && company != null) {
-				user = getCompanyApplicationBusiness(getIWApplicationContext()).getCompanyContact(company);
+				User companyContactUser = getCompanyApplicationBusiness(getIWApplicationContext()).getCompanyContact(company);
+				if (companyContactUser != null && LoginDBHandler.getUserLogin(companyContactUser) != null) {
+					user = companyContactUser;
+				}
 			}
 		} catch (Exception eComp) {
 			getLogger().log(Level.WARNING, "Could not find the company by SSN: " + ssn, eComp);
