@@ -3,7 +3,6 @@ package is.idega.idegaweb.egov.citizen.presentation;
 import java.rmi.RemoteException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -15,16 +14,15 @@ import java.util.logging.Level;
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 
+import org.springframework.web.context.support.WebApplicationContextUtils;
+
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.business.IBORuntimeException;
-import com.idega.company.business.CompanyBusiness;
-import com.idega.company.data.Company;
 import com.idega.core.accesscontrol.business.LoginDBHandler;
 import com.idega.core.accesscontrol.data.LoginTable;
 import com.idega.core.builder.data.ICPage;
 import com.idega.core.contact.data.Email;
-import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWMainApplicationSettings;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.IWContext;
@@ -39,20 +37,16 @@ import com.idega.presentation.ui.DropdownMenu;
 import com.idega.presentation.ui.Form;
 import com.idega.presentation.ui.Label;
 import com.idega.presentation.ui.TextInput;
-import com.idega.user.business.GroupBusiness;
 import com.idega.user.business.NoEmailFoundException;
 import com.idega.user.business.UserBusiness;
-import com.idega.user.data.Group;
 import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
-import com.idega.util.ListUtil;
-import com.idega.util.expression.ELUtil;
+import com.idega.util.datastructures.map.MapUtil;
 
+import is.idega.idegaweb.egov.citizen.business.UserEntityService;
 import is.idega.idegaweb.egov.citizen.business.WSCitizenAccountBusiness;
 import is.idega.idegaweb.egov.citizen.business.WSCitizenAccountBusinessBean;
-import is.idega.idegaweb.egov.company.business.CompanyApplicationBusiness;
-import is.idega.idegaweb.egov.company.business.CompanyPortalBusiness;
 
 /**
  * *
@@ -175,7 +169,7 @@ public class ForgottenPassword extends CitizenBlock {
 				throw new IBORuntimeException(re);
 			} catch (FinderException ex) {
 				//User was not found, searching for the company and company's user
-				user = getCompanyUser(ssn);
+				user = getCompanyUser(iwc, ssn);
 			}
 		}
 
@@ -283,57 +277,22 @@ public class ForgottenPassword extends CitizenBlock {
 		}
 	}
 
-	private User getCompanyUser(String ssn) {
-		User user = null;
-
+	private User getCompanyUser(IWContext iwc, String ssn) {
 		try {
-			CompanyBusiness companyBusiness = getCompanyBusiness(getIWApplicationContext());
-
-			//Get the company by ssn
-			Company company = companyBusiness.getCompany(ssn);
-
-			//Get the user for the company
-			if (company != null) {
-				Collection<User> companyUsers = companyBusiness.getOwnersForCompanies(Arrays.asList(company));
-				if (!ListUtil.isEmpty(companyUsers)) {
-					for (User companyUser: companyUsers) {
-						if (companyUser != null && LoginDBHandler.getUserLogin(companyUser) != null) {
-							user = companyUser;
-							break;
-						}
-					}
-				}
+			Map<String, UserEntityService> beans = WebApplicationContextUtils.getWebApplicationContext(iwc.getServletContext()).getBeansOfType(UserEntityService.class);
+			if (MapUtil.isEmpty(beans)) {
+				return null;
 			}
 
-			//If user is not found, search the company admin user
-			if (user == null && company != null) {
-				Group adminsGroupForCompany = getCompanyPortalBusiness(getIWApplicationContext()).getCompanyAdminsGroup(getIWApplicationContext(), company.getName(), company.getPersonalID());
-				if (adminsGroupForCompany != null) {
-					GroupBusiness groupBusiness = getGroupBusiness(getIWApplicationContext());
-					Collection<User> adminUsers = groupBusiness.getUsers(adminsGroupForCompany);
-					if (!ListUtil.isEmpty(adminUsers)) {
-						for (User adminUser : adminUsers) {
-							if (adminUser != null && LoginDBHandler.getUserLogin(adminUser) != null) {
-								user = adminUser;
-								break;
-							}
-						}
-					}
-				}
+			User user = null;
+			for (Iterator<UserEntityService> iter = beans.values().iterator(); (iter.hasNext() && user == null);) {
+				UserEntityService service = iter.next();
+				user = service.getUserForEntity(ssn);
 			}
-
-			//If user was not found, get the company contact/admin user
-			if (user == null && company != null) {
-				User companyContactUser = getCompanyApplicationBusiness(getIWApplicationContext()).getCompanyContact(company);
-				if (companyContactUser != null && LoginDBHandler.getUserLogin(companyContactUser) != null) {
-					user = companyContactUser;
-				}
-			}
-		} catch (Exception eComp) {
-			getLogger().log(Level.WARNING, "Could not find the company by SSN: " + ssn, eComp);
+		} catch (Exception e) {
+			getLogger().log(Level.WARNING, "Error getting user for company with personal ID: " + ssn, e);
 		}
-
-		return user;
+		return null;
 	}
 
 	/**
@@ -499,28 +458,6 @@ public class ForgottenPassword extends CitizenBlock {
 
 	public void setToShowSendSnailMailChooser(boolean showSendSnailMailChooser) {
 		this.showSendSnailMailChooser = showSendSnailMailChooser;
-	}
-
-
-	protected CompanyBusiness getCompanyBusiness(IWApplicationContext iwac) throws RemoteException {
-		return IBOLookup.getServiceInstance(iwac, CompanyBusiness.class);
-	}
-
-	protected GroupBusiness getGroupBusiness(IWApplicationContext iwac) throws RemoteException {
-		return IBOLookup.getServiceInstance(iwac, GroupBusiness.class);
-	}
-
-	protected CompanyApplicationBusiness getCompanyApplicationBusiness(IWApplicationContext iwac) throws RemoteException {
-		return IBOLookup.getServiceInstance(iwac, CompanyApplicationBusiness.class);
-	}
-
-	private CompanyPortalBusiness getCompanyPortalBusiness(IWApplicationContext iwac) {
-		try {
-			return ELUtil.getInstance().getBean(CompanyPortalBusiness.SPRING_BEAN_IDENTIFIER);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
 	}
 
 }
