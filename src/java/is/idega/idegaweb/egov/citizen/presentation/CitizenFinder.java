@@ -63,6 +63,7 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 	private static final String PROPERTY_MINIMUM_AGE_CITIZEN_FINDER = "citizen.finder.minimum.age";
 
 	private ICPage iPage;
+	private boolean redirectToHomePage = false;
 	protected Collection<User> users;
 	protected IWResourceBundle iwrb;
 
@@ -279,9 +280,31 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 				else {
 					nameLink.addParameter(PARAMETER_USER_PK, user.getPrimaryKey().toString());
 				}
-				if (getResponsePage() != null) {
-					nameLink.setPage(getResponsePage());
+				
+				if (isRedirectToHomePage()) {
+					ICPage pageToRedirectTo = null;
+					
+					try {
+						pageToRedirectTo = getUserBusiness(iwc).getHomePageForUser(user);
+					} catch (RemoteException re) {
+						throw new IBORuntimeException(re);
+					} catch (FinderException fe) {
+					}
+					
+					if (pageToRedirectTo == null) {
+						pageToRedirectTo = getResponsePage();
+					}
+					
+					if (pageToRedirectTo != null) {
+						nameLink.setPage(pageToRedirectTo);
+					}
+
+				} else {
+					if (getResponsePage() != null) {
+						nameLink.setPage(getResponsePage());
+					}
 				}
+				
 			}
 			else {
 				nameLink.setURL("#");
@@ -419,5 +442,13 @@ public class CitizenFinder extends CitizenBlock implements IWPageEventListener {
 
 	protected ICPage getResponsePage() {
 		return this.iPage;
+	}
+
+	public void setRedirectToHomePage(boolean redirectToHomePage) {
+		this.redirectToHomePage = redirectToHomePage;
+	}
+	
+	protected boolean isRedirectToHomePage() {
+		return this.redirectToHomePage;
 	}
 }
