@@ -164,8 +164,9 @@ public class CitizenServices extends DefaultSpringBean implements
 		if (!ListUtil.isEmpty(params)){
 			born = params.get(0);
 			Date bornDate = IWDatePickerHandler.getParsedDate(born, iwc.getCurrentLocale());
-			if (bornDate != null)
+			if (bornDate != null) {
 				user.setDateOfBirth(new java.sql.Date(bornDate.getTime()));
+			}
 		}
 		String resume = null;
 		params = parameters.get(CitizenConstants.USER_EDIT_RESUME_PARAMETER);
@@ -475,8 +476,9 @@ public class CitizenServices extends DefaultSpringBean implements
 		}
 		String postalBox = null;
 		params = parameters.get(CitizenConstants.USER_EDIT_POSTAL_BOX_PARAMETER);
-		if (!ListUtil.isEmpty(params))
+		if (!ListUtil.isEmpty(params)) {
 			postalBox = params.get(0);
+		}
 		try {
 			userBusiness.updateUsersMainAddressOrCreateIfDoesNotExist(Integer.valueOf(userId), streetNameAndNumber, postalCodeId, country, city, null, postalBox);
 		} catch (NumberFormatException e) {
@@ -1077,14 +1079,11 @@ public class CitizenServices extends DefaultSpringBean implements
 	}
 
 	public boolean forgotPassword(String ssn) {
-
 		boolean hasErrors = false;
 		boolean invalidPersonalID = false;
-		Collection<String> errors = new ArrayList<String>();
 
-		IWContext iwc = IWContext.getCurrentInstance();
+		IWContext iwc = CoreUtil.getIWContext();
 
-		Locale locale = iwc.getCurrentLocale();
 		IWMainApplicationSettings settings = iwc.getApplicationSettings();
 
 		if (ssn == null || ssn.length() == 0) {
@@ -1094,6 +1093,10 @@ public class CitizenServices extends DefaultSpringBean implements
 		boolean hasAppliedForPassword = iwc.getSessionAttribute("has_applied_before") != null;
 		if (hasAppliedForPassword) {
 			hasErrors = true;
+		}
+
+		if (hasErrors) {
+			return false;
 		}
 
 		User user = null;
@@ -1108,10 +1111,15 @@ public class CitizenServices extends DefaultSpringBean implements
 			}
 		}
 
-		Email email = null;
+		hasErrors = user == null ? true : hasErrors;
+		if (hasErrors) {
+			return false;
+		}
+
 		if (user != null && !hasAppliedForPassword) {
 			boolean restrictLoginAccess = settings.getBoolean("egov.account.restrict.password.creation", true);
 
+			Email email = null;
 			try {
 				UserBusiness business = IBOLookup.getServiceInstance(iwc, UserBusiness.class);
 				email = business.getUsersMainEmail(user);
@@ -1122,12 +1130,18 @@ public class CitizenServices extends DefaultSpringBean implements
 			catch (NoEmailFoundException ex) {
 				// No email found...
 			}
+			if (email == null) {
+				hasErrors = true;
+			}
+			if (hasErrors) {
+				return false;
+			}
 
 			LoginTable loginTable = LoginDBHandler.getUserLogin(user);
 			if (loginTable == null) {
 				hasErrors = true;
 			}
-			else {
+			else if (!hasErrors) {
 				boolean canSendMessage = false;
 				if (LoginDBHandler.hasLoggedIn(loginTable) && restrictLoginAccess) {
 					canSendMessage = true;
