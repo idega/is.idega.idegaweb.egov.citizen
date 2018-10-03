@@ -34,6 +34,7 @@ import com.idega.block.cal.business.CalendarManagementService;
 import com.idega.builder.business.BuilderLogic;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
+import com.idega.business.IBORuntimeException;
 import com.idega.core.accesscontrol.business.LoginBusinessBean;
 import com.idega.core.accesscontrol.business.LoginDBHandler;
 import com.idega.core.accesscontrol.data.LoginTable;
@@ -57,6 +58,7 @@ import com.idega.data.IDORemoveRelationshipException;
 import com.idega.dwr.business.DWRAnnotationPersistance;
 import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWMainApplication;
+import com.idega.idegaweb.IWMainApplicationSettings;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.Block;
 import com.idega.presentation.IWContext;
@@ -65,6 +67,7 @@ import com.idega.presentation.Table2;
 import com.idega.presentation.ui.handlers.IWDatePickerHandler;
 import com.idega.user.bean.UserDataBean;
 import com.idega.user.business.GroupBusiness;
+import com.idega.user.business.NoEmailFoundException;
 import com.idega.user.business.UserApplicationEngine;
 import com.idega.user.business.UserBusiness;
 import com.idega.user.data.User;
@@ -1071,6 +1074,97 @@ public class CitizenServices extends DefaultSpringBean implements
 			e.printStackTrace();
 		}
 		return false;
+	}
+
+	public boolean forgotPassword(String ssn) {
+
+		boolean hasErrors = false;
+		boolean invalidPersonalID = false;
+		Collection<String> errors = new ArrayList<String>();
+
+		IWContext iwc = IWContext.getCurrentInstance();
+
+		Locale locale = iwc.getCurrentLocale();
+		IWMainApplicationSettings settings = iwc.getApplicationSettings();
+
+		if (ssn == null || ssn.length() == 0) {
+			hasErrors = true;
+			invalidPersonalID = true;
+		}
+		boolean hasAppliedForPassword = iwc.getSessionAttribute("has_applied_before") != null;
+		if (hasAppliedForPassword) {
+			hasErrors = true;
+		}
+
+		User user = null;
+		if (!invalidPersonalID) {
+			try {
+				UserBusiness business = IBOLookup.getServiceInstance(iwc, UserBusiness.class);
+				user = business.getUser(ssn);
+			} catch (RemoteException re) {
+				throw new IBORuntimeException(re);
+			} catch (FinderException ex) {
+				hasErrors = true;
+			}
+		}
+
+		Email email = null;
+		if (user != null && !hasAppliedForPassword) {
+			boolean restrictLoginAccess = settings.getBoolean("egov.account.restrict.password.creation", true);
+
+			try {
+				UserBusiness business = IBOLookup.getServiceInstance(iwc, UserBusiness.class);
+				email = business.getUsersMainEmail(user);
+			}
+			catch (RemoteException re) {
+				throw new IBORuntimeException(re);
+			}
+			catch (NoEmailFoundException ex) {
+				// No email found...
+			}
+
+			LoginTable loginTable = LoginDBHandler.getUserLogin(user);
+			if (loginTable == null) {
+				hasErrors = true;
+			}
+			else {
+				boolean canSendMessage = false;
+				if (LoginDBHandler.hasLoggedIn(loginTable) && restrictLoginAccess) {
+					canSendMessage = true;
+				}
+				else if (!restrictLoginAccess) {
+					canSendMessage = true;
+				}
+
+				if (canSendMessage) {
+					String newPassword = LoginDBHandler.getGeneratedPasswordForUser();
+					try {
+						if (iwc.getIWMainApplication().getSettings().getBoolean("forgotten_password.print_new", false)) {
+							getLogger().info("Credentials: " + loginTable.getUserLogin() + CoreConstants.SLASH + newPassword);
+						}
+						WSCitizenAccountBusiness business = IBOLookup.getServiceInstance(iwc, WSCitizenAccountBusiness.class);
+						business.changePasswordAndSendLetterOrEmail(iwc, loginTable, user, newPassword, false);
+						CoreUtil.clearAllCaches();
+					} catch (RemoteException re) {
+						throw new IBORuntimeException(re);
+					}
+					catch (CreateException ce) {
+						getLogger().log(Level.WARNING, "Error creating/changing password for user " + user + (user == null ? CoreConstants.EMPTY : ", ID: " + user.getId() + ", personal ID: " + user.getPersonalID()));
+						hasErrors = true;
+					}
+				}
+				else {
+					hasErrors = true;
+				}
+			}
+		}
+
+		if (!hasErrors) {
+			return false;
+		}
+		else {
+			return true;
+		}
 	}
 
 }
