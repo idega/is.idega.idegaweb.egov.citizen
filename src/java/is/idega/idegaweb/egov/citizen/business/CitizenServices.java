@@ -1173,12 +1173,7 @@ public class CitizenServices extends DefaultSpringBean implements
 			}
 		}
 
-		if (!hasErrors) {
-			return false;
-		}
-		else {
-			return true;
-		}
+		return !hasErrors;
 	}
 
 }
