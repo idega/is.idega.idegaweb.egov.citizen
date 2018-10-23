@@ -67,6 +67,7 @@ import com.idega.util.CoreConstants;
 import com.idega.util.EmailValidator;
 import com.idega.util.FileUtil;
 import com.idega.util.ListUtil;
+import com.idega.util.StringHandler;
 import com.idega.util.StringUtil;
 import com.idega.util.expression.ELUtil;
 
@@ -179,8 +180,9 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	private SessionData sessionData;
 
 	private SessionData getSessionData() {
-		if (sessionData == null)
+		if (sessionData == null) {
 			ELUtil.getInstance().autowire(this);
+		}
 		return sessionData;
 	}
 
@@ -856,17 +858,26 @@ public class CitizenAccountPreferences extends CitizenBlock {
 
 			if (useCOAddress) {
 				Address coAddress = getCOAddress(iwc);
-				//coAddress.setStreetName(coStreetAddress);
 
 				AddressBusiness addressBusiness = IBOLookup.getServiceInstance(iwc, AddressBusiness.class);
-				Country country = addressBusiness.getCountryHome().findByPrimaryKey(new Integer(coCountry));
-				PostalCode pc = addressBusiness.getPostalCodeAndCreateIfDoesNotExist(coPostalCode, coCity, country);
+
+				Country country = null;
+				if (StringHandler.isNumeric(coCountry)) {
+					country = addressBusiness.getCountryHome().findByPrimaryKey(new Integer(coCountry));
+				}
+				PostalCode pc = null;
+				if (StringHandler.isNumeric(coPostalCode) && country != null) {
+					pc = addressBusiness.getPostalCodeAndCreateIfDoesNotExist(coPostalCode, coCity, country);
+				}
+
 				String streetName = addressBusiness.getStreetNameFromAddressString(coStreetAddress);
 				String streetNumber = addressBusiness.getStreetNumberFromAddressString(coStreetAddress);
 				coAddress.setStreetName(streetName);
 				coAddress.setStreetNumber(streetNumber);
 
-				coAddress.setPostalCode(pc);
+				if (pc != null) {
+					coAddress.setPostalCode(pc);
+				}
 				coAddress.setCity(coCity);
 				coAddress.store();
 			}
