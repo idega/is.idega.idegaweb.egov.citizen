@@ -8,11 +8,6 @@
  */
 package is.idega.idegaweb.egov.citizen.business;
 
-import is.idega.idegaweb.egov.accounting.business.CitizenBusiness;
-import is.idega.idegaweb.egov.citizen.IWBundleStarter;
-import is.idega.idegaweb.egov.citizen.data.AccountApplication;
-import is.idega.idegaweb.egov.message.business.CommuneMessageBusiness;
-
 import java.rmi.RemoteException;
 import java.text.MessageFormat;
 import java.util.logging.Level;
@@ -33,6 +28,12 @@ import com.idega.user.data.Group;
 import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
+
+import is.idega.idegaweb.egov.accounting.business.CitizenBusiness;
+import is.idega.idegaweb.egov.citizen.CitizenConstants;
+import is.idega.idegaweb.egov.citizen.IWBundleStarter;
+import is.idega.idegaweb.egov.citizen.data.AccountApplication;
+import is.idega.idegaweb.egov.message.business.CommuneMessageBusiness;
 
 /**
  * @author <a href="mailto:tryggvi@idega.is">Tryggvi Larusson</a>
@@ -166,7 +167,10 @@ public abstract class AccountApplicationBusinessBean extends CaseBusinessBean im
 	}
 
 	protected String getApplicationLoginURL() {
-		return getIWApplicationContext().getApplicationSettings().getProperty("app_url_login", "http://www.egov.is");
+		return getIWApplicationContext().getApplicationSettings().getProperty(
+				CitizenConstants.APPLICATION_LOGIN_URL, 
+				"http://www.egov.is"
+		);
 	}
 
 	protected void sendAcceptMessage(AccountApplication accAppl, String subject, String body) throws RemoteException {
