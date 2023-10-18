@@ -244,6 +244,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 				file.setName(fileOld.getName());
 				file.setMimeType(fileOld.getMimeType());
 				file.setFileValue(input);
+				file.setPublic(true);
 				file.setFileSize(os.size());
 				file.store();
 
@@ -715,7 +716,7 @@ public class CitizenAccountPreferences extends CitizenBlock {
 	}
 
 	protected boolean updatePreferences(IWContext iwc) throws Exception {
-		Collection<String> errors = new ArrayList<String>();
+		Collection<String> errors = new ArrayList<>();
 
 		int fileID = -1;
 		UploadFile uploadFile = iwc.getUploadedFile();
