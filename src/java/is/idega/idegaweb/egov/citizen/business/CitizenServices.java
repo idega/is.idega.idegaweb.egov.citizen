@@ -271,7 +271,7 @@ public class CitizenServices extends DefaultSpringBean implements
 		if(!ListUtil.isEmpty(params)){
 			try {
 				ICLanguageHome iCLanguageHome = this.getICLanguageHome();
-				Collection<Integer> ids = new ArrayList<Integer>(params.size());
+				Collection<Integer> ids = new ArrayList<>(params.size());
 				for(String languageId : params){
 					ids.add(Integer.valueOf(languageId));
 				}
@@ -312,7 +312,7 @@ public class CitizenServices extends DefaultSpringBean implements
 					continue;
 				}
 			}else{
-				Collection <Integer> ids = new ArrayList<Integer>(1);
+				Collection <Integer> ids = new ArrayList<>(1);
 				try{
 					ids.add(Integer.valueOf(id));
 					Collection <LoginData> logins = loginDataHome.getEntityCollectionForPrimaryKeys(ids);
@@ -365,7 +365,7 @@ public class CitizenServices extends DefaultSpringBean implements
 			getLogger().log(Level.WARNING, "failed getting LoginDataHome", e);
 			return Boolean.FALSE;
 		}
-		Collection<Integer> ids = new ArrayList<Integer>(1);
+		Collection<Integer> ids = new ArrayList<>(1);
 		ids.add(loginId);
 		Collection<LoginData> dataList = null;
 		try {
@@ -555,7 +555,7 @@ public class CitizenServices extends DefaultSpringBean implements
 	}
 
 	public Map <String ,Collection<User>> getFamilyMembers(IWContext iwc, User user, Collection<String> relationTypes) {
-		Map<String,Collection<User>> members = new HashMap<String,Collection<User>>();
+		Map<String,Collection<User>> members = new HashMap<>();
 		FamilyLogic familyLogic = null;
 		try {
 			familyLogic = getFamilyLogic(iwc);
@@ -577,7 +577,7 @@ public class CitizenServices extends DefaultSpringBean implements
 	}
 
 	public List<String> getFamilyRelationTypes(IWContext iwc) throws Exception{
-		List<String> familyRelationTypes = new ArrayList<String>();
+		List<String> familyRelationTypes = new ArrayList<>();
 		FamilyLogic familyLogic = getFamilyLogic(iwc);
 		familyRelationTypes.add(familyLogic.getChildRelationType());
 		familyRelationTypes.add(familyLogic.getParentRelationType());
@@ -609,8 +609,8 @@ public class CitizenServices extends DefaultSpringBean implements
 		IWResourceBundle iwrb = bundle.getResourceBundle(iwc);
 		IWMainApplication iwma = iwc.getApplicationContext().getIWMainApplication();
 		IWBundle iwb = iwma.getBundle(CitizenConstants.IW_BUNDLE_IDENTIFIER);
-		List <String>tables = new ArrayList<String>();
-		Map<String,Collection<String>> response = new HashMap<String,Collection<String>>();
+		List <String>tables = new ArrayList<>();
+		Map<String,Collection<String>> response = new HashMap<>();
 		FamilyLogic fl = null;
 		if(relationType.equals("-1")){
 			response.put("status", Arrays.asList("bad_request"));
@@ -732,7 +732,7 @@ public class CitizenServices extends DefaultSpringBean implements
 			if(ListUtil.isEmpty(userLanguages)){
 				return Collections.emptyMap();
 			}
-			Map <String,String> languages = new HashMap<String,String>();
+			Map <String,String> languages = new HashMap<>();
 			for(ICLanguage language : userLanguages){
 				languages.put(language.getPrimaryKey().toString(), language.getName());
 			}
@@ -750,7 +750,7 @@ public class CitizenServices extends DefaultSpringBean implements
 
 	@RemoteMethod
 	public Map <String,String> removeCurrentUserEmail(String id){
-		HashMap<String, String> response = new HashMap<String, String>();
+		HashMap<String, String> response = new HashMap<>();
 		if(StringUtil.isEmpty(id)){
 			response.put("status", "OK");
 			return response;
@@ -777,7 +777,7 @@ public class CitizenServices extends DefaultSpringBean implements
 
 	@RemoteMethod
 	public Map <String,String> removeCurrentUserPhone(String id){
-		HashMap<String, String> response = new HashMap<String, String>();
+		HashMap<String, String> response = new HashMap<>();
 		if(StringUtil.isEmpty(id)){
 			response.put("status", "OK");
 			return response;
@@ -959,7 +959,7 @@ public class CitizenServices extends DefaultSpringBean implements
 
 	@RemoteMethod
 	public Map <String,Object> saveUserMessagesData(Map<String,Collection<Map<String,String>>> values, Map<String,Collection<String>> dataToRemove ){
-		HashMap<String, Object> response = new HashMap<String, Object>();
+		HashMap<String, Object> response = new HashMap<>();
 
 		IWContext iwc = CoreUtil.getIWContext();
 		IWBundle bundle = iwc.getIWMainApplication().getBundle(CitizenConstants.IW_BUNDLE_IDENTIFIER);
@@ -1001,7 +1001,7 @@ public class CitizenServices extends DefaultSpringBean implements
 
 	@RemoteMethod
 	public Map <String,Object> saveCitizenCalendarSettings(Map<String,Collection<String>> settings){
-		Map<String, Object> response = new HashMap<String, Object>();
+		Map<String, Object> response = new HashMap<>();
 
 		IWContext iwc = CoreUtil.getIWContext();
 		IWBundle bundle = iwc.getIWMainApplication().getBundle(CitizenConstants.IW_BUNDLE_IDENTIFIER);
@@ -1074,6 +1074,33 @@ public class CitizenServices extends DefaultSpringBean implements
 			return children != null && children.contains(child) && custodians != null && custodians.contains(parent);
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+		return false;
+	}
+
+	@RemoteMethod
+	public boolean setAsSpouseFor(String personToSetPersonalId, String relatedPersonPersonalId) {
+		if (StringUtil.isEmpty(personToSetPersonalId) || StringUtil.isEmpty(personToSetPersonalId)) {
+			return false;
+		}
+
+		try {
+			userBusiness = getUserBusiness();
+			User personToSet = userBusiness.getUser(personToSetPersonalId);
+			User relatedPerson = userBusiness.getUser(relatedPersonPersonalId);
+
+			FamilyLogic familyLogic = getServiceInstance(FamilyLogic.class);
+			familyLogic.setAsSpouseFor(personToSet, relatedPerson);
+
+			User spouseForPersonToSet = familyLogic.getSpouseFor(personToSet);
+			getLogger().info("Spouse for " + personToSet + ": " + spouseForPersonToSet);
+
+			User spouseForRelatedPerson = familyLogic.getSpouseFor(relatedPerson);
+			getLogger().info("Spouse for " + relatedPerson + ": " + spouseForRelatedPerson);
+
+			return true;
+		} catch (Exception e) {
+			getLogger().log(Level.WARNING, "Error setting spouse " + relatedPersonPersonalId + " for " + personToSetPersonalId, e);
 		}
 		return false;
 	}
