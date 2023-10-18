@@ -275,9 +275,11 @@ public class CitizenAccountBusinessBean extends AccountApplicationBusinessBean i
 			// send letter or email to user
 			CommuneMessageBusiness messageBusiness = getMessageBusiness();
 			if (sendLetter) {
+				getLogger().info("Sending letter to " + user.getName() + ", personal ID: " + user.getPersonalID() + " regarding new passwrod");
 				messageBusiness.createPasswordMessage(user, loginName, newPassword);
 			}
 			else {
+				getLogger().info("Not sending letter to " + user.getName() + ", personal ID: " + user.getPersonalID() + " regarding new passwrod");
 				messageBusiness.createUserMessage(user, messageSubject, messageBody, true);
 			}
 

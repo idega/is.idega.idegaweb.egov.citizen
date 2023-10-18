@@ -217,6 +217,7 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean imp
 		boolean sendMessageToBank = sendMessageToBank();
 		boolean sendToLandsbankinn = sendToLandsbankinn();
 		if (sendMessageToBank && sendToLandsbankinn) {
+			getLogger().info("Sending new passord of " + user.getName() + ", personal ID: " + user.getPersonalID() + " to bank");
 			UserTransaction trans = null;
 			try {
 				trans = this.getSessionContext().getUserTransaction();
@@ -374,20 +375,24 @@ public class WSCitizenAccountBusinessBean extends CitizenAccountBusinessBean imp
 		xml.append(password);
 		xml.append("</Field>\n");
 		xml.append("\t\t\t<Field Name=\"PageLink\">");
-		if (pageLink != null)
+		if (pageLink != null) {
 			xml.append(pageLink);
+		}
 		xml.append("</Field>\n");
 		xml.append("\t\t\t<Field Name=\"Logo\">");
-		if (logo != null)
+		if (logo != null) {
 			xml.append(logo);
+		}
 		xml.append("</Field>\n");
 		xml.append("\t\t\t<Field Name=\"Mayor\">");
-		if (mayor != null)
+		if (mayor != null) {
 			xml.append(mayor);
+		}
 		xml.append("</Field>\n");
 		xml.append("\t\t\t<Field Name=\"Signature\">");
-		if (signature != null)
+		if (signature != null) {
 			xml.append(signature);
+		}
 		xml.append("</Field>\n");
 		xml.append("\t\t</Section>\n");
 		xml.append("\t</Statement>\n");

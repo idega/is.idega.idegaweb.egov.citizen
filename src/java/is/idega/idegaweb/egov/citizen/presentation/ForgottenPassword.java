@@ -219,7 +219,10 @@ public class ForgottenPassword extends CitizenBlock {
 						getBusiness(iwc).changePasswordAndSendLetterOrEmail(iwc, loginTable, user, newPassword, false);
 						CoreUtil.clearAllCaches();
 						if (sendSnailMail) {
+							getLogger().info("Sending snail mail to " + user.getName() + ", personal ID: " + user.getPersonalID());
 							getBusiness(iwc).sendLostPasswordMessage(user, loginTable.getUserLogin(), newPassword);
+						} else {
+							getLogger().info("Not sending snail mail to " + user.getName() + ", personal ID: " + user.getPersonalID());
 						}
 					} catch (RemoteException re) {
 						throw new IBORuntimeException(re);
